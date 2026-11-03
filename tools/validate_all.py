@@ -74,3 +74,50 @@ for mb, size in SIZES.items():
             and tt['m_SubMeshes'][0]['indexCount'] == len(idx) and np.isfinite(d['pos']).all() \
             and abs(d['weights'].sum(1) - 1).max() < 1e-3 and np.abs(np.linalg.norm(d['normal'], axis=1) - 1).max() < 1e-2
         print(f"MESH {mb} {tt['m_Name']}: verts {nv} tris {len(idx)//3}", 'OK' if good else 'BAD')
+
+# --- effect timing: no effect may be recycled before its last particle (incl. overlays) has faded out
+from effect_timing import analyse as timing_analyse
+paths = {}
+for dp, dn, fn in os.walk(new_root):
+    for f in fn:
+        if f.endswith('.unity3d'):
+            paths[f[:-len('.unity3d')]] = os.path.join(dp, f)
+cut = 0; checked = 0
+cache = {}
+def tend(stem):
+    if stem not in cache:
+        mgr, e, loops = timing_analyse(paths[stem]); cache[stem] = (mgr, e[0][0] if e else 0.0)
+    return cache[stem]
+for stem in sorted(paths):
+    if stem.startswith(('hero_', 'heroshow', 'Hero45')) or 'Atlas' in stem:
+        continue
+    mgr, own = tend(stem)
+    if not mgr or mgr['DelayTime'] >= 7000:
+        continue
+    last = own
+    for k in ('strSpliteNode1', 'strSpliteNode2'):
+        sub = mgr.get('FilterInfo', {}).get(k)
+        if sub and sub in paths:
+            last = max(last, tend(sub)[1])
+    checked += 1
+    if last > mgr['DelayTime'] + 1e-3:
+        cut += 1; print(f'TIMING CUT {stem}: last fade {last:.2f} > DelayTime {mgr["DelayTime"]:.2f}')
+print(f'TIMING effects checked {checked}, cut before fade end: {cut}', 'OK' if cut == 0 else 'BAD')
+
+# --- every particle system starts and ends invisible (fade-in + fade-out)
+from vfx_fix import get_alpha, interp
+n_ps = bad_ps = 0
+for stem, path in sorted(paths.items()):
+    if stem.startswith(('hero_', 'heroshow', 'Hero45')) or 'Atlas' in stem:
+        continue
+    for o in UnityPy.load(path).objects:
+        if o.type.name != 'ParticleSystem':
+            continue
+        tt = o.read_typetree(); n_ps += 1
+        gr = tt['ColorModule']['gradient']
+        grads = [gr['maxGradient']] + ([gr['minGradient']] if gr['minMaxState'] == 3 else [])
+        ok = tt['ColorModule']['enabled'] and gr['minMaxState'] in (1, 3) and all(
+            interp(get_alpha(g), 0.0) <= 0.02 and interp(get_alpha(g), 1.0) <= 0.02 for g in grads)
+        if not ok:
+            bad_ps += 1; print('NO FADE', stem, o.path_id)
+print(f'FADES particle systems {n_ps}, without fade-in/out: {bad_ps}', 'OK' if bad_ps == 0 else 'BAD')

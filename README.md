@@ -1,10 +1,57 @@
-# AxH — Hidan Revamp v3
+# AxH — Hidan Revamp v4
 
-**Unduh:** [`release/Hidan.Revamp.v3.zip`](release/Hidan.Revamp.v3.zip)
+**Unduh:** [`release/Hidan.Revamp.v4.zip`](release/Hidan.Revamp.v4.zip)
 
 Isinya 99 file dengan struktur folder (`HIDAN/Art`, `HIDAN/UI`, `HIDAN/Audio`) yang sama persis dengan
 `Hidan.Revamp.zip` di rilis [AxH](https://github.com/yuuichi1286-hash/AxH/releases/tag/AxH). Cara pasangnya juga
-sama: timpa file lama dengan file di zip ini. v3 sudah mencakup semua perbaikan v2 (bagian 1–4 di bawah).
+sama: timpa file lama dengan file di zip ini. v4 sudah mencakup semua perbaikan v3 dan v2 (lihat bagian di bawah).
+
+## Yang baru di v4: fade-in & fade-out di semua efek, versi sinematik untuk basic attack & pasif
+
+### Semua efek punya fade-in dan fade-out
+
+- **463 dari 463 sistem partikel** mulai dan berakhir di alpha 0. Validator memeriksa ini otomatis, jadi tidak ada
+  partikel yang muncul atau hilang mendadak.
+- **Tidak ada efek yang terpotong sebelum fade-out selesai.** Setiap efek punya umur (`DelayTime` di
+  `ParticleSysMgr`), dan efek dihapus begitu umurnya habis. Di file asli umurnya dipasang mepet, ±0,03 dtk setelah
+  partikel terakhir. Sekarang ke-44 efek dicek bersama overlay `zzp1`/`zzp2`-nya dan diperpanjang bila perlu.
+- **11 efek mesh yang tadinya "pop".** Mesh ini dimatikan saat masih terlihat. Sekarang semuanya memudar atau
+  dissolve sampai selesai sebelum dimatikan. Contohnya puing batu ult yang tenggelam sambil larut, pita dan tanduk
+  di `skill4_2`, dan dissolve di `skill01_Hit_03`.
+
+### Basic attack & pasif: fade-in dan fade-out sinematik
+
+Basic attack mencakup `Attack_01–03` dan hit-nya. Pasif mencakup glow pedang `Keep_daoguang`, efek saat pasif
+selesai (`xiaosan`), seret pedang `tuodi`, serangan diperkuat `Attack_04_x`, dan `Hit_05`. Setiap partikel diberi
+perilaku sesuai perannya:
+
+| Peran | Fade-in | Fade-out |
+|---|---|---|
+| Tebasan (mesh) | *whip*: membesar 86→100% + kilatan panas | mengembang 12% sambil mendingin ke merah tua (kurva S) |
+| Afterimage (echo/ghost) | lebih redup | ekor panjang mulai 1/3 umur, mengembang 18%, hampir hitam-merah |
+| Bara / wisp | kepala panas | hidup 1,45× lebih lama dan **melayang naik** |
+| Asap / kabut darah | lembut | mengembang 25% dan menggelap jadi hitam-merah |
+| Serpihan / tetesan darah | — | **jatuh** oleh gravitasi |
+| Bloom / glow | — | mekar 12% saat memudar |
+| Tanda di tanah | — | bertahan 1,5× lebih lama, padam perlahan |
+| **Pasif selesai** | glow pedang menyala merah-putih | bloom mekar 35% lalu larut jadi merah darah; percikan jadi bara yang naik; inti gelap pedang larut perlahan, tidak lagi putus mendadak |
+
+Umur efek ikut disesuaikan supaya fade-out tampil utuh:
+
+- Basic attack: 0,80 → 1,13 dtk.
+- Hit: 0,40 → 0,59 dtk.
+- Serangan diperkuat: 1,5 → 2,0 dtk.
+- Hit pasif: 1,2 → 1,8 dtk.
+
+![Timeline fade basic attack](docs/previews/9_basic_attack_fade_timeline.png)
+![Timeline fade pasif](docs/previews/10_pasif_fade_timeline.png)
+![Pasif selesai: flare lalu larut](docs/previews/11_pasif_selesai_flare.png)
+
+Ada satu keterbatasan. Beberapa mesh statis tidak punya animasi sama sekali: rantai skill 1 selama skill aktif, dan
+mesh glow pedang selama pasif aktif. Mesh ini muncul dan hilang bersama objek efeknya, dan menambahkan fade ke
+situ butuh komponen animasi baru. Untuk glow pedang, akhirnya sudah tertutup oleh efek "pasif selesai" di atas.
+
+---
 
 ## Yang baru di v3
 
@@ -162,6 +209,8 @@ Perbaikan:
 - Mesh hasil tessellasi juga dicek: indeks valid, jumlah vertex/indeks submesh, bobot tulang = 1, normal satuan, dan
   bounding box per tulang. Rumus bounding box-nya dicocokkan dulu dengan data asli, dengan selisih ~1e-7.
 - Build-nya deterministik: menjalankan `tools/build.py` ulang menghasilkan 99 file yang identik byte demi byte.
+- Mulai v4 validator juga memeriksa dua hal. Pertama, setiap sistem partikel mulai dan berakhir di alpha 0 (463/463).
+  Kedua, tidak ada efek yang dihapus sebelum partikel terakhirnya, termasuk overlay, selesai memudar (44/44).
 - **Belum dites langsung di dalam game.** Di lingkungan build tidak ada perangkat Android maupun MLBB. Kalau ada
   skill yang terlihat aneh, sebutkan nama skill-nya.
 
@@ -189,6 +238,9 @@ python tools/make_previews.py orig/HIDAN out/HIDAN docs/previews   # gambar sebe
 | `tools/vfx_fix.py` | fade alpha (kurva S), warna, noise, budget partikel, drag/taper percikan, fade & tangen efek mesh |
 | `tools/fx_tex.py` | penajaman tepi + grading tekstur efek, encoder ASTC/ETC2 (format & mip sama dengan aslinya) |
 | `tools/jerk_metrics.py`, `make_previews_v3.py` | metrik kehalusan animasi dan gambar pratinjau v3 |
+| `tools/cinematic.py` | v4: fade sinematik per peran partikel (basic attack & pasif), flare pasif selesai, perbaikan mesh "pop" |
+| `tools/effect_timing.py` | kapan partikel terakhir benar-benar hilang vs `DelayTime` efek (dipakai build & validator) |
+| `tools/make_previews_v4.py`, `make_passive_end_chart.py`, `dump_effect.py` | timeline fade dan inspeksi efek |
 | `tools/clipio.py`, `meshio.py`, `fk.py` | parser kurva streamed/dense, vertex buffer, forward kinematics + skinning |
 | `tools/toon_preview.py`, `filmstrip.py`, `render_obj.py` | renderer software untuk pratinjau |
 | `docs/build_report.json` | rincian perubahan per bundle |

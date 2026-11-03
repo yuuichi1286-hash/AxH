@@ -16,6 +16,8 @@ import mesh_tess
 import model_tex
 import vfx_fix
 import fx_tex
+import cinematic
+from effect_timing import analyse as timing_analyse
 
 MODEL_BUNDLES = {'hero_argus_skin.unity3d': 1024, 'hero_argus_skin_high_add.unity3d': 2048}
 UNTOUCHED = ('hero_argus.unity3d', 'hero_argus_skin_extlow_add.unity3d', 'heroshow_ip03_add.unity3d')
@@ -75,7 +77,7 @@ def process_model(env, report, tex_size):
             report['material_toon'] = TOON
 
 
-def process_vfx(env, report, tex_cache, pool):
+def process_vfx(env, report, tex_cache, pool, filename=''):
     objs = {o.path_id: o for o in env.objects}
     rmode = {}
     for o in env.objects:
@@ -83,6 +85,9 @@ def process_vfx(env, report, tex_cache, pool):
             t = o.read_typetree()
             rmode[t['m_GameObject']['m_PathID']] = t['m_RenderMode']
     totals = collections.Counter()
+    kind = cinematic.bundle_kind(filename)
+    if kind:
+        totals[f'cinematic_bundle_{kind}'] = 1
     pending = []
     for o in env.objects:
         t = o.type.name
@@ -91,6 +96,10 @@ def process_vfx(env, report, tex_cache, pool):
             gid = tt['m_GameObject']['m_PathID']
             go = objs[gid].read_typetree()['m_Name'] if gid in objs else ''
             rep = vfx_fix.process_particle_system_v3(tt, go, rmode.get(gid))
+            if kind:
+                r, done = cinematic.apply_cinematic(tt, go, rmode.get(gid), filename)
+                if done:
+                    totals[f'cinematic_{r}'] += 1
             o.save_typetree(tt)
             totals['particle_systems'] += 1
             for k, v in rep.items():
@@ -99,10 +108,16 @@ def process_vfx(env, report, tex_cache, pool):
             tt = o.read_typetree()
             if tt.get('m_Legacy'):
                 n1 = vfx_fix.fade_legacy_clip(tt)
+                n3 = cinematic.fix_legacy_popouts(tt)
+                if kind:
+                    n4 = cinematic.flare_off_clip(tt)
+                    totals['passive_off_flare'] += n4
+                    n3 += n4
                 n2 = vfx_fix.smooth_legacy_tangents(tt)
-                if n1 or n2:
+                if n1 or n2 or n3:
                     o.save_typetree(tt)
                     totals['mesh_alpha_fadein'] += n1
+                    totals['mesh_popout_fixed'] += n3
                     totals['mesh_curves_smoothed'] += n2
         elif t == 'Texture2D':
             tt = o.read_typetree()
@@ -134,6 +149,50 @@ def process_vfx(env, report, tex_cache, pool):
     report['vfx'] = dict(totals)
 
 
+def fix_delay_times(root, margin=0.06):
+    """Pass 2: every effect lives at least until its last particle (incl. overlay sub-effects) has faded."""
+    paths = {}
+    for dp, dn, fn in os.walk(root):
+        for f in fn:
+            if f.endswith('.unity3d'):
+                paths[f[:-len('.unity3d')]] = os.path.join(dp, f)
+    ends = {}
+    def end_of(stem):
+        if stem not in ends:
+            mgr, e, loops = timing_analyse(paths[stem])
+            ends[stem] = (mgr, e[0][0] if e else 0.0)
+        return ends[stem]
+    changes = {}
+    for stem, path in sorted(paths.items()):
+        if stem.startswith('hero_') or stem.startswith('heroshow') or 'Atlas' in stem or stem.startswith('Hero45'):
+            continue
+        mgr, own = end_of(stem)
+        if not mgr or mgr['DelayTime'] >= 7000:
+            continue
+        last = own
+        fi = mgr.get('FilterInfo', {})
+        for k in ('strSpliteNode1', 'strSpliteNode2'):
+            sub = fi.get(k)
+            if sub and sub in paths:
+                last = max(last, end_of(sub)[1])
+        need = round(last + margin, 3)
+        if need > mgr['DelayTime'] + 1e-4:
+            env = UnityPy.load(path)
+            for o in env.objects:
+                if o.type.name == 'MonoBehaviour':
+                    try:
+                        tt = o.read_typetree()
+                    except Exception:
+                        continue
+                    if 'DelayTime' in tt:
+                        changes[stem] = (round(tt['DelayTime'], 3), need)
+                        tt['DelayTime'] = float(need)
+                        o.save_typetree(tt)
+            with open(path, 'wb') as fh:
+                fh.write(env.file.save(packer='original'))
+    return changes
+
+
 def main():
     src_root, dst_root, report_path = sys.argv[1:4]
     workers = int(sys.argv[4]) if len(sys.argv) > 4 else 4
@@ -158,12 +217,13 @@ def main():
                 if f in MODEL_BUNDLES:
                     process_model(env, rep, MODEL_BUNDLES[f])
                 else:
-                    process_vfx(env, rep, tex_cache, pool)
+                    process_vfx(env, rep, tex_cache, pool, f)
                 data = env.file.save(packer='original')
                 with open(path, 'wb') as fh:
                     fh.write(data)
                 report[rel] = rep
                 print(f'{rel}: {rep.get("vfx") or "model"}', flush=True)
+    report['_delaytime'] = fix_delay_times(dst_root)
     report['_build_seconds'] = round(time.time() - t0, 1)
     with open(report_path, 'w') as fh:
         json.dump(report, fh, indent=1, default=str)
