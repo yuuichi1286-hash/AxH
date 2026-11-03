@@ -91,6 +91,8 @@ def raster(img, zbuf, P, UV, tex, height=None):
         tx = np.clip(((u % 1.0) * tw).astype(int), 0, tw - 1)
         ty = np.clip(((1 - (v % 1.0)) * th).astype(int), 0, th - 1)
         col = tex[ty, tx, :3]
+        if tex.shape[2] == 4:                       # alpha-tested foliage
+            m &= tex[ty, tx, 3] >= 0.5
         zz = zbuf[ys, xs]
         m &= d >= zz
         yy, xx = ys[m], xs[m]
@@ -129,7 +131,8 @@ def render(env, textures=None, px_per_m=24, extent=(-64, 64, -50, 50), layers=(1
         tname = to.read_typetree()['m_Name']
         if tname not in tex_cache:
             im = textures[tname] if textures and tname in textures else to.read().image
-            tex_cache[tname] = np.asarray(im.convert('RGB'), np.float32) / 255.0
+            arr = np.asarray(im.convert('RGBA'), np.float32) / 255.0
+            tex_cache[tname] = arr if arr[..., 3].min() < 0.99 else arr[..., :3]
         pos = d['pos'][:, :3].astype(np.float64)
         wp = (M @ np.c_[pos, np.ones(len(pos))].T).T[:, :3]
         idx = d['index'].astype(np.int64)

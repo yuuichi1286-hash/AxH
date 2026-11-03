@@ -8,6 +8,7 @@ import numpy as np
 import UnityPy
 from PIL import Image
 import map_fx
+import map_bake
 
 o_root, n_root = sys.argv[1:3]
 problems = 0
@@ -68,15 +69,57 @@ if dict(added) != expected:
 
 # every object re-reads; untouched kinds keep their exact bytes
 reread = 0
+water_changed = 0
 for k, o in mn.items():
     try:
         o.read_typetree(); reread += 1
     except Exception as e:
         bad('read fail', k, o.type.name, e)
-    if k in mo and o.type.name not in ('Texture2D', 'PreloadData'):
+    if k in mo and o.type.name not in ('Texture2D', 'PreloadData', 'Cubemap'):
         if o.get_raw_data() != mo[k].get_raw_data():
+            if o.type.name == 'Material':
+                # only the water materials may change, and only their reflection strength
+                a, b = mo[k].read_typetree(), o.read_typetree()
+                fa, fb = dict(a['m_SavedProperties']['m_Floats']), dict(b['m_SavedProperties']['m_Floats'])
+                diff = {x for x in fa if fa[x] != fb.get(x)}
+                rest_a = dict(a); rest_b = dict(b)
+                rest_a['m_SavedProperties'] = dict(a['m_SavedProperties'], m_Floats=None)
+                rest_b['m_SavedProperties'] = dict(b['m_SavedProperties'], m_Floats=None)
+                if diff - set(map_bake.WATER_TWEAKS) or rest_a != rest_b:
+                    bad('material changed beyond the water reflection tweak', b['m_Name'], diff)
+                water_changed += 1
+                continue
             bad('object bytes changed', k, o.type.name)
-print('objects re-read:', reread)
+print('objects re-read:', reread, '| water materials with stronger reflection:', water_changed)
+
+# reflection cubemap: 6 faces (face-major), each with its full mip chain
+for k, o in mn.items():
+    if o.type.name != 'Cubemap':
+        continue
+    import texture2ddecoder
+    tt = o.read_typetree()
+    w, fmt, mips = tt['m_Width'], tt['m_TextureFormat'], tt['m_MipCount']
+    blk = {48: 4, 49: 5, 50: 6, 51: 8}[fmt]
+    per = sum(math.ceil(max(1, w >> i) / blk) ** 2 * 16 for i in range(mips))
+    if tt['m_CompleteImageSize'] != per or len(tt['image data']) != 6 * per:
+        bad('cubemap size fields', tt['m_Name'], tt['m_CompleteImageSize'], per, len(tt['image data']))
+    ot = mo[k].read_typetree()
+    ow, oblk = ot['m_Width'], {48: 4, 49: 5, 50: 6, 51: 8}[ot['m_TextureFormat']]
+    oper = ot['m_CompleteImageSize']
+    for f in range(6):
+        raw = bytes(tt['image data'][f * per: f * per + math.ceil(w / blk) ** 2 * 16])
+        face = np.frombuffer(texture2ddecoder.decode_astc(raw, w, w, blk, blk), np.uint8).reshape(w, w, 4)
+        if face[..., :3].max() == 0:
+            bad('cubemap face empty', f)
+        oraw = bytes(ot['image data'][f * oper: f * oper + math.ceil(ow / oblk) ** 2 * 16])
+        of = np.frombuffer(texture2ddecoder.decode_astc(oraw, ow, ow, oblk, oblk), np.uint8).reshape(ow, ow, 4)[..., :3].mean(-1)
+        nf = np.asarray(Image.fromarray(face[..., :3]).resize((ow, ow), Image.BOX), np.float32).mean(-1)
+        if of.std() > 1 and nf.std() > 1:
+            c = np.corrcoef(nf.ravel(), of.ravel())[0, 1]
+            cf = np.corrcoef(nf[::-1].ravel(), of.ravel())[0, 1]
+            if c < 0.8 or cf > c:
+                bad(f'cubemap face {f} orientation/content: corr {c:.3f} flipped {cf:.3f}')
+    print(f'cubemap {tt["m_Name"]}: {w}px fmt {fmt} mips {mips} ok')
 
 # textures
 ASTC = {48: 4, 49: 5, 50: 6, 51: 8}

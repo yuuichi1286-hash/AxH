@@ -7,7 +7,7 @@ def streams(vd):
     nstreams = 1 + max(c['stream'] for c in chans)
     out = []; off = 0
     for s in range(nstreams):
-        stride = sum(c['dimension']*FMT[c['format']][1] for c in chans if c['stream']==s and c['dimension']>0)
+        stride = sum((c['dimension'] & 0xF)*FMT[c['format']][1] for c in chans if c['stream']==s and c['dimension'] & 0xF)
         out.append((off, stride))
         off += n*stride
         off = (off + 15) & ~15
@@ -18,10 +18,10 @@ def decode(tt):
     st, total = streams(vd)
     res = {}
     for i, c in enumerate(vd['m_Channels']):
-        if c['dimension'] == 0: continue
+        dim = c['dimension'] & 0xF          # high bits are flags in 2019+ (e.g. 52 = half4 position)
+        if dim == 0: continue
         dt, sz = FMT[c['format']]
         off, stride = st[c['stream']]
-        dim = c['dimension']
         buf = np.frombuffer(raw, dtype=np.uint8, count=n*stride, offset=off).reshape(n, stride)
         col = buf[:, c['offset']:c['offset']+dim*sz].copy().view(dt).reshape(n, dim)
         res[CH[i]] = col
@@ -37,10 +37,10 @@ def encode(tt, arrays, n):
     raw = bytearray(total)
     mv = np.frombuffer(raw, dtype=np.uint8)
     for i, c in enumerate(vd['m_Channels']):
-        if c['dimension'] == 0: continue
+        dim = c['dimension'] & 0xF
+        if dim == 0: continue
         dt, sz = FMT[c['format']]
         off, stride = st[c['stream']]
-        dim = c['dimension']
         a = np.ascontiguousarray(arrays[CH[i]].astype(dt).reshape(n, dim))
         view = mv[off:off+n*stride].reshape(n, stride)
         view[:, c['offset']:c['offset']+dim*sz] = a.view(np.uint8).reshape(n, dim*sz)

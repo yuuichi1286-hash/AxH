@@ -117,3 +117,36 @@ for (title, ext, ppm), t in zip(views, tiles):
     x += t.size[0] + 16
 canvas.save(os.path.join(out, '5_efek_baru_simulasi.png'))
 print('ok')
+
+
+# 6. baked building shadows + AO (ground and props), 7. water reflection cube map
+for i, ext in enumerate(((-30, -6, -34, -14), (-62, -40, -12, 10))):
+    a = map_render.render(eo, px_per_m=36, extent=ext, layers=(17, 10))
+    b = map_render.render(en, px_per_m=36, extent=ext, layers=(17, 10))
+    pair(a, b, f'Bayangan + AO + emboss/PBR {i + 1}').save(
+        os.path.join(out, f'{6 + i}_bayangan_ao_{i + 1}.png'))
+
+
+def cube_faces(env):
+    import texture2ddecoder, math as m_
+    o = next(o for o in env.objects if o.type.name == 'Cubemap')
+    tt = o.read_typetree()
+    w, fmt, per = tt['m_Width'], tt['m_TextureFormat'], tt['m_CompleteImageSize']
+    blk = {48: 4, 49: 5, 50: 6, 51: 8}[fmt]
+    faces = []
+    for f in range(6):
+        raw = bytes(tt['image data'][f * per: f * per + m_.ceil(w / blk) ** 2 * 16])
+        bgra = np.frombuffer(texture2ddecoder.decode_astc(raw, w, w, blk, blk), np.uint8).reshape(w, w, 4)
+        faces.append(Image.fromarray(bgra[..., [2, 1, 0]].copy()).resize((192, 192), Image.NEAREST if w < 64 else Image.LANCZOS))
+    return faces, w
+
+
+fa, wa = cube_faces(eo)
+fb, wb = cube_faces(en)
+c = Image.new('RGB', (6 * 200, 2 * 222 + 40), (12, 13, 15))
+d = ImageDraw.Draw(c)
+d.text((8, 8), f'Cubemap pantulan air (pengganti SSR): atas = asli {wa}px, bawah = {wb}px lebih tajam', font=F, fill=(230, 230, 230))
+for i in range(6):
+    c.paste(fa[i], (i * 200, 40)); c.paste(fb[i], (i * 200, 40 + 222))
+c.save(os.path.join(out, '8_pantulan_air.png'))
+print('ok 6-8')

@@ -2,12 +2,13 @@ GalleryCenter.unity3d: identical
 PVP_003_add.unity3d: identical
 PVP_003wall_add.unity3d: identical
 PVP_009.unity3d: identical
-PVP_049_add.unity3d: 10062779 -> 55544443 bytes
+PVP_049_add.unity3d: 10062779 -> 54666264 bytes
 PVP_049_highwall_add.unity3d: identical
 PVP_049_low.unity3d: identical
 PVP_101wall_add.unity3d: identical
 added objects: {(True, 'Texture2D'): 4, (True, 'Material'): 4, (False, 'GameObject'): 14, (False, 'Transform'): 14, (False, 'ParticleSystem'): 13, (False, 'ParticleSystemRenderer'): 13}
-objects re-read: 1290
+objects re-read: 1290 | water materials with stronger reflection: 8
+cubemap 5v5_cube_water: 128px fmt 50 mips 8 ok
 textures checked: 74
 effects: 13 particle systems, ~237 particles alive in total
 

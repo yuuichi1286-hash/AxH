@@ -12,7 +12,7 @@ byte-identical.
   * masks 2x Lanczos, water noise 64 -> 256 (tileable)
   * new ambient effects (map_fx): fireflies, river sparkles + mist, Lord/Turtle pit aura, base sparkles, light motes
 """
-import sys, os, json, shutil, time, collections
+import sys, os, json, shutil, time, collections, zlib
 from concurrent.futures import ProcessPoolExecutor
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np
@@ -21,6 +21,7 @@ import UnityPy
 
 import map_hd
 import map_fx
+import map_bake
 import fx_tex_hd
 
 HIGH = 'PVP_049_add.unity3d'
@@ -48,7 +49,31 @@ PLAN = {'ground': (50, True, 2, 4), 'prop': (51, True, 2, 2), 'sky': (50, False,
         'lightmap': (50, False, 1, 1), 'mask': (51, False, 1, 1), 'noise': (51, False, 1, 1)}
 
 
-def process_image(kind, rgba, sr):
+class CachedSR:
+    """SR results cached on disk (exact float32, so a cached build is byte-identical to a fresh one).
+    Enabled by the MAP_SR_CACHE environment variable (directory)."""
+
+    def __init__(self, sr, onnx_path, cache_dir=None):
+        import hashlib
+        self.sr, self.dir = sr, cache_dir
+        self.model = hashlib.sha1(open(onnx_path, 'rb').read()).hexdigest()[:16]
+        if cache_dir:
+            os.makedirs(cache_dir, exist_ok=True)
+
+    def x2(self, rgb):
+        import hashlib
+        if not self.dir:
+            return self.sr.x2(rgb)
+        rgb = np.ascontiguousarray(rgb, np.float32)
+        path = os.path.join(self.dir, hashlib.sha1(rgb.tobytes()).hexdigest() + self.model + '.npy')
+        if os.path.exists(path):
+            return np.load(path)
+        out = self.sr.x2(rgb).astype(np.float32)
+        np.save(path, out)
+        return out
+
+
+def process_image(kind, rgba, sr, name='', bake=None):
     """rgba float32 HxWx4 -> processed float32 rgba"""
     import cv2
     rgb, a = rgba[..., :3], rgba[..., 3]
@@ -56,7 +81,23 @@ def process_image(kind, rgba, sr):
     if kind in ('ground', 'prop', 'sky', 'foliage'):
         up = sr.x2(rgb)
         lz = np.clip(cv2.resize(rgb, (W * 2, H * 2), interpolation=cv2.INTER_LANCZOS4), 0, 1)
-        x = map_hd.detail_restore(up, lz, 0.35 if kind == 'ground' else 0.25)
+        x = map_hd.detail_restore(up, lz, {'ground': 0.45, 'foliage': 0.3}.get(kind, 0.25))
+        if kind == 'ground':
+            # grass / soil / stone get extra detail, water stays clean
+            grass, water, soil = map_hd.masks(x)
+            x = map_hd.local_detail(x, (grass + soil) * (1 - water), 0.35, 0.18)
+            x = map_hd.detail_synth(x, seed=zlib.crc32(name.encode()) & 0xFFFF)
+            if bake is not None and name in bake['tiles']:
+                xz, cov, tex_dir = bake['tiles'][name]
+                x = map_bake.relief_pbr(x, tex_dir, emboss=0.09, cavity=0.14, sheen=0.08, kind='ground')
+                x = map_bake.apply_shadow_ao(x, xz, bake['shadow'], bake['ao'])
+            else:
+                x = map_bake.relief_pbr(x, emboss=0.09, cavity=0.14, sheen=0.08, kind='ground')
+        elif kind == 'foliage':
+            x = map_hd.local_detail(x, np.clip(cv2.resize(a, (W * 2, H * 2)), 0, 1), 0.45, 0.2)
+            x = map_bake.relief_pbr(x, emboss=0.06, cavity=0.12, sheen=0.02, kind='prop')
+        elif kind == 'prop':
+            x = map_bake.relief_pbr(x, emboss=0.10, cavity=0.16, sheen=0.09, kind='prop')
         x = map_hd.grade(x, {'ground': 'ground', 'prop': 'prop', 'sky': 'sky', 'foliage': 'prop'}[kind])
         x = map_hd.sharpen(x, 0.25 if kind != 'sky' else 0.15, 0.8)
         if a.min() < 0.999:
@@ -86,7 +127,37 @@ def encode_job(job):
     return name, fx_tex_hd.encode(img, fmt, mips)
 
 
+def bake_context(env):
+    """World-space cast-shadow / contact-AO maps from the real prop geometry + per ground texture the world
+    position of every texel (2x size) and the texture-space light direction."""
+    ground, _ = map_bake.scene_meshes(env, (17,))
+    props, failed = map_bake.scene_meshes(env, (10,))
+    hm = map_bake.ground_heightmap(ground)
+    shadow, ao = map_bake.shadow_ao_maps(props, hm)
+    from map_render import Scene
+    sc = Scene(env)
+    mats = {pid: o.read_typetree() for pid, o in sc.shared.items() if o.type.name == 'Material'}
+    texname = {pid: o.read_typetree() for pid, o in sc.shared.items() if o.type.name == 'Texture2D'}
+    from meshio import decode
+    tiles = {}
+    for gname, layer, M, mesh_pid, mat_pids in sc.renderers():
+        if layer != 17 or 'dibiaobake' not in gname or not mat_pids or mat_pids[0] not in mats:
+            continue
+        tp = dict(mats[mat_pids[0]]['m_SavedProperties']['m_TexEnvs']).get('_MainTex')
+        t = texname.get(tp['m_Texture']['m_PathID']) if tp else None
+        d = decode(sc.shared[mesh_pid].read_typetree())
+        if t is None or 'uv0' not in d:
+            continue
+        size = (t['m_Width'] * 2, t['m_Height'] * 2)
+        tiles[t['m_Name']] = map_bake.tile_position_map(M, d, size)
+    return {'shadow': shadow, 'ao': ao, 'tiles': tiles, 'props': len(props), 'props_failed': failed,
+            'shadow_cover': float((shadow > 0.5).mean())}
+
+
 def process_high(env, report, sr, pool):
+    bake = bake_context(env)
+    report['bake'] = {'props_casting': bake['props'], 'props_skipped_undecodable': bake['props_failed'],
+                      'ground_tiles_shadowed': sorted(bake['tiles']), 'light_to': map_bake.TO_LIGHT.round(3).tolist()}
     tex_objs = [o for o in env.objects if o.type.name == 'Texture2D']
     jobs = {}
     meta = {}
@@ -97,7 +168,7 @@ def process_high(env, report, sr, pool):
         name = tt['m_Name']
         kind = kind_of(name)
         img = np.asarray(o.read().image.convert('RGBA'), np.float32) / 255.0
-        out = process_image(kind, img, sr)
+        out = process_image(kind, img, sr, name, bake)
         im = Image.fromarray((np.clip(out, 0, 1) * 255 + 0.5).astype(np.uint8), 'RGBA')
         fmt, mips, filt, aniso = PLAN[kind]
         nm = fx_tex_hd.full_chain(*im.size) if mips else 1
@@ -122,6 +193,20 @@ def process_high(env, report, sr, pool):
         tex_rep[name] = {'kind': kind, 'before': before, 'after': (size[0], size[1], fmt, nm), 'bytes': len(data)}
     report['textures'] = tex_rep
     report['texture_kinds'] = dict(counts)
+    # sharper, higher resolution water reflection (cube map) + slightly stronger reflection / fresnel
+    for o in env.objects:
+        if o.type.name == 'Cubemap':
+            tt = o.read_typetree()
+            before = (tt['m_Width'], tt['m_TextureFormat'], tt['m_MipCount'])
+            map_bake.upgrade_cubemap(tt, fx_tex_hd.encode)
+            o.save_typetree(tt)
+            report['cubemap'] = {tt['m_Name']: {'before': before, 'after': (tt['m_Width'], tt['m_TextureFormat'], tt['m_MipCount'])}}
+        elif o.type.name == 'Material':
+            tt = o.read_typetree()
+            if any(k == '_Water_CubeMap' for k, v in tt['m_SavedProperties']['m_TexEnvs']):
+                if map_bake.tweak_water_material(tt):
+                    o.save_typetree(tt)
+                    report.setdefault('water_materials', []).append(tt['m_Name'])
     report['effects'] = map_fx.inject(env, TEMPLATES, fx_tex_hd.encode)
 
 
@@ -132,7 +217,7 @@ def main():
         shutil.rmtree(dst)
     shutil.copytree(src, dst)
     from sr_model import SR
-    sr = SR(onnx_path, threads=workers)
+    sr = CachedSR(SR(onnx_path, threads=workers), onnx_path, os.environ.get('MAP_SR_CACHE'))
     report = {}
     t0 = time.time()
     with ProcessPoolExecutor(max_workers=workers) as pool:

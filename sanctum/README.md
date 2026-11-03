@@ -1,6 +1,6 @@
 # Sanctum Island — HD Remaster (grafik High)
 
-**Unduh:** [`release/Sanctum_Island_Map_HD.zip`](release/Sanctum_Island_Map_HD.zip) (60 MB) — menggantikan
+**Unduh:** [`release/Sanctum_Island_Map_HD.zip`](release/Sanctum_Island_Map_HD.zip) (59 MB) — menggantikan
 `Sanctum_Island_Map.zip`.
 
 Struktur zip, nama file, urutan entri, dan kompresinya sama persis dengan file asli (`Scenes/android/...`). Cara
@@ -12,6 +12,25 @@ identik byte-per-byte: versi Low `PVP_049_low`, data jalur/tembok A* (`*wall_add
 
 ![Peta sebelum / sesudah](docs/previews/1_peta_sebelum_sesudah.png)
 
+## Yang baru di versi ini
+
+- **Pewarnaan lebih gelap:** rata-rata ±25–30% lebih gelap dari aslinya, dengan bayangan lebih dalam. Warna tetap
+  kaya, jadi tidak kusam.
+- **Rumput dan tanah lebih detail:** serat helai rumput, butiran tanah dan kerikil, plus kontras lokal dua skala.
+- **Bayangan setiap bangunan:** 181 bangunan dan props memberi bayangan nyata ke tanah, mengikuti arah cahaya peta.
+- **AO:** gelap kontak di kaki bangunan, ditambah AO celah di dalam tekstur.
+- **Emboss / relief:** permukaan batu, ukiran lane, dan props terlihat timbul.
+- **Kilau ala PBR:** batu dan logam memantulkan cahaya, sedangkan rumput tetap matte.
+- **Pantulan air ala SSR:** cubemap pantulan sungai 32 → 128 px dan pantulan sedikit lebih kuat.
+
+> **Kenapa "baked":** SSR, shader PBR, dan shadow real-time adalah fitur renderer dan shader game. Keduanya ada di
+> engine dan bundle shader MLBB, bukan di file map, jadi tidak bisa dinyalakan dari map. Karena itu semuanya saya
+> *bake*: dihitung dari geometri dan arah cahaya asli peta, lalu ditanam ke tekstur dan cubemap. Dari kamera MOBA
+> yang tetap, hasilnya terlihat sama, dan beban FPS-nya **nol**.
+
+![Bayangan + AO + emboss/PBR](docs/previews/6_bayangan_ao_1.png)
+![Bayangan di base](docs/previews/7_bayangan_ao_2.png)
+
 ## 1. Tekstur sangat HD
 
 Semua tekstur asli berformat ASTC 8x8 (kompresi paling kasar) tanpa mipmap. Tanah hanya punya ±39 texel per meter,
@@ -22,8 +41,9 @@ jadi di layar HP ia diperbesar ±2×. Itu sebabnya tanah terlihat buram dan berb
 | 16 petak tanah + sungai (`hedaobake`) | 1024², ASTC 8x8 | **2048²**, ASTC 6x6, mipmap penuh |
 | 40 props (patung, pohon, bangunan, tembok, kamp buff, tebing, kristal, …) | 512², ASTC 8x8 | **1024²**, ASTC 8x8, mipmap penuh |
 | Langit / pulau melayang (`skybox`) | 512² | **1024²**, ASTC 6x6 |
-| Rumput & daun (cut-out) | 512² | **1024²**, ASTC 6x6, alpha di-upscale terpisah supaya tepi daun tetap tajam |
+| Rumput & daun 3D (cut-out) | 512² | **1024²**, ASTC 6x6, alpha di-upscale terpisah supaya tepi daun tetap tajam |
 | 7 lightmap | 1024² / 512², ASTC 8x8 | ukuran sama, artefak blok dihaluskan, ASTC 6x6 |
+| Cubemap pantulan air | 32 px, ASTC 8x8 | **128 px**, ASTC 6x6, 8 mip |
 | Mask, noise air | 256² / 64² | 512² / 256² (noise air tetap seamless) |
 
 Cara upscale-nya:
@@ -35,38 +55,70 @@ Cara upscale-nya:
   dipertajam ringan.
 - **Kualitas kompresi:** dibanding versi HD tanpa kompresi, ASTC 6x6 pada 2048 mencapai PSNR 43 dB (8x8: 40 dB).
 
-## 2. Pewarnaan lebih keren
+## 2. Rumput dan tanah lebih detail
 
-Grading sinematik yang sama untuk tanah, props, langit, dan lightmap, jadi semuanya tetap serasi:
+Di petak tanah (sekitar 1,3 cm per texel setelah 2×), sungai sengaja dibiarkan halus dan bersih. Yang ditambahkan:
 
-- *Dehaze*: lapisan kabut pucat dihilangkan, lalu kontras mid-tone dinaikkan sambil menjaga kecerahan.
-- *Vibrance*: warna pucat lebih hidup, warna yang sudah kuat tidak berlebihan.
-- Rumput dan pohon lebih hijau segar. Air sungai lebih toska dan jernih.
-- *Split-tone*: highlight hangat (cahaya matahari), bayangan sedikit dingin. Lightmap props ikut diberi nada yang
-  sama.
-- *Clarity* (kontras lokal): ukiran jalur lane, retakan batu, dan tepi semak lebih tegas.
+- **Rumput:** helai pendek dibuat dari noise yang diseret mengikuti arah yang berubah perlahan, jadi tidak terlihat
+  berpola. Ada gumpalan rumput lebih gelap, ujung helai sedikit lebih hangat, dan pangkalnya lebih dingin.
+- **Tanah, batu, jalur lane:** butiran halus dan bintik kerikil kecil.
+- **Kontras lokal dua skala (1,3 px dan 4 px):** detail lukisan asli (helai, retakan, kerikil) lebih menonjol.
+- **Rumput dan daun 3D** (sprite cut-out) mendapat kontras lokal dan relief ringan.
 
 ![Close-up 1](docs/previews/2_closeup_1.png)
 ![Close-up 2](docs/previews/3_closeup_2.png)
+
+## 3. Bayangan, AO, emboss, PBR, pantulan
+
+- **Arah cahaya:** diambil dari parameter cahaya shader kristal peta (`_CustomLightDir` = 0,61 / 0,71 / -0,35).
+  Artinya cahaya datang dari kanan-depan atas dengan elevasi ±45°, dan bayangan jatuh ke kiri-atas peta.
+- **Bayangan bangunan:** setiap segitiga dari 181 mesh bangunan dan props diproyeksikan sepanjang arah cahaya ke
+  permukaan tanah. Tinggi tanah diambil dari heightmap mesh tanah, jadi platform base yang lebih rendah juga benar.
+  - Geometri yang terkubur di bawah tanah tidak memberi bayangan.
+  - Tepi bayangan dibuat lembut (penumbra 2 tingkat).
+  - Area bayangan diberi nada sedikit dingin, seperti cahaya langit.
+  - Kekuatan bayangan 55%, lalu dipetakan ke tekstur 16 petak tanah lewat posisi dunia setiap texel.
+- **AO kontak:** jejak geometri dalam 0,9 m dari tanah dibuat gelap lembut di sekeliling kaki bangunan, tembok,
+  batu, dan pohon (40%).
+- **AO celah:** retakan dan sambungan batu di dalam tekstur menjadi lebih gelap.
+- **Emboss / relief:** normal dihitung dari luminansi tekstur, lalu disinari dari arah cahaya peta. Untuk tanah,
+  arah cahaya dihitung per petak di ruang tekstur. Hasilnya permukaan terlihat timbul.
+- **Kilau ala PBR:** specular dengan *half-vector* cahaya-kamera hanya di area batu dan logam (saturasi rendah,
+  terang). Rumput dan daun hampir tanpa kilau, jadi materialnya terbedakan.
+- **Pantulan air (pengganti SSR):**
+  - Cubemap pantulan sungai 32 → 128 px dengan kilau matahari lebih tegas.
+  - Pada 8 material air, intensitas cubemap dinaikkan 0,6 → 0,8 dan fresnel 0,7 → 0,85.
+
+![Pantulan air](docs/previews/8_pantulan_air.png)
 ![Tekstur props](docs/previews/4_tekstur_props.png)
 
-## 3. Halus dan ringan
+## 4. Pewarnaan
 
-- **Mipmap + trilinear** untuk tanah dan props. Tekstur tidak lagi berkilau/bergerigi saat kamera bergeser.
-  Mipmap juga lebih ramah cache GPU.
+Grading sinematik yang sama untuk tanah, props, langit, dan lightmap, jadi semuanya tetap serasi:
+
+- *Dehaze* dan kontras mid-tone.
+- **Mid-tone lebih gelap** (gamma 1,08) dan *exposure* diturunkan (tanah 0,92, props 0,93). Lightmap props ikut
+  digelapkan.
+- *Vibrance*: hijau rumput dan pohon lebih pekat, air lebih toska.
+- *Split-tone*: highlight hangat, bayangan sedikit dingin.
+- *Clarity*: ukiran lane, retakan batu, dan tepi semak lebih tegas.
+
+## 5. Halus dan ringan
+
+- **Mipmap + trilinear** untuk tanah dan props. Tekstur tidak berkilau/bergerigi saat kamera bergeser, dan lebih
+  ramah cache GPU.
 - **Anisotropic filtering** 4× untuk tanah, 2× untuk props. Bagian atas layar yang terlihat miring tetap tajam.
 - Rumput dan daun cut-out sengaja tanpa mipmap, supaya tidak menipis.
+- Bayangan, AO, relief, dan kilau semuanya baked, jadi tidak ada biaya render tambahan.
 - **Efek baru dibuat seringan mungkin:**
-  - Total hanya ±237 partikel hidup di seluruh peta, dari 13 sistem.
-  - Tanpa modul Noise atau Collision. Gerak meliuk dibuat dari kurva kecepatan acak, yang lebih murah.
-  - Simulasi world-space dengan *prewarm*, jadi efek sudah ada sejak map dimuat.
-  - Culling otomatis Unity.
-  - Hanya 4 tekstur kecil (64–128 px).
-- **Konsekuensi memori:** tekstur High naik dari 8,3 MB menjadi 57,5 MB (tanah 40 MB, props 13,7 MB). Bundle
-  High naik dari 10,1 MB ke 55,5 MB. Untuk perangkat yang memakai grafik High, ini masih wajar. Versi Low tidak
-  tersentuh.
+  - Total ±237 partikel dari 13 sistem.
+  - Tanpa modul Noise atau Collision.
+  - Simulasi world-space dengan *prewarm*, plus culling otomatis.
+  - Hanya 4 tekstur kecil.
+- **Konsekuensi memori:** tekstur High naik dari 8,3 MB menjadi 57,5 MB. Bundle High naik dari 10,1 MB ke
+  54,7 MB. Untuk perangkat yang memakai grafik High, ini masih wajar. Versi Low tidak tersentuh.
 
-## 4. Efek baru di peta
+## 6. Efek baru di peta
 
 | Efek | Lokasi | Tampilan |
 |---|---|---|
@@ -88,8 +140,8 @@ Cara efek disisipkan:
   di sharedAssets.
 - Tipe ParticleSystem diambil dari bundle Unity 2019.4.33f1 asli, dengan hash tipe yang identik dengan bundle game
   lainnya.
-- Shader-nya memakai shader efek additive / alpha-blend yang sudah ada di bundle shader yang memang dipakai map ini.
-  Shader itu ditambahkan ke PreloadData scene supaya ikut dimuat.
+- Shader-nya memakai shader efek additive / alpha-blend yang sudah ada di bundle shader yang dipakai map ini. Shader
+  itu ditambahkan ke PreloadData scene supaya ikut dimuat.
 - Semua efek ada di layer yang sama dengan props peta (layer 10).
 
 ## Validasi
@@ -98,14 +150,17 @@ Cara efek disisipkan:
 
 - 7 file selain scene High identik byte-per-byte.
 - Header bundle dan nama file internal sama. Tidak ada objek asli yang hilang atau berubah tipe.
-- Semua objek non-tekstur asli identik byte-per-byte. Pengecualiannya PreloadData, yang memang ditambah 2 shader.
+- Semua objek asli selain tekstur identik byte-per-byte, dengan tiga pengecualian:
+  - PreloadData: ditambah 2 shader efek.
+  - Cubemap air: diganti versi 128 px.
+  - 8 material air: hanya dua nilai pantulan yang berubah, dan ini diperiksa.
 - 1290 objek terbaca ulang lewat typetree.
 - 74 tekstur ter-decode. Ukuran data cocok dengan format dan mipmap. Isi dan orientasinya berkorelasi dengan
   aslinya, tidak ada yang terbalik.
-- Objek yang ditambahkan persis sesuai rencana: 13 sistem efek + 1 root, 4 material, 4 tekstur.
-- Semua referensi efek valid: komponen, hierarki transform, material → tekstur, material → shader additive/blend,
-  dan shader ada di PreloadData.
-- Kapasitas partikel cukup (tidak ada yang kehabisan slot). Total partikel di bawah anggaran 260.
+- Cubemap: ukuran per sisi dan total cocok. Keenam sisinya berisi, dengan orientasi yang sama seperti aslinya.
+- Objek yang ditambahkan persis sesuai rencana: 13 sistem efek + 1 root, 4 material, 4 tekstur. Semua referensinya
+  valid (komponen, hierarki, material → tekstur dan shader, PreloadData).
+- Kapasitas partikel cukup. Total partikel di bawah anggaran 260.
 
 Catatan: validasi ini memeriksa struktur file. Tampilan di dalam game belum bisa saya uji langsung di HP.
 
@@ -127,16 +182,18 @@ python tools/map_previews.py orig/Scenes/android/PVP_049_add.unity3d out/Scenes/
 python tools/pack_like.py Sanctum_Island_Map.zip out Sanctum_Island_Map_HD.zip
 ```
 
-Build memakan ±10 menit dengan 4 core. Hasil zip (SHA-256
-`3d029ce428a02188836eec64e6a825f20a7e40bad7ae2f8905ffcaa144698234`) bisa direproduksi. Inferensi AI-nya
+Build dari nol memakan ±15 menit dengan 4 core. Kalau variabel `MAP_SR_CACHE=<folder>` diisi, hasil AI disimpan di
+cache dan build berikutnya ±6 menit, dengan hasil yang identik. Zip-nya (SHA-256
+`b1476e8d73f7a5594aa8435af23b01a3fbd7f467dd78f6ba00f53086d52e82bb`) bisa direproduksi. Inferensi AI-nya
 deterministik pada jumlah thread yang sama.
 
 | Tool | Fungsi |
 |---|---|
 | `sr_model.py` | muat bobot Real-ESRGAN tanpa torch, campur denoise, ekspor ONNX, upscale ×2 per tile |
-| `map_hd.py` | grading sinematik, detail restore, sharpening |
+| `map_hd.py` | grading (lebih gelap), detail rumput/tanah, kontras lokal, detail restore, sharpening |
+| `map_bake.py` | bayangan bangunan + AO dari geometri, posisi dunia per texel, emboss/AO celah/kilau PBR, cubemap air |
 | `map_fx.py` + `map_fx_templates.json` | efek ambient baru dan penyisipannya ke scene (template tipe ParticleSystem Unity 2019.4.33f1) |
 | `build_map.py` | build lengkap scene High |
 | `validate_map.py` | validasi di atas |
-| `map_render.py`, `map_previews.py` | render peta tampak atas dan gambar pratinjau |
+| `map_render.py`, `map_previews.py` | render peta tampak atas (dengan props dan foliage alpha-test) dan pratinjau |
 | `pack_like.py` | zip dengan entri / urutan / kompresi sama seperti zip asli |
