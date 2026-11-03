@@ -1,24 +1,49 @@
-"""Build Hidan Revamp v2 from the original Hidan.Revamp.zip contents.
+"""Build Hidan Revamp (v3) from the original Hidan.Revamp.zip contents.
 
-usage: python build.py <original HIDAN dir> <output HIDAN dir> <report.json>
+usage: python build.py <original HIDAN dir> <output HIDAN dir> <report.json> [workers]
 """
 import sys, os, json, shutil, time, collections
+from concurrent.futures import ProcessPoolExecutor
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import numpy as np
 import UnityPy
 from PIL import Image
 
 from fk import Rig
+from meshio import decode
 from anim_fix import ClipFixer, fix_controller
+import mesh_tess
 import model_tex
 import vfx_fix
+import fx_tex
 
-MODEL_BUNDLES = ('hero_argus_skin.unity3d', 'hero_argus_skin_high_add.unity3d')
+MODEL_BUNDLES = {'hero_argus_skin.unity3d': 1024, 'hero_argus_skin_high_add.unity3d': 2048}
 UNTOUCHED = ('hero_argus.unity3d', 'hero_argus_skin_extlow_add.unity3d', 'heroshow_ip03_add.unity3d')
 TOON = {'_ToonThreshold1': 0.12, '_ToonThreshold2': 0.45, '_ToonValue1': 0.66, '_ToonValue2': 0.86, '_ToonValue3': 1.0}
 
 
-def process_model(env, report):
+def process_model(env, report, tex_size):
     rig = Rig(env)
+    objs = {o.path_id: o for o in env.objects}
+    # --- meshes: remember UV islands (for texture padding), then Phong-tessellate
+    uv_tris = []
+    mesh_rep = {}
+    for o in env.objects:
+        if o.type.name != 'SkinnedMeshRenderer':
+            continue
+        s = o.read_typetree()
+        if s['m_Mesh']['m_PathID'] == 0:
+            continue
+        names = [rig.goname[b['m_PathID']] for b in s['m_Bones']]
+        rigid = [i for i, n in enumerate(names) if 'Weapon' in n]
+        mo = objs[s['m_Mesh']['m_PathID']]
+        tt = mo.read_typetree()
+        d = decode(tt)
+        uv_tris.append(d['uv0'].astype(np.float64)[d['index'].reshape(-1, 3)])
+        mesh_rep[tt['m_Name']] = mesh_tess.tessellate_mesh_typetree(tt, rigid_bones=rigid)
+        mo.save_typetree(tt)
+    report['meshes'] = mesh_rep
+    # --- animation clips + controller
     fixer = ClipFixer(rig)
     r = report.setdefault('animations', {})
     for o in env.objects:
@@ -30,17 +55,15 @@ def process_model(env, report):
             r[res['name']] = {k: res[k] for k in ('dur', 'loop', 'worst_deg_per_frame_before', 'worst_deg_per_frame_after')}
         elif t == 'AnimatorController':
             tt = o.read_typetree()
-            ch = fix_controller(tt)
+            report['controller_transitions_changed'] = len(fix_controller(tt))
             o.save_typetree(tt)
-            report['controller_transitions_changed'] = len(ch)
-        elif t == 'Texture2D':
-            tt = o.read_typetree()
-            if tt['m_Name'] != '777daa':
-                continue
-            src = o.read().image
-            new = model_tex.revamp(src)
+    # --- texture + material
+    for o in env.objects:
+        t = o.type.name
+        if t == 'Texture2D' and o.read_typetree()['m_Name'] == '777daa':
+            new = model_tex.revamp(o.read().image, tex_size, uv_tris)
             size, nmip = model_tex.apply_to_texture_object(o, new)
-            report['texture'] = {'name': '777daa', 'format': 'ETC2_RGB4', 'mips': nmip, 'bytes': size}
+            report['texture'] = {'name': '777daa', 'size': tex_size, 'format': 'ETC2_RGB4', 'mips': nmip, 'bytes': size}
         elif t == 'Material':
             tt = o.read_typetree()
             if tt['m_Name'] != '777daa':
@@ -52,15 +75,22 @@ def process_model(env, report):
             report['material_toon'] = TOON
 
 
-def process_vfx(env, report):
+def process_vfx(env, report, tex_cache, pool):
     objs = {o.path_id: o for o in env.objects}
+    rmode = {}
+    for o in env.objects:
+        if o.type.name == 'ParticleSystemRenderer':
+            t = o.read_typetree()
+            rmode[t['m_GameObject']['m_PathID']] = t['m_RenderMode']
     totals = collections.Counter()
+    pending = []
     for o in env.objects:
         t = o.type.name
         if t == 'ParticleSystem':
             tt = o.read_typetree()
-            go = objs[tt['m_GameObject']['m_PathID']].read_typetree()['m_Name'] if tt['m_GameObject']['m_PathID'] in objs else ''
-            rep = vfx_fix.process_particle_system(tt, go)
+            gid = tt['m_GameObject']['m_PathID']
+            go = objs[gid].read_typetree()['m_Name'] if gid in objs else ''
+            rep = vfx_fix.process_particle_system_v3(tt, go, rmode.get(gid))
             o.save_typetree(tt)
             totals['particle_systems'] += 1
             for k, v in rep.items():
@@ -68,49 +98,72 @@ def process_vfx(env, report):
         elif t == 'AnimationClip':
             tt = o.read_typetree()
             if tt.get('m_Legacy'):
-                n = vfx_fix.fade_legacy_clip(tt)
-                if n:
+                n1 = vfx_fix.fade_legacy_clip(tt)
+                n2 = vfx_fix.smooth_legacy_tangents(tt)
+                if n1 or n2:
                     o.save_typetree(tt)
-                    totals['mesh_alpha_fadein'] += n
+                    totals['mesh_alpha_fadein'] += n1
+                    totals['mesh_curves_smoothed'] += n2
         elif t == 'Texture2D':
             tt = o.read_typetree()
+            img = o.read().image.convert('RGBA')
+            fmt, mips = tt['m_TextureFormat'], tt['m_MipCount']
+            force = False
             if tt['m_Width'] > 1024 or tt['m_Height'] > 1024:
-                img = o.read().image
-                w = min(1024, tt['m_Width']); h = min(1024, tt['m_Height'])
-                img = img.resize((w, h), Image.LANCZOS)
-                tex = o.read()
-                tex.set_image(img, target_format=49)   # ASTC 5x5 (RGB(A)), same family as the other FX textures
-                tex.save()
+                force = True
+                img = img.resize((min(1024, tt['m_Width']), min(1024, tt['m_Height'])), Image.LANCZOS)
+                fmt = 49
                 totals['textures_downscaled'] += 1
+            key = fx_tex.key_of(img, fmt, mips, tt['m_Name']) + ('F' if force else '')
+            pending.append((o, key, img, fmt, mips))
+            if key not in tex_cache:
+                tex_cache[key] = pool.submit(fx_tex.process_texture_job, (key, img.tobytes(), img.size, fmt, mips, tt['m_Name'], force))
+    for o, key, img, fmt, mips in pending:
+        k2, data = tex_cache[key].result()
+        if data is None:
+            continue
+        tt = o.read_typetree()
+        tt['m_Width'], tt['m_Height'] = img.size
+        tt['m_TextureFormat'] = fmt
+        tt['m_MipCount'] = mips
+        tt['image data'] = data
+        tt['m_CompleteImageSize'] = len(data)
+        tt['m_StreamData'] = {'offset': 0, 'size': 0, 'path': ''}
+        o.save_typetree(tt)
+        totals['textures_sharpened'] += 1
     report['vfx'] = dict(totals)
 
 
 def main():
     src_root, dst_root, report_path = sys.argv[1:4]
+    workers = int(sys.argv[4]) if len(sys.argv) > 4 else 4
     if os.path.exists(dst_root):
         shutil.rmtree(dst_root)
     shutil.copytree(src_root, dst_root)
     report = {}
     t0 = time.time()
-    for dp, dn, fn in os.walk(dst_root):
-        for f in sorted(fn):
-            if not f.endswith('.unity3d'):
-                continue
-            path = os.path.join(dp, f)
-            rel = os.path.relpath(path, dst_root)
-            if f in UNTOUCHED or rel.startswith('UI'):
-                continue
-            env = UnityPy.load(path)
-            rep = {}
-            if f in MODEL_BUNDLES:
-                process_model(env, rep)
-            else:
-                process_vfx(env, rep)
-            data = env.file.save(packer='original')
-            with open(path, 'wb') as fh:
-                fh.write(data)
-            report[rel] = rep
-            print(f'{rel}: {rep.get("vfx", "") or "model"}', flush=True)
+    tex_cache = {}
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        for dp, dn, fn in sorted(os.walk(dst_root)):
+            dn.sort()
+            for f in sorted(fn):
+                if not f.endswith('.unity3d'):
+                    continue
+                path = os.path.join(dp, f)
+                rel = os.path.relpath(path, dst_root)
+                if f in UNTOUCHED or rel.startswith('UI'):
+                    continue
+                env = UnityPy.load(path)
+                rep = {}
+                if f in MODEL_BUNDLES:
+                    process_model(env, rep, MODEL_BUNDLES[f])
+                else:
+                    process_vfx(env, rep, tex_cache, pool)
+                data = env.file.save(packer='original')
+                with open(path, 'wb') as fh:
+                    fh.write(data)
+                report[rel] = rep
+                print(f'{rel}: {rep.get("vfx") or "model"}', flush=True)
     report['_build_seconds'] = round(time.time() - t0, 1)
     with open(report_path, 'w') as fh:
         json.dump(report, fh, indent=1, default=str)

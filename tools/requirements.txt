@@ -4,5 +4,6 @@ pillow
 etcpak
 texture2ddecoder
 astc-encoder-py
+opencv-python-headless
 scipy
 matplotlib

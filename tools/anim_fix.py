@@ -4,12 +4,8 @@ What it does per clip
   * samples the clip exactly like Unity evaluates it (streamed Hermite / dense lerp / constant)
   * quaternion hemisphere continuity (no sign flips)
   * looping clips: removes the pose jump at the loop seam (error spread over the cycle) + periodic smoothing
-  * despin: extreme sustained spins (e.g. 9 turns in 0.6 s, strobing at 30 fps) lose whole turns only,
-    start/end orientation unchanged
-  * despike: isolated snaps (a bone jumping 100-180 deg in 1-2 frames) are re-tweened with an eased slerp
-    so they read as a fast swing instead of a teleport
-  * light Gaussian smoothing everywhere (kills linear-key kinks / jitter), capped by angular speed so fast
-    intentional spins are never averaged away
+  * adaptive Gaussian smoothing: light everywhere (kills linear-key kinks / jitter), stronger only where a
+    bone snaps (hundreds of degrees per second) so snaps become fast-but-visible motion instead of teleports
   * GameObject.m_IsActive (mesh swap) curves are kept as exact step functions
   * recall: rebuilt as a longer non-looping clip: smoothed gesture -> stance with subtle breathing -> rest
   * re-encoded as a dense 60 fps clip; m_MuscleClipSize recomputed with the formula verified on all clips
@@ -104,6 +100,28 @@ PROFILES = {
 }
 DEFAULT_PROFILE = 0.015
 SIGMA_CAP_DEG = 45.0   # never average over more rotation than this per sigma (keeps fast spins intact)
+JERK_LO, JERK_HI = 2.2e4, 9.0e4   # deg/s^2 (~6 and ~25 deg/frame^2 @60fps): range where extra smoothing ramps in
+JERK_EXTRA = 0.014                # s, extra Gaussian sigma at strong jerks
+
+
+def smooth_profile(x, sig_samples):
+    r = int(math.ceil(3 * sig_samples))
+    k = np.exp(-0.5 * (np.arange(-r, r + 1) / sig_samples) ** 2); k /= k.sum()
+    xp = np.pad(x, r, mode='edge')
+    return np.convolve(xp, k, mode='valid')
+
+
+def ang_accel(q, rate):
+    """|d omega / dt| in deg/s^2 per sample (omega = angular velocity vector in the parent frame)."""
+    d = qmul(q[1:], qinv(q[:-1]))
+    d = np.where(d[:, 3:4] < 0, -d, d)
+    s = np.linalg.norm(d[:, :3], axis=1)
+    ang = 2 * np.arctan2(s, d[:, 3])
+    axis = d[:, :3] / np.maximum(s, 1e-12)[:, None]
+    w = axis * (ang * rate)[:, None]                       # rad/s
+    a = np.linalg.norm(np.diff(w, axis=0), axis=1) * rate  # rad/s^2
+    a = np.degrees(a)
+    return np.concatenate([a[:1], a, a[-1:]])
 
 # isolated snaps (teleport-like jumps) are re-tweened with an eased slerp
 SNAP_ROT = 1500.0      # deg/s  (= 25 deg per frame @60fps)
@@ -253,9 +271,13 @@ def _smooth_group(X, kind, rate, profile, periodic):
         X = despike(X, kind, rate)
     if kind == 'rot':
         sp = ang_speed(X, rate)
+        # v3: extra smoothing where the angular velocity changes abruptly (residual jerks / kinks)
+        acc = ang_accel(X, rate)
+        extra = JERK_EXTRA * maxfilter(smoothstep(JERK_LO, JERK_HI, acc), int(0.02 * rate))
         sp = maxfilter(sp, int(0.03 * rate))
-        sigma = np.minimum(base, SIGMA_CAP_DEG / np.maximum(sp, 1e-3))
+        sigma = np.minimum(base + extra, SIGMA_CAP_DEG / np.maximum(sp, 1e-3))
         sigma = np.maximum(sigma, 0.25 / rate)
+        sigma = smooth_profile(sigma, 0.025 * rate)      # kernel width must vary gradually (no new kinks)
     else:
         sigma = np.full(len(X), base)
     Y = adaptive_gauss(X, sigma, 1.0 / rate, periodic)

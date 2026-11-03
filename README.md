@@ -1,10 +1,70 @@
-# AxH — Hidan Revamp v2
+# AxH — Hidan Revamp v3
 
-**Unduh:** [`release/Hidan.Revamp.v2.zip`](release/Hidan.Revamp.v2.zip)
+**Unduh:** [`release/Hidan.Revamp.v3.zip`](release/Hidan.Revamp.v3.zip)
 
 Isinya 99 file dengan struktur folder (`HIDAN/Art`, `HIDAN/UI`, `HIDAN/Audio`) yang sama persis dengan
 `Hidan.Revamp.zip` di rilis [AxH](https://github.com/yuuichi1286-hash/AxH/releases/tag/AxH). Cara pasangnya juga
-sama: timpa file lama dengan file di zip ini.
+sama: timpa file lama dengan file di zip ini. v3 sudah mencakup semua perbaikan v2 (bagian 1–4 di bawah).
+
+## Yang baru di v3
+
+### Model lebih detail
+
+- **Geometri 4× lebih rapat (Phong tessellation).** Setiap segitiga dibagi empat, dan titik barunya dibulatkan
+  mengikuti normal permukaan, jadi siluet kepala, bahu, lengan, dan jubah lebih bulat.
+  - Mesh normal: 1.566 → 4.365 vertex (1.407 → 5.628 segitiga).
+  - Mesh ritual: 1.632 → 4.488 vertex (1.418 → 5.672 segitiga).
+  - Sabit dan tombak sengaja dikunci supaya bentuknya tidak menggembung. Seam UV dan tepi tajam tetap rapat
+    (tidak ada retakan).
+- **Tekstur High jadi 2048²** (sebelumnya 1024²). Tekstur Normal tetap 1024².
+- **Line art lebih bersih dan tajam.** Noise sisa upscale "cat AI" di area datar dibersihkan dengan filter
+  bilateral. Penajaman hanya dipakai di tepi, jadi noise dan blok kompresi tidak ikut menguat.
+- **Padding pulau UV.** Warna pulau didorong ke area kosong di sekitarnya, jadi mipmap tidak lagi memunculkan garis
+  gelap di tepi bagian model saat dilihat dari jauh.
+- **Pewarnaan.** Awan Akatsuki dan bilah sabit jadi crimson yang lebih kaya. Jubah hitam kebiruan ala anime. Rambut
+  dan logam perak dingin. Kontras diberi kurva S yang lembut.
+
+![Detail model v2 vs v3](docs/previews/5_model_v3_lebih_detail.png)
+
+### Efek lebih tajam, warna lebih keren, gerak lebih halus
+
+- **456 tekstur efek ditajamkan.** Penajaman hanya di tepi, jadi tebasan, percikan, simbol Jashin, dan flipbook
+  darah lebih tegas. Ada 79 peta noise/dissolve/flow yang sengaja tidak disentuh karena peta itu menggerakkan
+  efek, bukan warna.
+- **Tekstur darah berwarna di-grade jadi crimson.** Sebelumnya warnanya pink.
+- **Fade partikel berbentuk kurva S** (ease-in/ease-out, 466 gradien), bukan ramp linear lagi. Partikel muncul dan
+  hilang lebih lembut.
+- **39 kurva warna/alpha efek mesh** diberi tangen otomatis, jadi tidak ada sudut patah di tengah fade.
+- **Percikan yang belum punya Limit Velocity** diberi drag (melambat halus) dan ukurannya mengecil di akhir umur.
+  Percikan "HIDAN_" yang sudah punya keduanya tidak diubah.
+- Encoder ASTC memakai preset THOROUGH. Format, ukuran, dan jumlah mip tetap sama dengan aslinya.
+
+![Tekstur efek sebelum vs sesudah](docs/previews/6_vfx_tekstur_tajam.png)
+![Fade kurva S](docs/previews/8_fade_s_curve.png)
+
+### Animasi lebih halus lagi
+
+Ada penghalusan tambahan di titik-titik yang kecepatan sudutnya berubah mendadak. Lebar penghalusannya berubah
+bertahap dan tetap dibatasi kecepatan, jadi ayunan dan putaran cepat tidak hilang.
+
+- Sentakan (persentil-99) turun **20% lagi** dibanding v2, atau **62% lebih rendah** dari animasi asli.
+- Contoh, asli → v2 → v3:
+
+| Klip | Asli | v2 | v3 |
+|---|---|---|---|
+| attack1 | 25,8 | 11,8 | 9,3 |
+| attack4 | 32,2 | 13,1 | 10,9 |
+| skill3 (ult) | 35,0 | 11,6 | 8,1 |
+| skill4_2 | 41,7 | 14,2 | 12,2 |
+
+![Kehalusan animasi asli vs v2 vs v3](docs/previews/7_animasi_lebih_halus.png)
+
+**Konsekuensi:**
+
+- Bundle High bertambah sekitar 2 MB karena tekstur 2048².
+- Tiap mesh sekarang sekitar 4,4 ribu vertex. Angka ini masih wajar untuk hero MOBA.
+
+---
 
 ![Model sebelum vs sesudah](docs/previews/1_model_sebelum_sesudah.png)
 
@@ -99,6 +159,8 @@ Perbaikan:
   `tools/validate_all.py`.
 - Klip animasi divalidasi: ukuran muscle clip (rumus dikalibrasi dari semua 90+ klip di mod ini), jumlah kurva,
   norma quaternion, dan tidak ada flip hemisphere. Orientasi tekstur model juga dicek.
+- Mesh hasil tessellasi juga dicek: indeks valid, jumlah vertex/indeks submesh, bobot tulang = 1, normal satuan, dan
+  bounding box per tulang. Rumus bounding box-nya dicocokkan dulu dengan data asli, dengan selisih ~1e-7.
 - Build-nya deterministik: menjalankan `tools/build.py` ulang menghasilkan 99 file yang identik byte demi byte.
 - **Belum dites langsung di dalam game.** Di lingkungan build tidak ada perangkat Android maupun MLBB. Kalau ada
   skill yang terlihat aneh, sebutkan nama skill-nya.
@@ -121,9 +183,12 @@ python tools/make_previews.py orig/HIDAN out/HIDAN docs/previews   # gambar sebe
 
 | File | Isi |
 |---|---|
-| `tools/anim_fix.py` | decode/encode klip Mecanim, despin, despike, smoothing, loop seam, recall baru, transisi Animator |
-| `tools/model_tex.py` | mata, kulit, liontin Jashin, sharpen, encoder ETC2 + mipmap |
-| `tools/vfx_fix.py` | fade alpha, warna, noise, budget partikel, fade efek mesh |
+| `tools/anim_fix.py` | decode/encode klip Mecanim, despin, despike, smoothing adaptif, loop seam, recall baru, transisi Animator |
+| `tools/mesh_tess.py` | Phong tessellation mesh skinned (UV/normal/bobot tulang, bounding box per tulang) |
+| `tools/model_tex.py` | mata, kulit, liontin Jashin, grading, line art, padding UV, versi 1024/2048, encoder ETC2 + mipmap |
+| `tools/vfx_fix.py` | fade alpha (kurva S), warna, noise, budget partikel, drag/taper percikan, fade & tangen efek mesh |
+| `tools/fx_tex.py` | penajaman tepi + grading tekstur efek, encoder ASTC/ETC2 (format & mip sama dengan aslinya) |
+| `tools/jerk_metrics.py`, `make_previews_v3.py` | metrik kehalusan animasi dan gambar pratinjau v3 |
 | `tools/clipio.py`, `meshio.py`, `fk.py` | parser kurva streamed/dense, vertex buffer, forward kinematics + skinning |
 | `tools/toon_preview.py`, `filmstrip.py`, `render_obj.py` | renderer software untuk pratinjau |
 | `docs/build_report.json` | rincian perubahan per bundle |

@@ -313,3 +313,134 @@ def fade_legacy_clip(tt, fade=0.06):
         fc['curve']['m_Curve'] = new_sorted
         changed += 1
     return changed
+
+
+# ================================================================== v3: smoother particles
+def _ss(u):
+    return u * u * (3 - 2 * u)
+
+
+def ease_ramps(keys):
+    """Turn the linear fade-in (first ramp) and fade-out (last ramp) into smooth S-curves."""
+    k = sorted(keys)
+    out = list(k)
+    if len(k) >= 2 and k[0][0] <= 1e-4 and k[0][1] <= 0.02 and k[1][1] > k[0][1] + 0.05 and k[1][0] > 0.04:
+        t1, a1 = k[1]
+        out += [(t1 * 0.3, a1 * _ss(0.3)), (t1 * 0.7, a1 * _ss(0.7))]
+    if len(k) >= 2 and k[-1][0] >= 0.9999 and k[-1][1] <= 0.02 and k[-2][1] > k[-1][1] + 0.05 and 1 - k[-2][0] > 0.04:
+        t0, a0 = k[-2]
+        span = 1 - t0
+        out += [(t0 + span * 0.3, a0 * (1 - _ss(0.3))), (t0 + span * 0.7, a0 * (1 - _ss(0.7)))]
+    out = sorted(set((round(t, 5), a) for t, a in out))
+    return simplify(out, 8)
+
+
+def _curve_key(t, v, s_in=0.0, s_out=0.0):
+    return {'time': float(t), 'value': float(v), 'inSlope': float(s_in), 'outSlope': float(s_out),
+            'weightedMode': 0, 'inWeight': 0.3333333432674408, 'outWeight': 0.3333333432674408}
+
+
+def taper_size(sm):
+    """Spark-like particles: size eases down to ~45 % at death (clean, defined tails)."""
+    curves = [sm['curve']] + ([sm['y'], sm['z']] if sm.get('separateAxes') else [])
+    if not sm['enabled']:
+        sm['enabled'] = True
+        for c in curves:
+            c['minMaxState'] = 1
+            c['scalar'] = 1.0
+            c['maxCurve']['m_Curve'] = [_curve_key(0.0, 0.75, 0, 2.2), _curve_key(0.15, 1.0, 0.0, 0.0),
+                                        _curve_key(1.0, 0.45, -0.9, -0.9)]
+        return True
+    changed = False
+    for c in curves:
+        if c['minMaxState'] != 1:
+            continue
+        ks = c['maxCurve']['m_Curve']
+        if len(ks) < 2:
+            continue
+        peak = max(k['value'] for k in ks)
+        if ks[-1]['time'] >= 0.999 and ks[-1]['value'] > 0.55 * peak:
+            ks[-1]['value'] = float(0.5 * ks[-1]['value'])
+            prev = ks[-2]
+            slope = (ks[-1]['value'] - prev['value']) / max(ks[-1]['time'] - prev['time'], 1e-3)
+            ks[-1]['inSlope'] = float(slope); ks[-1]['outSlope'] = float(slope)
+            changed = True
+    return changed
+
+
+def _mm_const(v):
+    return {'minMaxState': 0, 'scalar': float(v), 'minScalar': float(v),
+            'maxCurve': {'m_Curve': [], 'm_PreInfinity': 2, 'm_PostInfinity': 2, 'm_RotationOrder': 4},
+            'minCurve': {'m_Curve': [], 'm_PreInfinity': 2, 'm_PostInfinity': 2, 'm_RotationOrder': 4}}
+
+
+def spark_drag(tt):
+    """Fast spark-like particles decelerate smoothly (drag) instead of flying at constant speed."""
+    cv = tt['ClampVelocityModule']
+    if cv['enabled']:
+        return False
+    im = tt['InitialModule']
+    if mm_max(im['startSpeed']) < 2.5:
+        return False
+    cv['enabled'] = True
+    cv['separateAxis'] = False
+    cv['inWorldSpace'] = False
+    for key in ('magnitude', 'x', 'y', 'z'):
+        if key in cv and isinstance(cv[key], dict):
+            cv[key]['minMaxState'] = 0
+            cv[key]['scalar'] = 1000.0
+            cv[key]['minScalar'] = 1000.0
+    cv['dampen'] = 0.0
+    keep = cv['drag']['maxCurve'], cv['drag']['minCurve']
+    cv['drag'] = _mm_const(1.6)
+    cv['drag']['maxCurve'], cv['drag']['minCurve'] = keep
+    cv['multiplyDragByParticleSize'] = False
+    cv['multiplyDragByParticleVelocity'] = False
+    mm_scale(im['startSpeed'], 1.22)      # same reach, faster burst, smooth slow-down
+    return True
+
+
+def process_particle_system_v3(tt, go_name, render_mode=None):
+    rep = process_particle_system(tt, go_name)
+    rep.update({'s_curve': 0, 'size_taper': 0, 'drag': 0})
+    cm = tt['ColorModule']
+    gr = cm['gradient']
+    grads = [gr['maxGradient']] + ([gr['minGradient']] if gr['minMaxState'] == 3 else [])
+    for g in grads:
+        before = get_alpha(g)
+        after = ease_ramps(before)
+        if after != before:
+            set_alpha(g, after)
+            rep['s_curve'] += 1
+    life = max(mm_max(tt['InitialModule']['startLifetime']), 0.02)
+    spark = any(w in go_name.lower() for w in SPARK_WORDS) and life < 1.2
+    billboard = render_mode in (0, 1)        # 0 billboard, 1 stretched; never mesh/horizontal decals
+    if spark and billboard:
+        rep['size_taper'] = int(taper_size(tt['SizeModule']))
+        rep['drag'] = int(spark_drag(tt))
+    return rep
+
+
+# ================================================================== v3: smooth legacy effect curves
+def smooth_legacy_tangents(tt):
+    """Material colour/alpha curves of mesh effects get clamped-auto tangents (no linear corners)."""
+    n = 0
+    for fc in tt['m_FloatCurves']:
+        a = fc['attribute']
+        if not (a.startswith('material.') and a[-2:] in ('.r', '.g', '.b', '.a')):
+            continue
+        ks = sorted(fc['curve']['m_Curve'], key=lambda k: k['time'])
+        if len(ks) < 3:
+            continue
+        for i in range(1, len(ks) - 1):
+            p, c, nx = ks[i - 1], ks[i], ks[i + 1]
+            if (c['value'] - p['value']) * (nx['value'] - c['value']) <= 0:
+                s = 0.0                          # local extreme or plateau: flat tangent, no overshoot
+            else:
+                s = (nx['value'] - p['value']) / max(nx['time'] - p['time'], 1e-6)
+            c['inSlope'] = c['outSlope'] = float(s)
+        ks[0]['outSlope'] = ks[0]['inSlope'] = 0.0
+        ks[-1]['inSlope'] = ks[-1]['outSlope'] = 0.0
+        fc['curve']['m_Curve'] = ks
+        n += 1
+    return n

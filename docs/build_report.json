@@ -1,545 +1,4 @@
 {
- "Art/Android/zzp1_n/zzp1_nextalice_skill02_2.unity3d": {
-  "vfx": {
-   "particle_systems": 2,
-   "fade_in": 0,
-   "fade_out": 0,
-   "polish": 2,
-   "hot_head": 0,
-   "noise_low": 0,
-   "emit_scaled": 0,
-   "max_capped": 0
-  }
- },
- "Art/Android/zzp1_n/zzp1_nextbadninja_benti_skill01_yao_next.unity3d": {
-  "vfx": {
-   "particle_systems": 2,
-   "fade_in": 1,
-   "fade_out": 0,
-   "polish": 2,
-   "hot_head": 0,
-   "noise_low": 0,
-   "emit_scaled": 0,
-   "max_capped": 0
-  }
- },
- "Art/Android/zzp1_n/zzp1_nextwarrior_yingxiong_skill2_1_skin05_add.unity3d": {
-  "vfx": {
-   "particle_systems": 2,
-   "fade_in": 0,
-   "fade_out": 0,
-   "polish": 2,
-   "hot_head": 0,
-   "noise_low": 0,
-   "emit_scaled": 0,
-   "max_capped": 0
-  }
- },
- "Art/Android/zzp1_c/zzp1_couplemage_skill03_buff_skin05_add.unity3d": {
-  "vfx": {
-   "particle_systems": 3,
-   "fade_in": 2,
-   "fade_out": 0,
-   "polish": 4,
-   "hot_head": 0,
-   "noise_low": 0,
-   "emit_scaled": 1,
-   "max_capped": 0
-  }
- },
- "Art/Android/zzp2_k/zzp2_Kaijiacike_Henshin_skill01_attack02_skin02_add.unity3d": {
-  "vfx": {
-   "particle_systems": 13,
-   "fade_in": 3,
-   "fade_out": 1,
-   "polish": 13,
-   "hot_head": 4,
-   "noise_low": 3,
-   "emit_scaled": 3,
-   "max_capped": 6
-  }
- },
- "Art/Android/zzp2_111/zzp2_45_argus_Attack_01_skin03_add.unity3d": {
-  "vfx": {
-   "particle_systems": 1,
-   "fade_in": 0,
-   "fade_out": 0,
-   "polish": 1,
-   "hot_head": 0,
-   "noise_low": 0,
-   "emit_scaled": 0,
-   "max_capped": 0
-  }
- },
- "Art/Android/zzp2_111/zzp2_45_argus_Attack_02_skin03_add.unity3d": {
-  "vfx": {
-   "particle_systems": 1,
-   "fade_in": 0,
-   "fade_out": 0,
-   "polish": 1,
-   "hot_head": 0,
-   "noise_low": 0,
-   "emit_scaled": 0,
-   "max_capped": 0
-  }
- },
- "Art/Android/zzp2_111/zzp2_45_argus_Attack_04_1_skin03_add.unity3d": {
-  "vfx": {
-   "particle_systems": 1,
-   "fade_in": 0,
-   "fade_out": 0,
-   "polish": 1,
-   "hot_head": 0,
-   "noise_low": 0,
-   "emit_scaled": 0,
-   "max_capped": 0
-  }
- },
- "Art/Android/zzp2_111/zzp2_45_argus_Attack_04_2_skin03_add.unity3d": {
-  "vfx": {
-   "particle_systems": 1,
-   "fade_in": 0,
-   "fade_out": 0,
-   "polish": 1,
-   "hot_head": 0,
-   "noise_low": 0,
-   "emit_scaled": 0,
-   "max_capped": 0
-  }
- },
- "Art/Android/zzp2_111/zzp2_45_argus_Attack_04_3_skin03_add.unity3d": {
-  "vfx": {
-   "particle_systems": 1,
-   "fade_in": 0,
-   "fade_out": 0,
-   "polish": 1,
-   "hot_head": 0,
-   "noise_low": 0,
-   "emit_scaled": 0,
-   "max_capped": 0
-  }
- },
- "Art/Android/zzp2_111/zzp2_45_argus_Hit_01_skin03_add.unity3d": {
-  "vfx": {
-   "particle_systems": 1,
-   "fade_in": 0,
-   "fade_out": 1,
-   "polish": 1,
-   "hot_head": 0,
-   "noise_low": 1,
-   "emit_scaled": 1,
-   "max_capped": 1
-  }
- },
- "Art/Android/zzp2_111/zzp2_45_argus_Hit_05_skin03_add.unity3d": {
-  "vfx": {
-   "particle_systems": 1,
-   "fade_in": 0,
-   "fade_out": 1,
-   "polish": 1,
-   "hot_head": 0,
-   "noise_low": 1,
-   "emit_scaled": 1,
-   "max_capped": 1
-  }
- },
- "Art/Android/zzp2_111/zzp2_45_argus_Keep_daoguang_xiaosan_skin03_add.unity3d": {
-  "vfx": {
-   "particle_systems": 1,
-   "fade_in": 0,
-   "fade_out": 0,
-   "polish": 1,
-   "hot_head": 0,
-   "noise_low": 1,
-   "emit_scaled": 0,
-   "max_capped": 0
-  }
- },
- "Art/Android/zzp2_111/zzp2_45_argus_skill02_Keep_liuxue_skin03_add.unity3d": {
-  "vfx": {
-   "particle_systems": 1,
-   "fade_in": 0,
-   "fade_out": 0,
-   "polish": 1,
-   "hot_head": 0,
-   "noise_low": 1,
-   "emit_scaled": 1,
-   "max_capped": 0
-  }
- },
- "Art/Android/zzp2_111/zzp2_45_argus_skill03_Fire_02_skin03_add.unity3d": {
-  "vfx": {
-   "particle_systems": 2,
-   "fade_in": 0,
-   "fade_out": 0,
-   "polish": 2,
-   "hot_head": 0,
-   "noise_low": 1,
-   "emit_scaled": 1,
-   "max_capped": 1
-  }
- },
- "Art/Android/zzp2_111/zzp2_45_argus_skill03_Keep_02_skin03_add.unity3d": {
-  "vfx": {
-   "particle_systems": 3,
-   "fade_in": 1,
-   "fade_out": 0,
-   "polish": 3,
-   "hot_head": 1,
-   "noise_low": 1,
-   "emit_scaled": 1,
-   "max_capped": 1
-  }
- },
- "Art/Android/zzp2_111/zzp2_45_argus_skill03_Keep_03_skin03_add.unity3d": {
-  "vfx": {
-   "particle_systems": 2,
-   "fade_in": 1,
-   "fade_out": 0,
-   "polish": 2,
-   "hot_head": 0,
-   "noise_low": 2,
-   "emit_scaled": 2,
-   "max_capped": 0
-  }
- },
- "Art/Android/j/julian_skill3_2_02.unity3d": {
-  "vfx": {
-   "particle_systems": 2,
-   "fade_in": 0,
-   "fade_out": 0,
-   "polish": 2,
-   "hot_head": 1,
-   "noise_low": 1,
-   "emit_scaled": 1,
-   "max_capped": 1,
-   "textures_downscaled": 1
-  }
- },
- "Art/Android/zzp2_a/zzp2_argus_skill4_2_daoguang_skin06_add.unity3d": {
-  "vfx": {
-   "particle_systems": 6,
-   "fade_in": 5,
-   "fade_out": 2,
-   "polish": 6,
-   "hot_head": 2,
-   "noise_low": 2,
-   "emit_scaled": 1,
-   "max_capped": 1
-  }
- },
- "Art/Android/zzp2_a/zzp2_asura_skll02_2_skin06_add.unity3d": {
-  "vfx": {
-   "particle_systems": 7,
-   "fade_in": 1,
-   "fade_out": 1,
-   "polish": 7,
-   "hot_head": 0,
-   "noise_low": 1,
-   "emit_scaled": 1,
-   "max_capped": 1
-  }
- },
- "Art/Android/zzp1_k/zzp1_Kaijiacike_Henshin_skill01_attack02_skin02_add.unity3d": {
-  "vfx": {
-   "particle_systems": 3,
-   "fade_in": 1,
-   "fade_out": 0,
-   "polish": 4,
-   "hot_head": 1,
-   "noise_low": 2,
-   "emit_scaled": 2,
-   "max_capped": 3
-  }
- },
- "Art/Android/h/hero_argus_skin.unity3d": {
-  "animations": {
-   "run2": {
-    "dur": 0.8833333849906921,
-    "loop": true,
-    "worst_deg_per_frame_before": 20.4,
-    "worst_deg_per_frame_after": 18.4
-   },
-   "skill2": {
-    "dur": 1.2500001192092896,
-    "loop": false,
-    "worst_deg_per_frame_before": 97.6,
-    "worst_deg_per_frame_after": 39.9
-   },
-   "attack2": {
-    "dur": 0.6500000357627869,
-    "loop": false,
-    "worst_deg_per_frame_before": 76.8,
-    "worst_deg_per_frame_after": 33.6
-   },
-   "skill1_1": {
-    "dur": 1.7500001192092896,
-    "loop": false,
-    "worst_deg_per_frame_before": 103.5,
-    "worst_deg_per_frame_after": 55.7
-   },
-   "run": {
-    "dur": 0.8833333849906921,
-    "loop": true,
-    "worst_deg_per_frame_before": 20.4,
-    "worst_deg_per_frame_after": 18.4
-   },
-   "skill1_4": {
-    "dur": 0.45000001788139343,
-    "loop": false,
-    "worst_deg_per_frame_before": 23.0,
-    "worst_deg_per_frame_after": 15.4
-   },
-   "skill1_2": {
-    "dur": 0.7500000596046448,
-    "loop": false,
-    "worst_deg_per_frame_before": 38.1,
-    "worst_deg_per_frame_after": 35.5
-   },
-   "dead": {
-    "dur": 0.7666667103767395,
-    "loop": false,
-    "worst_deg_per_frame_before": 6.4,
-    "worst_deg_per_frame_after": 6.4
-   },
-   "attack3": {
-    "dur": 0.6500000357627869,
-    "loop": false,
-    "worst_deg_per_frame_before": 63.2,
-    "worst_deg_per_frame_after": 30.3
-   },
-   "skill3": {
-    "dur": 1.3166667222976685,
-    "loop": false,
-    "worst_deg_per_frame_before": 144.4,
-    "worst_deg_per_frame_after": 38.0
-   },
-   "landing": {
-    "dur": 2.3000001907348633,
-    "loop": false,
-    "worst_deg_per_frame_before": 34.2,
-    "worst_deg_per_frame_after": 35.0
-   },
-   "skill1_3": {
-    "dur": 1.133333444595337,
-    "loop": false,
-    "worst_deg_per_frame_before": 29.8,
-    "worst_deg_per_frame_after": 29.7
-   },
-   "skill4_2": {
-    "dur": 1.100000023841858,
-    "loop": false,
-    "worst_deg_per_frame_before": 90.3,
-    "worst_deg_per_frame_after": 63.5
-   },
-   "fight_idle": {
-    "dur": 15.116667747497559,
-    "loop": true,
-    "worst_deg_per_frame_before": 4.2,
-    "worst_deg_per_frame_after": 4.1
-   },
-   "attack4": {
-    "dur": 1.2500001192092896,
-    "loop": false,
-    "worst_deg_per_frame_before": 117.5,
-    "worst_deg_per_frame_after": 38.1
-   },
-   "attack5": {
-    "dur": 1.2500001192092896,
-    "loop": false,
-    "worst_deg_per_frame_before": 119.3,
-    "worst_deg_per_frame_after": 38.1
-   },
-   "attack1": {
-    "dur": 0.6500000357627869,
-    "loop": false,
-    "worst_deg_per_frame_before": 58.8,
-    "worst_deg_per_frame_after": 29.8
-   },
-   "recall": {
-    "dur": 6.5,
-    "loop": false,
-    "worst_deg_per_frame_before": 11.1,
-    "worst_deg_per_frame_after": 9.6
-   }
-  },
-  "texture": {
-   "name": "777daa",
-   "format": "ETC2_RGB4",
-   "mips": 11,
-   "bytes": 699064
-  },
-  "controller_transitions_changed": 354,
-  "material_toon": {
-   "_ToonThreshold1": 0.12,
-   "_ToonThreshold2": 0.45,
-   "_ToonValue1": 0.66,
-   "_ToonValue2": 0.86,
-   "_ToonValue3": 1.0
-  }
- },
- "Art/Android/h/hero_argus_skin_high_add.unity3d": {
-  "animations": {
-   "run2": {
-    "dur": 0.8833333849906921,
-    "loop": true,
-    "worst_deg_per_frame_before": 20.4,
-    "worst_deg_per_frame_after": 18.4
-   },
-   "skill2": {
-    "dur": 1.2500001192092896,
-    "loop": false,
-    "worst_deg_per_frame_before": 97.6,
-    "worst_deg_per_frame_after": 39.9
-   },
-   "attack2": {
-    "dur": 0.6500000357627869,
-    "loop": false,
-    "worst_deg_per_frame_before": 76.8,
-    "worst_deg_per_frame_after": 33.6
-   },
-   "skill1_1": {
-    "dur": 1.7500001192092896,
-    "loop": false,
-    "worst_deg_per_frame_before": 103.5,
-    "worst_deg_per_frame_after": 55.7
-   },
-   "run": {
-    "dur": 0.8833333849906921,
-    "loop": true,
-    "worst_deg_per_frame_before": 20.4,
-    "worst_deg_per_frame_after": 18.4
-   },
-   "skill1_4": {
-    "dur": 0.45000001788139343,
-    "loop": false,
-    "worst_deg_per_frame_before": 23.0,
-    "worst_deg_per_frame_after": 15.4
-   },
-   "skill1_2": {
-    "dur": 0.7500000596046448,
-    "loop": false,
-    "worst_deg_per_frame_before": 38.1,
-    "worst_deg_per_frame_after": 35.5
-   },
-   "dead": {
-    "dur": 0.7666667103767395,
-    "loop": false,
-    "worst_deg_per_frame_before": 6.4,
-    "worst_deg_per_frame_after": 6.4
-   },
-   "attack3": {
-    "dur": 0.6500000357627869,
-    "loop": false,
-    "worst_deg_per_frame_before": 63.2,
-    "worst_deg_per_frame_after": 30.3
-   },
-   "skill3": {
-    "dur": 1.3166667222976685,
-    "loop": false,
-    "worst_deg_per_frame_before": 144.4,
-    "worst_deg_per_frame_after": 38.0
-   },
-   "landing": {
-    "dur": 2.3000001907348633,
-    "loop": false,
-    "worst_deg_per_frame_before": 34.2,
-    "worst_deg_per_frame_after": 35.0
-   },
-   "skill1_3": {
-    "dur": 1.133333444595337,
-    "loop": false,
-    "worst_deg_per_frame_before": 29.8,
-    "worst_deg_per_frame_after": 29.7
-   },
-   "skill4_2": {
-    "dur": 1.100000023841858,
-    "loop": false,
-    "worst_deg_per_frame_before": 90.3,
-    "worst_deg_per_frame_after": 63.5
-   },
-   "fight_idle": {
-    "dur": 15.116667747497559,
-    "loop": true,
-    "worst_deg_per_frame_before": 4.2,
-    "worst_deg_per_frame_after": 4.1
-   },
-   "attack4": {
-    "dur": 1.2500001192092896,
-    "loop": false,
-    "worst_deg_per_frame_before": 117.5,
-    "worst_deg_per_frame_after": 38.1
-   },
-   "attack5": {
-    "dur": 1.2500001192092896,
-    "loop": false,
-    "worst_deg_per_frame_before": 119.3,
-    "worst_deg_per_frame_after": 38.1
-   },
-   "attack1": {
-    "dur": 0.6500000357627869,
-    "loop": false,
-    "worst_deg_per_frame_before": 58.8,
-    "worst_deg_per_frame_after": 29.8
-   },
-   "recall": {
-    "dur": 6.5,
-    "loop": false,
-    "worst_deg_per_frame_before": 11.1,
-    "worst_deg_per_frame_after": 9.6
-   }
-  },
-  "texture": {
-   "name": "777daa",
-   "format": "ETC2_RGB4",
-   "mips": 11,
-   "bytes": 699064
-  },
-  "controller_transitions_changed": 354,
-  "material_toon": {
-   "_ToonThreshold1": 0.12,
-   "_ToonThreshold2": 0.45,
-   "_ToonValue1": 0.66,
-   "_ToonValue2": 0.86,
-   "_ToonValue3": 1.0
-  }
- },
- "Art/Android/f/fanny_attack01_skin11_add.unity3d": {
-  "vfx": {
-   "particle_systems": 3,
-   "fade_in": 0,
-   "fade_out": 0,
-   "polish": 3,
-   "hot_head": 0,
-   "noise_low": 0,
-   "emit_scaled": 0,
-   "max_capped": 0
-  }
- },
- "Art/Android/zzp2_f/zzp2_feilun_skill3_buff02_skin10_add.unity3d": {
-  "vfx": {
-   "particle_systems": 4,
-   "fade_in": 3,
-   "fade_out": 1,
-   "polish": 4,
-   "hot_head": 0,
-   "noise_low": 2,
-   "emit_scaled": 2,
-   "max_capped": 2
-  }
- },
- "Art/Android/zzp2_l/zzp2_Lukas_skill03_bianshen_end_skin02_add.unity3d": {
-  "vfx": {
-   "particle_systems": 7,
-   "fade_in": 3,
-   "fade_out": 0,
-   "polish": 7,
-   "hot_head": 1,
-   "noise_low": 2,
-   "emit_scaled": 2,
-   "max_capped": 3
-  }
- },
  "Art/Android/111/45_argus_Attack_01.unity3d": {
   "vfx": {
    "particle_systems": 15,
@@ -549,7 +8,11 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 15,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 11
   }
  },
  "Art/Android/111/45_argus_Attack_02.unity3d": {
@@ -561,7 +24,11 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 15,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 11
   }
  },
  "Art/Android/111/45_argus_Attack_03.unity3d": {
@@ -573,7 +40,11 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 15,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 11
   }
  },
  "Art/Android/111/45_argus_Attack_04_1.unity3d": {
@@ -585,7 +56,11 @@
    "hot_head": 2,
    "noise_low": 4,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 13,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 8
   }
  },
  "Art/Android/111/45_argus_Attack_04_1_skin03_add.unity3d": {
@@ -597,7 +72,11 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 11,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 7
   }
  },
  "Art/Android/111/45_argus_Attack_04_2.unity3d": {
@@ -609,7 +88,11 @@
    "hot_head": 2,
    "noise_low": 4,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 13,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 8
   }
  },
  "Art/Android/111/45_argus_Attack_04_2_skin03_add.unity3d": {
@@ -621,7 +104,11 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 11,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 7
   }
  },
  "Art/Android/111/45_argus_Attack_04_3.unity3d": {
@@ -633,7 +120,11 @@
    "hot_head": 2,
    "noise_low": 4,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 13,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 8
   }
  },
  "Art/Android/111/45_argus_Attack_04_3_skin03_add.unity3d": {
@@ -645,7 +136,11 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 11,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 7
   }
  },
  "Art/Android/111/45_argus_Hit_01.unity3d": {
@@ -657,7 +152,11 @@
    "hot_head": 1,
    "noise_low": 2,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 10,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 10
   }
  },
  "Art/Android/111/45_argus_Hit_01_skin03_add.unity3d": {
@@ -669,7 +168,11 @@
    "hot_head": 1,
    "noise_low": 2,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 6,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 6
   }
  },
  "Art/Android/111/45_argus_Hit_05.unity3d": {
@@ -681,7 +184,11 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 13,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 12
   }
  },
  "Art/Android/111/45_argus_Keep_daoguang.unity3d": {
@@ -693,7 +200,11 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 2,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
   }
  },
  "Art/Android/111/45_argus_Keep_daoguang_skin03_add.unity3d": {
@@ -705,7 +216,11 @@
    "hot_head": 0,
    "noise_low": 1,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
   }
  },
  "Art/Android/111/45_argus_Keep_daoguang_xiaosan.unity3d": {
@@ -717,11 +232,19 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 0,
-   "max_capped": 0
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
   }
  },
  "Art/Android/111/45_argus_Keep_daoguang_xiaosan_skin03_add.unity3d": {
-  "vfx": {}
+  "vfx": {
+   "mesh_alpha_fadein": 0,
+   "mesh_curves_smoothed": 4,
+   "textures_sharpened": 1
+  }
  },
  "Art/Android/111/45_argus_Keep_tuodi_skin03_add.unity3d": {
   "vfx": {
@@ -732,7 +255,11 @@
    "hot_head": 0,
    "noise_low": 3,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 3,
+   "size_taper": 1,
+   "drag": 1,
+   "textures_sharpened": 3
   }
  },
  "Art/Android/111/45_argus_skill01_Bullet_01.unity3d": {
@@ -744,7 +271,11 @@
    "hot_head": 2,
    "noise_low": 1,
    "emit_scaled": 1,
-   "max_capped": 3
+   "max_capped": 3,
+   "s_curve": 3,
+   "size_taper": 0,
+   "drag": 1,
+   "textures_sharpened": 7
   }
  },
  "Art/Android/111/45_argus_skill01_Fire_01.unity3d": {
@@ -756,7 +287,11 @@
    "hot_head": 2,
    "noise_low": 3,
    "emit_scaled": 2,
-   "max_capped": 4
+   "max_capped": 4,
+   "s_curve": 12,
+   "size_taper": 1,
+   "drag": 0,
+   "textures_sharpened": 10
   }
  },
  "Art/Android/111/45_argus_skill01_Fire_02.unity3d": {
@@ -768,7 +303,11 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 2,
-   "max_capped": 2
+   "max_capped": 2,
+   "s_curve": 9,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 7
   }
  },
  "Art/Android/111/45_argus_skill01_Fire_03.unity3d": {
@@ -780,7 +319,11 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 2,
-   "max_capped": 4
+   "max_capped": 4,
+   "s_curve": 13,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 12
   }
  },
  "Art/Android/111/45_argus_skill01_Hit_01.unity3d": {
@@ -792,7 +335,11 @@
    "hot_head": 2,
    "noise_low": 3,
    "emit_scaled": 2,
-   "max_capped": 2
+   "max_capped": 2,
+   "s_curve": 20,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 15
   }
  },
  "Art/Android/111/45_argus_skill01_Hit_03.unity3d": {
@@ -805,11 +352,18 @@
    "noise_low": 1,
    "emit_scaled": 1,
    "max_capped": 1,
-   "mesh_alpha_fadein": 1
+   "s_curve": 6,
+   "size_taper": 1,
+   "drag": 0,
+   "mesh_alpha_fadein": 1,
+   "mesh_curves_smoothed": 4,
+   "textures_sharpened": 9
   }
  },
  "Art/Android/111/45_argus_skill01_Keep_01.unity3d": {
-  "vfx": {}
+  "vfx": {
+   "textures_sharpened": 4
+  }
  },
  "Art/Android/111/45_argus_skill02_Fire_01.unity3d": {
   "vfx": {
@@ -820,7 +374,11 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 2,
-   "max_capped": 2
+   "max_capped": 2,
+   "s_curve": 11,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 9
   }
  },
  "Art/Android/111/45_argus_skill02_Fire_02.unity3d": {
@@ -832,7 +390,11 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 2,
-   "max_capped": 3
+   "max_capped": 3,
+   "s_curve": 8,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 8
   }
  },
  "Art/Android/111/45_argus_skill02_Hit_01.unity3d": {
@@ -844,7 +406,11 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 15,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 12
   }
  },
  "Art/Android/111/45_argus_skill02_Keep_01.unity3d": {
@@ -856,7 +422,11 @@
    "hot_head": 0,
    "noise_low": 2,
    "emit_scaled": 2,
-   "max_capped": 2
+   "max_capped": 2,
+   "s_curve": 4,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 4
   }
  },
  "Art/Android/111/45_argus_skill02_Keep_02.unity3d": {
@@ -868,7 +438,11 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
   }
  },
  "Art/Android/111/45_argus_skill02_Keep_biaoji.unity3d": {
@@ -880,7 +454,11 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 0,
-   "max_capped": 0
+   "max_capped": 0,
+   "s_curve": 7,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 9
   }
  },
  "Art/Android/111/45_argus_skill02_Keep_liuxue.unity3d": {
@@ -892,7 +470,11 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 1,
-   "max_capped": 0
+   "max_capped": 0,
+   "s_curve": 3,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 5
   }
  },
  "Art/Android/111/45_argus_skill03_Fire_01.unity3d": {
@@ -905,7 +487,12 @@
    "noise_low": 4,
    "emit_scaled": 6,
    "max_capped": 4,
-   "mesh_alpha_fadein": 2
+   "s_curve": 20,
+   "size_taper": 1,
+   "drag": 0,
+   "mesh_alpha_fadein": 2,
+   "mesh_curves_smoothed": 8,
+   "textures_sharpened": 24
   }
  },
  "Art/Android/111/45_argus_skill03_Fire_02.unity3d": {
@@ -917,7 +504,11 @@
    "hot_head": 1,
    "noise_low": 3,
    "emit_scaled": 3,
-   "max_capped": 3
+   "max_capped": 3,
+   "s_curve": 10,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 12
   }
  },
  "Art/Android/111/45_argus_skill03_Keep_01_skin01_add.unity3d": {
@@ -929,7 +520,11 @@
    "hot_head": 3,
    "noise_low": 4,
    "emit_scaled": 1,
-   "max_capped": 4
+   "max_capped": 4,
+   "s_curve": 9,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 9
   }
  },
  "Art/Android/111/45_argus_skill03_Keep_02.unity3d": {
@@ -941,12 +536,17 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 2,
-   "max_capped": 2
+   "max_capped": 2,
+   "s_curve": 5,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 6
   }
  },
  "Art/Android/111/45_argus_skill03_Keep_03.unity3d": {
   "vfx": {
    "mesh_alpha_fadein": 1,
+   "mesh_curves_smoothed": 1,
    "particle_systems": 1,
    "fade_in": 1,
    "fade_out": 0,
@@ -954,7 +554,11 @@
    "hot_head": 1,
    "noise_low": 1,
    "emit_scaled": 1,
-   "max_capped": 0
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 3
   }
  },
  "Art/Android/111/45_argus_skill03_keep_01.unity3d": {
@@ -966,7 +570,11 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 0,
-   "max_capped": 2
+   "max_capped": 2,
+   "s_curve": 4,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 4
   }
  },
  "Art/Android/111/45_argus_skill03_ui_01.unity3d": {
@@ -978,7 +586,11 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 0,
-   "max_capped": 0
+   "max_capped": 0,
+   "s_curve": 2,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 2
   }
  },
  "Art/Android/111/45_argus_skill03_ui_02.unity3d": {
@@ -990,7 +602,11 @@
    "hot_head": 1,
    "noise_low": 0,
    "emit_scaled": 0,
-   "max_capped": 0
+   "max_capped": 0,
+   "s_curve": 10,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 12
   }
  },
  "Art/Android/111/45_argus_skill3_dilie.unity3d": {
@@ -1003,7 +619,12 @@
    "noise_low": 1,
    "emit_scaled": 2,
    "max_capped": 3,
-   "mesh_alpha_fadein": 1
+   "s_curve": 8,
+   "size_taper": 0,
+   "drag": 0,
+   "mesh_alpha_fadein": 1,
+   "mesh_curves_smoothed": 4,
+   "textures_sharpened": 9
   }
  },
  "Art/Android/111/51_sdhunter_skill03_bianshen_skin04_add.unity3d": {
@@ -1015,32 +636,11 @@
    "hot_head": 0,
    "noise_low": 1,
    "emit_scaled": 1,
-   "max_capped": 0
-  }
- },
- "Art/Android/y/Yin_skill01_fire04_skin03_add.unity3d": {
-  "vfx": {
-   "particle_systems": 7,
-   "fade_in": 5,
-   "fade_out": 2,
-   "polish": 7,
-   "hot_head": 1,
-   "noise_low": 2,
-   "emit_scaled": 1,
-   "max_capped": 1
-  }
- },
- "Art/Android/zzp1_b/zzp1_balancemagic_skill04_01_skin08_add.unity3d": {
-  "vfx": {
-   "particle_systems": 1,
-   "fade_in": 0,
-   "fade_out": 0,
-   "polish": 1,
-   "hot_head": 1,
-   "noise_low": 0,
-   "emit_scaled": 0,
    "max_capped": 0,
-   "textures_downscaled": 1
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 2
   }
  },
  "Art/Android/a/argus_skill4_2.unity3d": {
@@ -1052,7 +652,11 @@
    "hot_head": 2,
    "noise_low": 2,
    "emit_scaled": 2,
-   "max_capped": 2
+   "max_capped": 2,
+   "s_curve": 14,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 10
   }
  },
  "Art/Android/a/argus_skill4_2_chuxian.unity3d": {
@@ -1064,7 +668,11 @@
    "hot_head": 2,
    "noise_low": 3,
    "emit_scaled": 2,
-   "max_capped": 2
+   "max_capped": 2,
+   "s_curve": 5,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 4
   }
  },
  "Art/Android/a/argus_skill4_2_daoguang.unity3d": {
@@ -1077,11 +685,347 @@
    "noise_low": 2,
    "emit_scaled": 1,
    "max_capped": 1,
-   "mesh_alpha_fadein": 3
+   "s_curve": 6,
+   "size_taper": 0,
+   "drag": 0,
+   "mesh_alpha_fadein": 3,
+   "mesh_curves_smoothed": 18,
+   "textures_sharpened": 11
   }
  },
  "Art/Android/a/argus_skill4_2_xiaoshi.unity3d": {
   "vfx": {}
+ },
+ "Art/Android/f/fanny_attack01_skin11_add.unity3d": {
+  "vfx": {
+   "particle_systems": 3,
+   "fade_in": 0,
+   "fade_out": 0,
+   "polish": 3,
+   "hot_head": 0,
+   "noise_low": 0,
+   "emit_scaled": 0,
+   "max_capped": 0,
+   "s_curve": 3,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 3
+  }
+ },
+ "Art/Android/h/hero_argus_skin.unity3d": {
+  "meshes": {
+   "ulti": {
+    "vertices_before": 1632,
+    "vertices_after": 4488,
+    "triangles_before": 1418,
+    "triangles_after": 5672
+   },
+   "noraml": {
+    "vertices_before": 1566,
+    "vertices_after": 4365,
+    "triangles_before": 1407,
+    "triangles_after": 5628
+   }
+  },
+  "animations": {
+   "run2": {
+    "dur": 0.8833333849906921,
+    "loop": true,
+    "worst_deg_per_frame_before": 20.4,
+    "worst_deg_per_frame_after": 18.0
+   },
+   "skill2": {
+    "dur": 1.2500001192092896,
+    "loop": false,
+    "worst_deg_per_frame_before": 97.6,
+    "worst_deg_per_frame_after": 38.6
+   },
+   "attack2": {
+    "dur": 0.6500000357627869,
+    "loop": false,
+    "worst_deg_per_frame_before": 76.8,
+    "worst_deg_per_frame_after": 31.1
+   },
+   "skill1_1": {
+    "dur": 1.7500001192092896,
+    "loop": false,
+    "worst_deg_per_frame_before": 103.5,
+    "worst_deg_per_frame_after": 55.3
+   },
+   "run": {
+    "dur": 0.8833333849906921,
+    "loop": true,
+    "worst_deg_per_frame_before": 20.4,
+    "worst_deg_per_frame_after": 18.0
+   },
+   "skill1_4": {
+    "dur": 0.45000001788139343,
+    "loop": false,
+    "worst_deg_per_frame_before": 23.0,
+    "worst_deg_per_frame_after": 13.0
+   },
+   "skill1_2": {
+    "dur": 0.7500000596046448,
+    "loop": false,
+    "worst_deg_per_frame_before": 38.1,
+    "worst_deg_per_frame_after": 33.7
+   },
+   "dead": {
+    "dur": 0.7666667103767395,
+    "loop": false,
+    "worst_deg_per_frame_before": 6.4,
+    "worst_deg_per_frame_after": 6.4
+   },
+   "attack3": {
+    "dur": 0.6500000357627869,
+    "loop": false,
+    "worst_deg_per_frame_before": 63.2,
+    "worst_deg_per_frame_after": 27.3
+   },
+   "skill3": {
+    "dur": 1.3166667222976685,
+    "loop": false,
+    "worst_deg_per_frame_before": 144.4,
+    "worst_deg_per_frame_after": 36.4
+   },
+   "landing": {
+    "dur": 2.3000001907348633,
+    "loop": false,
+    "worst_deg_per_frame_before": 34.2,
+    "worst_deg_per_frame_after": 34.2
+   },
+   "skill1_3": {
+    "dur": 1.133333444595337,
+    "loop": false,
+    "worst_deg_per_frame_before": 29.8,
+    "worst_deg_per_frame_after": 27.7
+   },
+   "skill4_2": {
+    "dur": 1.100000023841858,
+    "loop": false,
+    "worst_deg_per_frame_before": 90.3,
+    "worst_deg_per_frame_after": 63.0
+   },
+   "fight_idle": {
+    "dur": 15.116667747497559,
+    "loop": true,
+    "worst_deg_per_frame_before": 4.2,
+    "worst_deg_per_frame_after": 4.1
+   },
+   "attack4": {
+    "dur": 1.2500001192092896,
+    "loop": false,
+    "worst_deg_per_frame_before": 117.5,
+    "worst_deg_per_frame_after": 36.6
+   },
+   "attack5": {
+    "dur": 1.2500001192092896,
+    "loop": false,
+    "worst_deg_per_frame_before": 119.3,
+    "worst_deg_per_frame_after": 36.6
+   },
+   "attack1": {
+    "dur": 0.6500000357627869,
+    "loop": false,
+    "worst_deg_per_frame_before": 58.8,
+    "worst_deg_per_frame_after": 27.8
+   },
+   "recall": {
+    "dur": 6.5,
+    "loop": false,
+    "worst_deg_per_frame_before": 11.1,
+    "worst_deg_per_frame_after": 9.6
+   }
+  },
+  "controller_transitions_changed": 354,
+  "texture": {
+   "name": "777daa",
+   "size": 1024,
+   "format": "ETC2_RGB4",
+   "mips": 11,
+   "bytes": 699064
+  },
+  "material_toon": {
+   "_ToonThreshold1": 0.12,
+   "_ToonThreshold2": 0.45,
+   "_ToonValue1": 0.66,
+   "_ToonValue2": 0.86,
+   "_ToonValue3": 1.0
+  }
+ },
+ "Art/Android/h/hero_argus_skin_high_add.unity3d": {
+  "meshes": {
+   "ulti": {
+    "vertices_before": 1632,
+    "vertices_after": 4488,
+    "triangles_before": 1418,
+    "triangles_after": 5672
+   },
+   "noraml": {
+    "vertices_before": 1566,
+    "vertices_after": 4365,
+    "triangles_before": 1407,
+    "triangles_after": 5628
+   }
+  },
+  "animations": {
+   "run2": {
+    "dur": 0.8833333849906921,
+    "loop": true,
+    "worst_deg_per_frame_before": 20.4,
+    "worst_deg_per_frame_after": 18.0
+   },
+   "skill2": {
+    "dur": 1.2500001192092896,
+    "loop": false,
+    "worst_deg_per_frame_before": 97.6,
+    "worst_deg_per_frame_after": 38.6
+   },
+   "attack2": {
+    "dur": 0.6500000357627869,
+    "loop": false,
+    "worst_deg_per_frame_before": 76.8,
+    "worst_deg_per_frame_after": 31.1
+   },
+   "skill1_1": {
+    "dur": 1.7500001192092896,
+    "loop": false,
+    "worst_deg_per_frame_before": 103.5,
+    "worst_deg_per_frame_after": 55.3
+   },
+   "run": {
+    "dur": 0.8833333849906921,
+    "loop": true,
+    "worst_deg_per_frame_before": 20.4,
+    "worst_deg_per_frame_after": 18.0
+   },
+   "skill1_4": {
+    "dur": 0.45000001788139343,
+    "loop": false,
+    "worst_deg_per_frame_before": 23.0,
+    "worst_deg_per_frame_after": 13.0
+   },
+   "skill1_2": {
+    "dur": 0.7500000596046448,
+    "loop": false,
+    "worst_deg_per_frame_before": 38.1,
+    "worst_deg_per_frame_after": 33.7
+   },
+   "dead": {
+    "dur": 0.7666667103767395,
+    "loop": false,
+    "worst_deg_per_frame_before": 6.4,
+    "worst_deg_per_frame_after": 6.4
+   },
+   "attack3": {
+    "dur": 0.6500000357627869,
+    "loop": false,
+    "worst_deg_per_frame_before": 63.2,
+    "worst_deg_per_frame_after": 27.3
+   },
+   "skill3": {
+    "dur": 1.3166667222976685,
+    "loop": false,
+    "worst_deg_per_frame_before": 144.4,
+    "worst_deg_per_frame_after": 36.4
+   },
+   "landing": {
+    "dur": 2.3000001907348633,
+    "loop": false,
+    "worst_deg_per_frame_before": 34.2,
+    "worst_deg_per_frame_after": 34.2
+   },
+   "skill1_3": {
+    "dur": 1.133333444595337,
+    "loop": false,
+    "worst_deg_per_frame_before": 29.8,
+    "worst_deg_per_frame_after": 27.7
+   },
+   "skill4_2": {
+    "dur": 1.100000023841858,
+    "loop": false,
+    "worst_deg_per_frame_before": 90.3,
+    "worst_deg_per_frame_after": 63.0
+   },
+   "fight_idle": {
+    "dur": 15.116667747497559,
+    "loop": true,
+    "worst_deg_per_frame_before": 4.2,
+    "worst_deg_per_frame_after": 4.1
+   },
+   "attack4": {
+    "dur": 1.2500001192092896,
+    "loop": false,
+    "worst_deg_per_frame_before": 117.5,
+    "worst_deg_per_frame_after": 36.6
+   },
+   "attack5": {
+    "dur": 1.2500001192092896,
+    "loop": false,
+    "worst_deg_per_frame_before": 119.3,
+    "worst_deg_per_frame_after": 36.6
+   },
+   "attack1": {
+    "dur": 0.6500000357627869,
+    "loop": false,
+    "worst_deg_per_frame_before": 58.8,
+    "worst_deg_per_frame_after": 27.8
+   },
+   "recall": {
+    "dur": 6.5,
+    "loop": false,
+    "worst_deg_per_frame_before": 11.1,
+    "worst_deg_per_frame_after": 9.6
+   }
+  },
+  "controller_transitions_changed": 354,
+  "texture": {
+   "name": "777daa",
+   "size": 2048,
+   "format": "ETC2_RGB4",
+   "mips": 12,
+   "bytes": 2796216
+  },
+  "material_toon": {
+   "_ToonThreshold1": 0.12,
+   "_ToonThreshold2": 0.45,
+   "_ToonValue1": 0.66,
+   "_ToonValue2": 0.86,
+   "_ToonValue3": 1.0
+  }
+ },
+ "Art/Android/j/julian_skill3_2_02.unity3d": {
+  "vfx": {
+   "particle_systems": 2,
+   "fade_in": 0,
+   "fade_out": 0,
+   "polish": 2,
+   "hot_head": 1,
+   "noise_low": 1,
+   "emit_scaled": 1,
+   "max_capped": 1,
+   "s_curve": 2,
+   "size_taper": 1,
+   "drag": 0,
+   "textures_downscaled": 1,
+   "textures_sharpened": 2
+  }
+ },
+ "Art/Android/y/Yin_skill01_fire04_skin03_add.unity3d": {
+  "vfx": {
+   "particle_systems": 7,
+   "fade_in": 5,
+   "fade_out": 2,
+   "polish": 7,
+   "hot_head": 1,
+   "noise_low": 2,
+   "emit_scaled": 1,
+   "max_capped": 1,
+   "s_curve": 7,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 8
+  }
  },
  "Art/Android/zzp1_111/zzp1_45_argus_Attack_01_skin03_add.unity3d": {
   "vfx": {
@@ -1092,7 +1036,11 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 0,
-   "max_capped": 0
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
   }
  },
  "Art/Android/zzp1_111/zzp1_45_argus_Attack_02_skin03_add.unity3d": {
@@ -1104,7 +1052,11 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 0,
-   "max_capped": 0
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
   }
  },
  "Art/Android/zzp1_111/zzp1_45_argus_Attack_04_1_skin03_add.unity3d": {
@@ -1116,7 +1068,11 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 0,
-   "max_capped": 0
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
   }
  },
  "Art/Android/zzp1_111/zzp1_45_argus_Attack_04_2_skin03_add.unity3d": {
@@ -1128,7 +1084,11 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 0,
-   "max_capped": 0
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
   }
  },
  "Art/Android/zzp1_111/zzp1_45_argus_Attack_04_3_skin03_add.unity3d": {
@@ -1140,14 +1100,22 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 0,
-   "max_capped": 0
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
   }
  },
  "Art/Android/zzp1_111/zzp1_45_argus_Keep_daoguang.unity3d": {
-  "vfx": {}
+  "vfx": {
+   "textures_sharpened": 1
+  }
  },
  "Art/Android/zzp1_111/zzp1_45_argus_Keep_daoguang_xiaosan_skin03_add.unity3d": {
-  "vfx": {}
+  "vfx": {
+   "textures_sharpened": 1
+  }
  },
  "Art/Android/zzp1_111/zzp1_45_argus_Keep_tuodi_skin03_add.unity3d": {
   "vfx": {
@@ -1158,7 +1126,11 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 0,
-   "max_capped": 0
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
   }
  },
  "Art/Android/zzp1_111/zzp1_45_argus_skill03_Fire_02_skin03_add.unity3d": {
@@ -1170,7 +1142,380 @@
    "hot_head": 0,
    "noise_low": 0,
    "emit_scaled": 0,
-   "max_capped": 0
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
+  }
+ },
+ "Art/Android/zzp1_b/zzp1_balancemagic_skill04_01_skin08_add.unity3d": {
+  "vfx": {
+   "particle_systems": 1,
+   "fade_in": 0,
+   "fade_out": 0,
+   "polish": 1,
+   "hot_head": 1,
+   "noise_low": 0,
+   "emit_scaled": 0,
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 1,
+   "drag": 0,
+   "textures_downscaled": 1,
+   "textures_sharpened": 1
+  }
+ },
+ "Art/Android/zzp1_c/zzp1_couplemage_skill03_buff_skin05_add.unity3d": {
+  "vfx": {
+   "particle_systems": 3,
+   "fade_in": 2,
+   "fade_out": 0,
+   "polish": 4,
+   "hot_head": 0,
+   "noise_low": 0,
+   "emit_scaled": 1,
+   "max_capped": 0,
+   "s_curve": 4,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 5
+  }
+ },
+ "Art/Android/zzp1_k/zzp1_Kaijiacike_Henshin_skill01_attack02_skin02_add.unity3d": {
+  "vfx": {
+   "particle_systems": 3,
+   "fade_in": 1,
+   "fade_out": 0,
+   "polish": 4,
+   "hot_head": 1,
+   "noise_low": 2,
+   "emit_scaled": 2,
+   "max_capped": 3,
+   "s_curve": 4,
+   "size_taper": 1,
+   "drag": 0,
+   "textures_sharpened": 4
+  }
+ },
+ "Art/Android/zzp1_n/zzp1_nextalice_skill02_2.unity3d": {
+  "vfx": {
+   "particle_systems": 2,
+   "fade_in": 0,
+   "fade_out": 0,
+   "polish": 2,
+   "hot_head": 0,
+   "noise_low": 0,
+   "emit_scaled": 0,
+   "max_capped": 0,
+   "s_curve": 2,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 3
+  }
+ },
+ "Art/Android/zzp1_n/zzp1_nextbadninja_benti_skill01_yao_next.unity3d": {
+  "vfx": {
+   "particle_systems": 2,
+   "fade_in": 1,
+   "fade_out": 0,
+   "polish": 2,
+   "hot_head": 0,
+   "noise_low": 0,
+   "emit_scaled": 0,
+   "max_capped": 0,
+   "s_curve": 2,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 2
+  }
+ },
+ "Art/Android/zzp1_n/zzp1_nextwarrior_yingxiong_skill2_1_skin05_add.unity3d": {
+  "vfx": {
+   "particle_systems": 2,
+   "fade_in": 0,
+   "fade_out": 0,
+   "polish": 2,
+   "hot_head": 0,
+   "noise_low": 0,
+   "emit_scaled": 0,
+   "max_capped": 0,
+   "s_curve": 2,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 3
+  }
+ },
+ "Art/Android/zzp2_111/zzp2_45_argus_Attack_01_skin03_add.unity3d": {
+  "vfx": {
+   "particle_systems": 1,
+   "fade_in": 0,
+   "fade_out": 0,
+   "polish": 1,
+   "hot_head": 0,
+   "noise_low": 0,
+   "emit_scaled": 0,
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
+  }
+ },
+ "Art/Android/zzp2_111/zzp2_45_argus_Attack_02_skin03_add.unity3d": {
+  "vfx": {
+   "particle_systems": 1,
+   "fade_in": 0,
+   "fade_out": 0,
+   "polish": 1,
+   "hot_head": 0,
+   "noise_low": 0,
+   "emit_scaled": 0,
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
+  }
+ },
+ "Art/Android/zzp2_111/zzp2_45_argus_Attack_04_1_skin03_add.unity3d": {
+  "vfx": {
+   "particle_systems": 1,
+   "fade_in": 0,
+   "fade_out": 0,
+   "polish": 1,
+   "hot_head": 0,
+   "noise_low": 0,
+   "emit_scaled": 0,
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 2
+  }
+ },
+ "Art/Android/zzp2_111/zzp2_45_argus_Attack_04_2_skin03_add.unity3d": {
+  "vfx": {
+   "particle_systems": 1,
+   "fade_in": 0,
+   "fade_out": 0,
+   "polish": 1,
+   "hot_head": 0,
+   "noise_low": 0,
+   "emit_scaled": 0,
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 2
+  }
+ },
+ "Art/Android/zzp2_111/zzp2_45_argus_Attack_04_3_skin03_add.unity3d": {
+  "vfx": {
+   "particle_systems": 1,
+   "fade_in": 0,
+   "fade_out": 0,
+   "polish": 1,
+   "hot_head": 0,
+   "noise_low": 0,
+   "emit_scaled": 0,
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 2
+  }
+ },
+ "Art/Android/zzp2_111/zzp2_45_argus_Hit_01_skin03_add.unity3d": {
+  "vfx": {
+   "particle_systems": 1,
+   "fade_in": 0,
+   "fade_out": 1,
+   "polish": 1,
+   "hot_head": 0,
+   "noise_low": 1,
+   "emit_scaled": 1,
+   "max_capped": 1,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
+  }
+ },
+ "Art/Android/zzp2_111/zzp2_45_argus_Hit_05_skin03_add.unity3d": {
+  "vfx": {
+   "particle_systems": 1,
+   "fade_in": 0,
+   "fade_out": 1,
+   "polish": 1,
+   "hot_head": 0,
+   "noise_low": 1,
+   "emit_scaled": 1,
+   "max_capped": 1,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
+  }
+ },
+ "Art/Android/zzp2_111/zzp2_45_argus_Keep_daoguang_xiaosan_skin03_add.unity3d": {
+  "vfx": {
+   "particle_systems": 1,
+   "fade_in": 0,
+   "fade_out": 0,
+   "polish": 1,
+   "hot_head": 0,
+   "noise_low": 1,
+   "emit_scaled": 0,
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 1
+  }
+ },
+ "Art/Android/zzp2_111/zzp2_45_argus_skill02_Keep_liuxue_skin03_add.unity3d": {
+  "vfx": {
+   "particle_systems": 1,
+   "fade_in": 0,
+   "fade_out": 0,
+   "polish": 1,
+   "hot_head": 0,
+   "noise_low": 1,
+   "emit_scaled": 1,
+   "max_capped": 0,
+   "s_curve": 1,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 2
+  }
+ },
+ "Art/Android/zzp2_111/zzp2_45_argus_skill03_Fire_02_skin03_add.unity3d": {
+  "vfx": {
+   "particle_systems": 2,
+   "fade_in": 0,
+   "fade_out": 0,
+   "polish": 2,
+   "hot_head": 0,
+   "noise_low": 1,
+   "emit_scaled": 1,
+   "max_capped": 1,
+   "s_curve": 2,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 2
+  }
+ },
+ "Art/Android/zzp2_111/zzp2_45_argus_skill03_Keep_02_skin03_add.unity3d": {
+  "vfx": {
+   "particle_systems": 3,
+   "fade_in": 1,
+   "fade_out": 0,
+   "polish": 3,
+   "hot_head": 1,
+   "noise_low": 1,
+   "emit_scaled": 1,
+   "max_capped": 1,
+   "s_curve": 3,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 4
+  }
+ },
+ "Art/Android/zzp2_111/zzp2_45_argus_skill03_Keep_03_skin03_add.unity3d": {
+  "vfx": {
+   "particle_systems": 2,
+   "fade_in": 1,
+   "fade_out": 0,
+   "polish": 2,
+   "hot_head": 0,
+   "noise_low": 2,
+   "emit_scaled": 2,
+   "max_capped": 0,
+   "s_curve": 2,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 2
+  }
+ },
+ "Art/Android/zzp2_a/zzp2_argus_skill4_2_daoguang_skin06_add.unity3d": {
+  "vfx": {
+   "particle_systems": 6,
+   "fade_in": 5,
+   "fade_out": 2,
+   "polish": 6,
+   "hot_head": 2,
+   "noise_low": 2,
+   "emit_scaled": 1,
+   "max_capped": 1,
+   "s_curve": 6,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 5
+  }
+ },
+ "Art/Android/zzp2_a/zzp2_asura_skll02_2_skin06_add.unity3d": {
+  "vfx": {
+   "particle_systems": 7,
+   "fade_in": 1,
+   "fade_out": 1,
+   "polish": 7,
+   "hot_head": 0,
+   "noise_low": 1,
+   "emit_scaled": 1,
+   "max_capped": 1,
+   "s_curve": 7,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 5
+  }
+ },
+ "Art/Android/zzp2_f/zzp2_feilun_skill3_buff02_skin10_add.unity3d": {
+  "vfx": {
+   "particle_systems": 4,
+   "fade_in": 3,
+   "fade_out": 1,
+   "polish": 4,
+   "hot_head": 0,
+   "noise_low": 2,
+   "emit_scaled": 2,
+   "max_capped": 2,
+   "s_curve": 4,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 6
+  }
+ },
+ "Art/Android/zzp2_k/zzp2_Kaijiacike_Henshin_skill01_attack02_skin02_add.unity3d": {
+  "vfx": {
+   "particle_systems": 13,
+   "fade_in": 3,
+   "fade_out": 1,
+   "polish": 13,
+   "hot_head": 4,
+   "noise_low": 3,
+   "emit_scaled": 3,
+   "max_capped": 6,
+   "s_curve": 13,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 13
+  }
+ },
+ "Art/Android/zzp2_l/zzp2_Lukas_skill03_bianshen_end_skin02_add.unity3d": {
+  "vfx": {
+   "particle_systems": 7,
+   "fade_in": 3,
+   "fade_out": 0,
+   "polish": 7,
+   "hot_head": 1,
+   "noise_low": 2,
+   "emit_scaled": 2,
+   "max_capped": 3,
+   "s_curve": 7,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 8
   }
  },
  "Art/Android/zzp2_n/zzp2_nextalice_skill02_2.unity3d": {
@@ -1182,7 +1527,11 @@
    "hot_head": 0,
    "noise_low": 1,
    "emit_scaled": 3,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 4,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 6
   }
  },
  "Art/Android/zzp2_n/zzp2_nextbadninja_benti_skill01_yao_next.unity3d": {
@@ -1194,7 +1543,11 @@
    "hot_head": 0,
    "noise_low": 1,
    "emit_scaled": 1,
-   "max_capped": 1
+   "max_capped": 1,
+   "s_curve": 4,
+   "size_taper": 0,
+   "drag": 0,
+   "textures_sharpened": 3
   }
  },
  "Art/Android/zzp2_n/zzp2_nextbadninja_fenshen_skill01_tun_bao_next_skin05_add.unity3d": {
@@ -1206,8 +1559,12 @@
    "hot_head": 1,
    "noise_low": 2,
    "emit_scaled": 3,
-   "max_capped": 2
+   "max_capped": 2,
+   "s_curve": 11,
+   "size_taper": 2,
+   "drag": 0,
+   "textures_sharpened": 16
   }
  },
- "_build_seconds": 60.0
+ "_build_seconds": 93.6
 }
