@@ -1,5 +1,8 @@
 # AxH — Hidan Revamp v4
 
+> **Skin lain di repo ini:** [Shisui x Suyou — Dark Green Revamp](shisui/README.md). Semua efek dominan hijau
+> gelap, lebih besar dan brutal, tekstur HD 2×, fade-in/out di semua efek, plus ikon skill baru.
+
 **Unduh:** [`release/Hidan.Revamp.v4.zip`](release/Hidan.Revamp.v4.zip)
 
 Isinya 99 file dengan struktur folder (`HIDAN/Art`, `HIDAN/UI`, `HIDAN/Audio`) yang sama persis dengan

@@ -124,10 +124,14 @@ def polish_colors(g, hot_head):
     return True
 
 
-def hot_head(im, grads, head_t=0.18):
+def _is_red(h, sat):
+    return sat > 0.35 and (h < 0.06 or h > 0.92)
+
+
+def hot_head(im, grads, head_t=0.18, accept=_is_red, lift=0.4):
     """Spark-like particles: brighter, whiter birth that settles to the original blood red after head_t.
     Colour over lifetime multiplies the start colour, so the start colour is lifted and the gradient
-    divides it back out after the head."""
+    divides it back out after the head. accept(h, sat) selects which start colours get the hot head."""
     sc = im['startColor']
     if sc['minMaxState'] not in (0, 2):
         return False
@@ -136,11 +140,11 @@ def hot_head(im, grads, head_t=0.18):
     if rgb.max() <= 1e-3:
         return False
     h, sat, v = colorsys.rgb_to_hsv(*np.clip(rgb / max(rgb.max(), 1.0), 0, 1))
-    if not (sat > 0.35 and (h < 0.06 or h > 0.92)):
-        return False                      # only red particles get the hot head
+    if not accept(h, sat):
+        return False                      # only red particles get the hot head (Hidan)
     for c in cols:
         for ch in 'rgb':
-            c[ch] = float(min(1.0, c[ch] * 0.6 + 0.4 * max(rgb.max(), 1e-3)))
+            c[ch] = float(min(1.0, c[ch] * (1 - lift) + lift * max(rgb.max(), 1e-3)))
     hot = np.mean([[c['r'], c['g'], c['b']] for c in cols], 0)
     ratio = rgb / np.maximum(hot, 1e-4)
     for g in grads:
@@ -193,7 +197,8 @@ def scale_bursts(em, f):
 
 
 # ------------------------------------------------------------------ main per-system pass
-def process_particle_system(tt, go_name):
+def process_particle_system(tt, go_name, palette='crimson', budget=PARTICLE_BUDGET):
+    """palette 'crimson' (Hidan): crimson tails + red hot heads; any other palette: fades/optimisation only."""
     rep = {'fade_in': 0, 'fade_out': 0, 'polish': 0, 'hot_head': 0, 'noise_low': 0, 'emit_scaled': 0, 'max_capped': 0}
     im, em, cm = tt['InitialModule'], tt['EmissionModule'], tt['ColorModule']
     life = max(mm_max(im['startLifetime']), 0.02)
@@ -225,9 +230,9 @@ def process_particle_system(tt, go_name):
             rep['fade_in'] += interp(before, 0.0) > 0.02
             rep['fade_out'] += interp(before, 1.0) > 0.02
             set_alpha(g, new)
-        if polish_colors(g, hot):
+        if palette == 'crimson' and polish_colors(g, hot):
             rep['polish'] += 1
-    if hot and hot_head(im, grads):
+    if palette == 'crimson' and hot and hot_head(im, grads):
         rep['hot_head'] = 1
 
     # ---- noise: medium/high (2D/3D) -> low (1D) quality
@@ -240,8 +245,8 @@ def process_particle_system(tt, go_name):
     if em['enabled']:
         rate = mm_max(em['rateOverTime'])
         alive = rate * life + sum(burst_alive(b, life) for b in em['m_Bursts'])
-        if alive > PARTICLE_BUDGET:
-            f = max(MIN_EMIT_FACTOR, (PARTICLE_BUDGET / alive) ** EMIT_EXPONENT)
+        if alive > budget:
+            f = max(MIN_EMIT_FACTOR, (budget / alive) ** EMIT_EXPONENT)
             mm_scale(em['rateOverTime'], f)
             mm_scale(em['rateOverDistance'], f)
             scale_bursts(em, f)
@@ -400,8 +405,8 @@ def spark_drag(tt):
     return True
 
 
-def process_particle_system_v3(tt, go_name, render_mode=None):
-    rep = process_particle_system(tt, go_name)
+def process_particle_system_v3(tt, go_name, render_mode=None, palette='crimson', budget=PARTICLE_BUDGET):
+    rep = process_particle_system(tt, go_name, palette, budget)
     rep.update({'s_curve': 0, 'size_taper': 0, 'drag': 0})
     cm = tt['ColorModule']
     gr = cm['gradient']
