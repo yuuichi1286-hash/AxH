@@ -1,0 +1,8 @@
+UnityPy==1.25.4
+numpy
+pillow
+etcpak
+texture2ddecoder
+astc-encoder-py
+scipy
+matplotlib
