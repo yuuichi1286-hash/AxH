@@ -1,0 +1,1095 @@
+{
+ "textures": {
+  "PVP_049_2026s3_tree_02": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_hedaobake_14": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_hedaobake_13": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_qiu_01_A": {
+   "kind": "mask",
+   "before": [
+    256,
+    256,
+    51
+   ],
+   "after": [
+    512,
+    512,
+    51,
+    1
+   ],
+   "bytes": 65536
+  },
+  "PVP_049_2026s3_dizuo_02_A": {
+   "kind": "mask",
+   "before": [
+    256,
+    256,
+    51
+   ],
+   "after": [
+    512,
+    512,
+    51,
+    1
+   ],
+   "bytes": 65536
+  },
+  "PVP_049_2026s3_statue_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_bluejidi_lm_01_final_DLM": {
+   "kind": "lightmap",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    50,
+    1
+   ],
+   "bytes": 467856
+  },
+  "PVP_049_2026s3_bluebuff_04": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_shanshi_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_redbuff_lm_01_final_DLM": {
+   "kind": "lightmap",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    50,
+    1
+   ],
+   "bytes": 467856
+  },
+  "PVP_049_2026s3_hedaobake_03": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_waiweihuatan_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_bluebuff_lm_01_final_DLM": {
+   "kind": "lightmap",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    50,
+    1
+   ],
+   "bytes": 467856
+  },
+  "PVP_049_2026s3_hedaobake_02": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_skybox_01_D": {
+   "kind": "sky",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    50,
+    1
+   ],
+   "bytes": 467856
+  },
+  "PVP_049_2026s3_r_redjidi_lm_01_final_DLM": {
+   "kind": "lightmap",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    50,
+    1
+   ],
+   "bytes": 467856
+  },
+  "PVP_049_2026s3_statue_03": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_grass_01_DA": {
+   "kind": "foliage",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    50,
+    1
+   ],
+   "bytes": 467856
+  },
+  "PVP_049_2026s3_build_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_crystal_02_D": {
+   "kind": "prop",
+   "before": [
+    256,
+    256,
+    51
+   ],
+   "after": [
+    512,
+    512,
+    51,
+    10
+   ],
+   "bytes": 87424
+  },
+  "PVP_049_2026s3_bluebuff_05": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_bluebuff_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_redbuff_05": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_statue_02": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_hedaobake_12": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_hedaobake_07": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_dizuo_02": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_hedaobake_16": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_dabaojian_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_redbuff_08": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_hedaobake_10": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_crystal_01_D": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_grass_lm_01_final_DLM": {
+   "kind": "lightmap",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    512,
+    512,
+    50,
+    1
+   ],
+   "bytes": 118336
+  },
+  "PVP_049_2026s3_redbuff_03": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_bluebuff_02": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s4_Water_Noise": {
+   "kind": "noise",
+   "before": [
+    64,
+    64,
+    51
+   ],
+   "after": [
+    256,
+    256,
+    51,
+    1
+   ],
+   "bytes": 16384
+  },
+  "PVP_049_2026s3_bluebuff_07": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_shanshi_04": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_hedaobake_01": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_outsid_lm_01_final_DLM": {
+   "kind": "lightmap",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    512,
+    512,
+    50,
+    1
+   ],
+   "bytes": 118336
+  },
+  "PVP_049_2026s3_outsidzhuzi_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_hedao_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_jidiqiang_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_dadunpai_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_hedaobake_11": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_qiu_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_bluebuff_06": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_hedaobake_15": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_redbuff_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_redbuff_06": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_hedaobake_06": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_gaodiweiqiang_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_door_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_shanshi_02": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_hedaobake_09": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_hedaobake_04": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_redbuff_04": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_hedaobake_05": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_redbuff_02": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_hedaobake_08": {
+   "kind": "ground",
+   "before": [
+    1024,
+    1024,
+    51
+   ],
+   "after": [
+    2048,
+    2048,
+    50,
+    12
+   ],
+   "bytes": 2497712
+  },
+  "PVP_049_2026s3_longkeng_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_shanshi_03": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_leaf_lm_01_final_DLM": {
+   "kind": "lightmap",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    512,
+    512,
+    50,
+    1
+   ],
+   "bytes": 118336
+  },
+  "PVP_049_2026s3_bluebuff_03": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_wall_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_jidiqiang_01_A": {
+   "kind": "mask",
+   "before": [
+    256,
+    256,
+    51
+   ],
+   "after": [
+    512,
+    512,
+    51,
+    1
+   ],
+   "bytes": 65536
+  },
+  "PVP_049_2026s3_jidiweiqiang_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_tree_01": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  },
+  "PVP_049_2026s3_leaf_01_DA": {
+   "kind": "foliage",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    50,
+    1
+   ],
+   "bytes": 467856
+  },
+  "PVP_049_2026s3_redbuff_07": {
+   "kind": "prop",
+   "before": [
+    512,
+    512,
+    51
+   ],
+   "after": [
+    1024,
+    1024,
+    51,
+    11
+   ],
+   "bytes": 349568
+  }
+ },
+ "texture_kinds": {
+  "prop": 40,
+  "ground": 16,
+  "mask": 3,
+  "lightmap": 7,
+  "sky": 1,
+  "foliage": 2,
+  "noise": 1
+ },
+ "effects": {
+  "effects": [
+   "FX_Fireflies_1",
+   "FX_Fireflies_2",
+   "FX_Fireflies_3",
+   "FX_Fireflies_4",
+   "FX_River_Sparkles",
+   "FX_River_Mist",
+   "FX_Pit_Aura_1",
+   "FX_Pit_Aura_2",
+   "FX_Base_Sparkles_1",
+   "FX_Base_Sparkles_2",
+   "FX_Light_Motes",
+   "FX_Falling_Leaves_1",
+   "FX_Falling_Leaves_2"
+  ],
+  "scene_objects_added": 54,
+  "shared_objects_added": 8,
+  "estimated_particles_alive": 237,
+  "materials": 4,
+  "textures": [
+   "FX_Sanctum_glow",
+   "FX_Sanctum_sparkle",
+   "FX_Sanctum_mist",
+   "FX_Sanctum_leaf"
+  ]
+ },
+ "_build_seconds": 601.6,
+ "_size": {
+  "before": 10062779,
+  "after": 55544443
+ }
+}
