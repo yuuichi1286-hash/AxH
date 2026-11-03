@@ -1,14 +1,19 @@
 # Shisui x Suyou — Dark Green Revamp
 
-**Unduh (pasang dua-duanya):**
+**Unduh (satu file, skin + efek):** [`release/Shisui_x_Suyou_DarkGreen.zip`](release/Shisui_x_Suyou_DarkGreen.zip)
+(24,5 MB)
 
-| File | Menggantikan | Isi |
+Zip ini menggabungkan `DAA [Shisui x Suyou] (DEFAULT).zip` dan `shisui.zip` dalam satu folder `shisoui x soyou/`:
+
+| Folder di dalam `shisoui x soyou/` | Isi | Asal |
 |---|---|---|
-| [`release/Shisui_x_Suyou_DarkGreen_Effects.zip`](release/Shisui_x_Suyou_DarkGreen_Effects.zip) | `shisui.zip` | `Art/android/k`, `zzp1_k`, `zzp2_k`: semua efek skill, basic attack, hit, mode Susanoo, recall/lobby |
-| [`release/Shisui_x_Suyou_DarkGreen_Skin.zip`](release/Shisui_x_Suyou_DarkGreen_Skin.zip) | `DAA [Shisui x Suyou] (DEFAULT).zip` | `shisoui x soyou/`: model, lengan Susanoo, audio, UI (ikon skill) |
+| `Art/android/h` | model Shisui, lengan Susanoo | skin |
+| `Art/android/k`, `zzp1_k`, `zzp2_k` | semua efek: skill, basic attack, hit, mode Susanoo, recall/lobby | efek |
+| `Audio/android` | suara | skin |
+| `Ui/android` | ikon skill, kartu hero | skin |
 
-Struktur folder, nama file, urutan entri, dan kompresi zip sama persis dengan file asli. Cara pasangnya juga
-sama: timpa file lama dengan isi kedua zip ini.
+Pasang seperti biasa: salin isi folder `shisoui x soyou/` (`Art`, `Audio`, `Ui`) ke folder game dan timpa file
+lama. Nama file dan sub-folder sama persis dengan dua file asli. Kompresi tiap file di dalam zip juga sama.
 
 ![Ikon skill sebelum / sesudah](docs/previews/1_ikon_sebelum_sesudah.png)
 
@@ -130,10 +135,9 @@ Model Shisui (`hero_kaijiacike_skin`), kartu hero (`Hero1261_add`), audio (`*.bn
 - 39 efek dicek: `DelayTime` selalu ≥ akhir fade terakhir, termasuk overlay.
 - Atlas ikon: piksel berubah hanya di dalam 4 ikon Suyou. Tidak ada sprite hero lain yang tersentuh.
 
-Build juga deterministik. Build ulang dari tools di repo menghasilkan kedua zip dengan SHA-256 yang sama:
-
-- Effects: `cab618b6cfeda0333de6b48775a27d86d4753b2306ceae9c5cbedcf363ce1b05`
-- Skin: `3114bf247fb8ae15d101bd91ccfa32241b99b3d8253c1658aed3db09b57045e5`
+Build juga deterministik. Build ulang dari tools di repo menghasilkan zip dengan SHA-256 yang sama:
+`c41b689e01a18438b1ee090b0b19924420be39e3a061bee500d49f7598c92f26`. Semua 116 file di dalamnya identik
+byte-per-byte dengan hasil build yang divalidasi.
 
 ## Build ulang dari file asli
 
@@ -143,8 +147,7 @@ unzip shisui.zip -d orig_fx                               # -> orig_fx/Art/andro
 unzip "DAA [Shisui x Suyou] (DEFAULT).zip" -d orig_model  # -> orig_model/shisoui x soyou/...
 python tools/build_shisui.py orig_fx "orig_model/shisoui x soyou" out_fx "out_model/shisoui x soyou" report.json 4
 python tools/validate_shisui.py orig_fx/Art/android "orig_model/shisoui x soyou" out_fx/Art/android "out_model/shisoui x soyou"
-python tools/pack_like.py shisui.zip out_fx Shisui_x_Suyou_DarkGreen_Effects.zip
-python tools/pack_like.py "DAA [Shisui x Suyou] (DEFAULT).zip" out_model Shisui_x_Suyou_DarkGreen_Skin.zip
+python tools/pack_merged.py "DAA [Shisui x Suyou] (DEFAULT).zip" out_model shisui.zip out_fx Shisui_x_Suyou_DarkGreen.zip
 ```
 
 | Tool | Fungsi |
@@ -156,5 +159,6 @@ python tools/pack_like.py "DAA [Shisui x Suyou] (DEFAULT).zip" out_model Shisui_
 | `build_shisui.py` | build lengkap (efek, lengan Susanoo, ikon, DelayTime) |
 | `validate_shisui.py` | validasi di atas |
 | `shisui_previews.py`, `icon_preview.py` | gambar pratinjau |
-| `pack_like.py` | zip dengan entri / urutan / kompresi sama seperti zip asli |
+| `pack_merged.py` | satu zip skin + efek (efek masuk ke `shisoui x soyou/Art/android/`) |
+| `pack_like.py` | zip terpisah dengan entri / urutan / kompresi sama seperti zip asli |
 | `shisui_survey.py`, `shisui_show.py`, `tex_sheet.py` | survei bundle (shader, material, tekstur, warna) |
