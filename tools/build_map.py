@@ -175,7 +175,7 @@ def bake_context(env):
     classes = map_decor.world_classes(orig)
     plants = [tuple(M[[0, 2], 3]) for gname, layer, M, mesh_pid, mat_pids in sc.renderers()
               if gname.startswith('PVP_049_2026s3_leaf_')]
-    decor = map_decor.placements(classes, foot, ao, plants)
+    decor = map_decor.placements(classes, foot, plants)
     return {'shadow': shadow, 'ao': ao, 'tiles': tiles, 'props': len(props), 'props_failed': failed,
             'shadow_cover': float((shadow > 0.5).mean()), 'decor': decor, 'sprites': {}}
 

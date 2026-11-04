@@ -1,10 +1,15 @@
-"""New trees for Sanctum Island (High): clones of the map's own edge tree (trunk + leaf canopy) planted on free
-spots of the outer cliff rim, outside the playable diamond, so they never block a lane, a jungle path or the view.
+"""New trees for Sanctum Island (High): clones of the map's own edge tree (trunk + leaf canopy) planted against the
+outer face of the lane walls, so they read as part of the wall line like the map's original edge trees, but never
+stand on, overhang or hide a lane or jungle path.
 
 Clones reference the SAME mesh / material assets as the original tree (no new assets); only scene objects are
 added: GameObject + Transform + MeshFilter + MeshRenderer per part, under one root. Trunks get the same baked
 lighting as the original (an extra entry in the scene's BattleSceneDiffmapStorage); the leaf canopy carries its
 lightmap in the material.
+
+The walkable edge is MEASURED, not assumed: a top-surface height map of all solid map geometry (ground + props,
+without foliage / trees / sky / effects) is marched outward from the lane line, perpendicular to each side of the
+map; the first wall top (> 0.9 m) or cliff drop (< -0.7 m) is the edge of the walkable area at that point.
 """
 import copy
 import math
@@ -12,39 +17,109 @@ import numpy as np
 
 SOURCE = ('PVP_049_2026s3_tree_04', 'PVP_049_2026s3_outsideleaf_05')     # trunk, canopy (pivot = trunk)
 
-# (x, z, surface y, yaw deg, scale): trunk spots on the outer cliff rim, searched so that EVERY vertex of the tree
-# stays outside the real lane walls (>= 5 m beyond the diamond |x|/50 + |z|/44 = 1, >= 9.5 m near the top / bottom
-# tips, where the walls sit further out) and the game camera's sight lines through the tree reach the ground only
-# beyond the walls' inner face: a new tree can never stand on, overhang or hide a lane or jungle path.
+# (x, z, surface y, yaw deg, scale): trunks at the outer foot of the lane walls, searched against the measured
+# walkable edge: the trunk stands on solid ground beyond the wall's outer face, no vertex lies above walkable ground,
+# no game-camera sight line through the tree reaches walkable ground, trees are >= 8 m apart; among the valid ones
+# the closest to the wall (with the canopy resting on the wall top / ledge rather than hanging over a deep drop)
 PLACEMENTS = [
-    (20.6, 36.9, -0.84, 75.0, 1.6),
-    (44.7, -14.8, -4.78, 180.0, 1.6),
-    (19.7, -36.9, -2.13, 180.0, 1.6),
-    (-28.0, -34.0, -2.47, 0.0, 1.6),
-    (-45.0, -18.0, -4.96, 0.0, 1.6),
-    (-17.3, 38.4, -0.91, 0.0, 1.6),
-    (15.3, -42.4, -0.26, 165.0, 1.6),
+    (21.63, 32.4, -0.84, 120.0, 1.3),
+    (42.43, -12.22, -3.45, 195.0, 1.15),
+    (31.0, -23.87, -2.65, 195.0, 1.3),
+    (-24.08, -31.81, -1.86, 270.0, 1.3),
+    (-46.23, -10.32, -3.32, 255.0, 1.45),
+    (-21.1, 33.63, -2.04, 0.0, 1.15),
+    (12.24, -48.0, -0.62, 195.0, 1.6),
 ]
-# geometry rule shared with the validator
-WALL_CLEAR, WALL_CLEAR_TIPS, SIGHT_CLEAR = 5.0, 9.5, 2.5
+TOLERANCE = 0.15          # m: a vertex / sight-line hit counts as over walkable ground when > 15 cm inside the edge
+HM_PPM, HM_X0, HM_Z1 = 4.0, -72.0, 58.0
+SIDES = ((1, 1), (1, -1), (-1, -1), (-1, 1))
+EDGE_U = np.linspace(0, 1, 801)
+SKIP = ('skybox', 'grass', 'leaf', 'tree', 'FX_')     # not solid ground (the new trees contain tree / leaf too)
 
 
 def d_out(x, z):
-    """distance outside the playable diamond (m); the lane walls stand at ~2.5-4.75 m"""
+    """distance outside the playable diamond |x|/50 + |z|/44 = 1, in metres-like units (the lane line is 0)"""
     return (np.abs(x) / 50.0 + np.abs(z) / 44.0 - 1.0) * 33.0
 
 
-def clearance_ok(world_verts, cam_fwd):
-    """every vertex beyond the walls, and every camera sight line through a vertex reaching the ground beyond the
-    walls' inner face -> (ok, closest vertex d_out, closest sight-line ground hit d_out)"""
+def solid_heightmap(env):
+    """top surface (y) of all solid map geometry on a 25 cm grid (-99 where there is nothing)"""
+    import cv2
+    from map_render import Scene
+    from meshio import decode
+    sc = Scene(env)
+    W, H = int(144 * HM_PPM), int(116 * HM_PPM)
+    hm = np.full((H, W), -99.0, np.float32)
+    for name, layer, M, mp, mats in sc.renderers():
+        if layer not in (10, 17) or any(k in name for k in SKIP) or name.startswith('Sanctum_'):
+            continue
+        try:
+            d = decode(sc.shared[mp].read_typetree())
+        except Exception:
+            continue
+        pos = d['pos'][:, :3].astype(np.float64)
+        wp = (M @ np.c_[pos, np.ones(len(pos))].T).T[:, :3]
+        idx = d['index'].astype(np.int64)
+        for t in wp[idx[:len(idx) // 3 * 3]].reshape(-1, 3, 3):
+            pts = np.stack([(t[:, 0] - HM_X0) * HM_PPM, (HM_Z1 - t[:, 2]) * HM_PPM], -1)
+            x0, y0 = np.floor(pts.min(0)).astype(int); x1, y1 = np.ceil(pts.max(0)).astype(int)
+            if x1 < 0 or y1 < 0 or x0 >= W or y0 >= H:
+                continue
+            x0, y0 = max(x0, 0), max(y0, 0); x1, y1 = min(x1, W - 1), min(y1, H - 1)
+            sub = np.zeros((y1 - y0 + 1, x1 - x0 + 1), np.uint8)
+            cv2.fillPoly(sub, [np.round((pts - [x0, y0]) * 16).astype(np.int32)], 1, shift=4)
+            ys, xs = np.nonzero(sub)
+            if len(ys):
+                cur = hm[ys + y0, xs + x0]
+                hm[ys + y0, xs + x0] = np.maximum(cur, t[:, 1].max())
+    return hm
+
+
+def _h_at(hm, x, z):
+    H, W = hm.shape
+    r = np.clip(((HM_Z1 - z) * HM_PPM).astype(int), 0, H - 1); c = np.clip(((x - HM_X0) * HM_PPM).astype(int), 0, W - 1)
+    return hm[r, c]
+
+
+def walk_edge(hm):
+    """per side: d_out of the walkable edge along the side (first wall top > 0.9 m or drop < -0.7 m outward)"""
+    edge = {}
+    ds = np.arange(-0.5, 14, 0.125)
+    for sx, sz in SIDES:
+        n = np.array([sx / 50.0, sz / 44.0]); n /= np.linalg.norm(n)
+        k = 33.0 * (abs(n[0]) / 50 + abs(n[1]) / 44)
+        P = np.stack([sx * 50 * (1 - EDGE_U), sz * 44 * EDGE_U], -1)
+        b = np.full(len(EDGE_U), 14.0)
+        for i, p in enumerate(P):
+            q = p[None, :] + n[None, :] * (ds[:, None] / k)
+            hh = _h_at(hm, q[:, 0], q[:, 1])
+            bad = (hh > 0.9) | (hh < -0.7)
+            if bad.any():
+                b[i] = ds[int(np.argmax(bad))]
+        edge[(sx, sz)] = b
+    return edge
+
+
+def _edge_at(edge, x, z):
+    sx = np.where(x >= 0, 1, -1); sz = np.where(z >= 0, 1, -1)
+    u = np.clip(((np.abs(x) - 50) * -50.0 + np.abs(z) * 44.0) / (50.0 ** 2 + 44.0 ** 2), 0, 1)
+    out = np.empty(len(x))
+    for (a, b), arr in edge.items():
+        m = (sx == a) & (sz == b)
+        out[m] = np.interp(u[m], EDGE_U, arr)
+    return out
+
+
+def clearance(world_verts, cam_fwd, edge):
+    """-> (vertices above walkable ground, camera sight lines through a vertex that reach walkable ground,
+    smallest vertex margin, smallest sight-line margin) - margins in m beyond the measured walkable edge"""
     v = np.asarray(world_verts, np.float64)
-    need = np.where(np.abs(v[:, 0]) < 12, WALL_CLEAR_TIPS, WALL_CLEAR)
-    dv = d_out(v[:, 0], v[:, 2])
+    dv = d_out(v[:, 0], v[:, 2]) - _edge_at(edge, v[:, 0], v[:, 2])
     f = np.asarray(cam_fwd, np.float64); f = f / np.linalg.norm(f)
     t = np.maximum(v[:, 1], 0) / -f[1]
     hit = v + f[None, :] * t[:, None]
-    dh = d_out(hit[:, 0], hit[:, 2])
-    return bool((dv >= need).all() and (dh >= SIGHT_CLEAR).all()), float(dv.min()), float(dh.min())
+    dh = d_out(hit[:, 0], hit[:, 2]) - _edge_at(edge, hit[:, 0], hit[:, 2])
+    return int((dv < -TOLERANCE).sum()), int((dh < -TOLERANCE).sum()), float(dv.min()), float(dh.min())
 
 
 ROOT_NAME = 'Sanctum_NewTrees'

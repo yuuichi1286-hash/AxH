@@ -253,9 +253,10 @@ for src in map_trees.SOURCE:
 n_tree = 0
 closest = closest_hit = 99.0
 new_mr = {}
-# the game camera's viewing direction, read from the scene (3DCamera_11)
+# the game camera's viewing direction, read from the scene (3DCamera_11), and the measured walkable edge
 cam_go = next(pid for pid, g in sc_n.gos.items() if g['m_Name'] == '3DCamera_11')
 cam_fwd = sc_n.world(sc_n.go_tr[cam_go])[:3, :3] @ np.array([0.0, 0.0, 1.0])
+walk_edge = map_trees.walk_edge(map_trees.solid_heightmap(en))
 for pid, g in sc_n.gos.items():
     if not g['m_Name'].startswith('Sanctum_') or '_new' not in g['m_Name']:
         continue
@@ -282,9 +283,9 @@ for pid, g in sc_n.gos.items():
     d = decode(mesh.read_typetree())
     M = sc_n.world(sc_n.go_tr[pid])
     wp = (M @ np.c_[d['pos'][:, :3], np.ones(len(d['pos']))].T).T[:, :3]
-    ok, dv, dh = map_trees.clearance_ok(wp, cam_fwd)
-    if not ok:
-        bad('new tree too close to the lanes / hides walkable ground', g['m_Name'], round(dv, 2), round(dh, 2))
+    n_over, n_hide, dv, dh = map_trees.clearance(wp, cam_fwd, walk_edge)
+    if n_over or n_hide:
+        bad('new tree over / hiding walkable ground', g['m_Name'], n_over, n_hide, round(dv, 2), round(dh, 2))
     closest = min(closest, dv)
     closest_hit = min(closest_hit, dh)
 if n_tree != n_parts:
@@ -297,7 +298,7 @@ for m, e in got.items():
     se = diffmap_src.get(src_mr[map_trees.SOURCE[0]])
     if se is None or (e['diffmapIndex'], e['diffmapScaleOffset']) != (se['diffmapIndex'], se['diffmapScaleOffset']):
         bad('cloned trunk lighting differs from the source trunk', m)
-print(f'trees: {n_tree // 2} new trees ({n_tree} parts), {len(got)} diffmap entries; closest geometry '
-      f'{closest:.1f} m beyond the playable diamond (walls at 2.5-4.75 m), closest camera sight-line ground hit '
-      f'{closest_hit:.1f} m beyond it')
+print(f'trees: {n_tree // 2} new trees ({n_tree} parts), {len(got)} diffmap entries; nothing above walkable ground '
+      f'(closest vertex {closest:+.2f} m from the measured walkable edge), no camera sight line onto it '
+      f'(closest {closest_hit:+.2f} m)')
 print(f'\nPROBLEMS: {problems}')

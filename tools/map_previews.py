@@ -188,10 +188,10 @@ def cam(env, x, z, dist=24.0, size=(1280, 720)):
     return map_render.render_view(env, eye, FWD, UP, fov=30, size=size)
 
 
-cam_views = [('Jungle: bangkai monster, daun gugur, warna alami (kamera game)', -14.0, -10.0, 22.0),
-             ('Pohon baru di tebing pinggir map (kamera game)', 17.0, 32.0, 30.0),
-             ('Jungle atas: warna alami (kamera game)', -18.0, 20.0, 22.0),
-             ('Lane bawah + pohon baru (kamera game)', 12.0, -34.0, 26.0)]
+cam_views = [('Jungle: bangkai monster, warna alami (kamera game)', -14.0, -10.0, 22.0),
+             ('Pohon baru menempel di tembok lane (kamera game)', -17.0, 29.0, 22.0),
+             ('Jungle atas: bunga kecil di kaki batu (kamera game)', -18.0, 20.0, 22.0),
+             ('Lane bawah + pohon baru di tembok (kamera game)', 27.0, -20.0, 24.0)]
 for i, (title, x, z, dist) in enumerate(cam_views):
     pair(cam(eo, x, z, dist), cam(en, x, z, dist), title).save(os.path.join(out, f'{13 + i}_kamera_game_{i + 1}.png'))
 print('ok 10+')

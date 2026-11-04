@@ -1,7 +1,8 @@
 """Ground decoration for Sanctum Island (High), painted into the 16 ground tiles:
 
 * monster carcasses: a horned beast skull with spine and ribs, half sunk into the ground, mossy, with a soil stain
-* fallen leaves around the plants growing on the jungle walls (same shape / colour family as the tree leaves)
+* a few small flower clumps in muted colours, pebbles, and fallen leaves - only on grass along the edges (the foot of
+  walls, rocks, trees and buildings), never in open lanes
 
 Placement is in WORLD space (seamless across tiles) with a fixed seed and mirrored through the map centre, so both
 teams get the same scenery. Lanes stay clear: the carcasses lie only inside the jungle (never on a lane or in the
@@ -123,6 +124,59 @@ def _shade_fn(base, tip=1.18, edge=0.18):
         k = (1 + (tip - 1) * np.clip((u + 1) / 2, 0, 1)) * (1 - edge * np.clip(d, 0, 1) ** 3)
         return np.clip(base * k[..., None], 0, 1)
     return f
+
+
+FLOWER_PALETTES = [  # petals, centre, weight: muted natural tones (a few soft accents, never colourful)
+    ((0.93, 0.92, 0.84), (0.95, 0.78, 0.35), 0.50),      # cream white
+    ((0.94, 0.87, 0.56), (0.85, 0.60, 0.26), 0.25),      # pale butter yellow
+    ((0.78, 0.75, 0.90), (0.95, 0.86, 0.52), 0.15),      # soft lilac
+    ((0.90, 0.75, 0.77), (0.95, 0.86, 0.52), 0.10),      # dusty pink
+]
+
+
+def sprite_flowers(rng, palette):
+    """a small clump at the foot of a wall / rock: leaf rosette, 3-7 five/six-petal blossoms, a bud or two"""
+    S = Sprite(0.8)
+    leaf = _shade_fn((0.19, 0.34, 0.15), tip=1.35)
+    for _ in range(rng.randint(5, 9)):
+        a = rng.uniform(0, 2 * math.pi); L = rng.uniform(0.09, 0.16); r = rng.uniform(0.04, 0.22)
+        S.dome(math.cos(a) * r, math.sin(a) * r, L * 0.55, L * 0.19, a + rng.uniform(-0.4, 0.4), 0.016, leaf)
+    petal_c, centre_c = palette[0], palette[1]
+    blossoms = []
+    for _ in range(rng.randint(3, 8)):
+        for _try in range(16):
+            r = 0.26 * math.sqrt(rng.uniform(0, 1)); a = rng.uniform(0, 2 * math.pi)
+            p = (math.cos(a) * r, math.sin(a) * r)
+            if all(math.hypot(p[0] - q[0], p[1] - q[1]) > 0.12 for q in blossoms):
+                blossoms.append(p)
+                break
+    for (cx, cy) in blossoms:
+        R = rng.uniform(0.06, 0.085)
+        hb = rng.uniform(0.035, 0.07)
+        n_p = 5 if rng.rand() < 0.75 else 6
+        rot = rng.uniform(0, 2 * math.pi)
+        tint = np.clip(np.asarray(petal_c) * rng.uniform(0.92, 1.03), 0, 1)
+        pf = _shade_fn(tint * 0.86, tip=1.18, edge=0.22)
+        for j in range(n_p):
+            a = rot + j * 2 * math.pi / n_p
+            S.dome(cx + math.cos(a) * R * 0.5, cy + math.sin(a) * R * 0.5, R * 0.52, R * 0.4, a, hb + 0.012, pf)
+        S.dome(cx, cy, R * 0.26, R * 0.26, 0, hb + 0.024, _shade_fn(centre_c, tip=1.0, edge=0.35), power=0.7)
+    for _ in range(rng.randint(1, 3)):                      # closed buds
+        a = rng.uniform(0, 2 * math.pi); r = rng.uniform(0.15, 0.3)
+        S.dome(math.cos(a) * r, math.sin(a) * r, 0.028, 0.019, a, 0.032, _shade_fn(np.asarray(petal_c) * 0.8, tip=1.2))
+    return S.finish()
+
+
+def sprite_pebbles(rng):
+    S = Sprite(0.7)
+    for _ in range(rng.randint(3, 7)):
+        r = rng.uniform(0.0, 0.2); a = rng.uniform(0, 2 * math.pi)
+        rx = rng.uniform(0.035, 0.1); ry = rx * rng.uniform(0.6, 0.95)
+        g = rng.uniform(0.36, 0.52)
+        base = np.array([g * rng.uniform(0.98, 1.04), g * rng.uniform(0.98, 1.03), g * rng.uniform(0.95, 1.0)])
+        S.dome(math.cos(a) * r, math.sin(a) * r, rx, ry, rng.uniform(0, math.pi), rx * 0.55,
+               _shade_fn(base, tip=1.0, edge=0.3), power=0.7)
+    return S.finish()
 
 
 def sprite_leaf(rng):
@@ -284,7 +338,7 @@ CARCASSES = [
 ]
 
 
-def placements(classes, foot, ao, wall_plants):
+def placements(classes, foot, wall_plants):
     """-> list of decals {kind, x, z, rot, scale, seed, variant}; generated on the blue half (x < 0) and mirrored
     through the map centre (x, z, rot) -> (-x, -z, rot + 180 deg)."""
     import cv2
@@ -295,7 +349,6 @@ def placements(classes, foot, ao, wall_plants):
     fh, fw = foot.shape
     foot_g = cv2.resize((foot > 0.5).astype(np.uint8), (W, H), interpolation=cv2.INTER_NEAREST) if (fh, fw) != (H, W) else (foot > 0.5).astype(np.uint8)
     wall_d = cv2.distanceTransform((1 - foot_g).astype(np.uint8), cv2.DIST_L2, 5) / GPPM
-    ao_g = cv2.resize(ao, (W, H), interpolation=cv2.INTER_LINEAR) if ao.shape != (H, W) else ao
     out = []
     xs_c = GRID[0] + (np.arange(W) + 0.5) / GPPM
     zs_c = GRID[3] - (np.arange(H) + 0.5) / GPPM
@@ -309,6 +362,39 @@ def placements(classes, foot, ao, wall_plants):
     river = np.abs(xs_c)[None, :] < 6.5
     jungle = ~side_lane & ~mid_lane & ~river
 
+    def poisson(ok, min_d, accept, n_try):
+        ys, xs = np.nonzero(ok)
+        if not len(ys):
+            return []
+        order = rng.permutation(len(ys))[:n_try]
+        pts = []
+        cell = min_d / math.sqrt(2)
+        grid = {}
+        for k in order:
+            x, z = xs_c[xs[k]], zs_c[ys[k]]
+            if rng.rand() > accept:
+                continue
+            gi, gj = int(x / cell), int(z / cell)
+            if any(math.hypot(x - q[0], z - q[1]) < min_d for di in (-2, -1, 0, 1, 2) for dj in (-2, -1, 0, 1, 2)
+                   for q in grid.get((gi + di, gj + dj), ())):
+                continue
+            grid.setdefault((gi, gj), []).append((x, z)); pts.append((x, z))
+        return pts
+
+    # everything except the carcasses lives only on GRASS along EDGES: the foot of walls, rocks, trees and buildings
+    edge = (wall_d > 0.3) & (wall_d < 1.5)
+    # --- flowers: few small clumps in muted colours
+    ok = half & edge & (G['grass'] > 0.65) & (G['water_d'] > 0.6) & (G['edge_d'] > 0.6)
+    cum = np.cumsum([p[2] for p in FLOWER_PALETTES]); cum = cum / cum[-1]
+    for x, z in poisson(ok, 5.5, 0.5, 30000):
+        pal = int(min(np.searchsorted(cum, rng.rand()), len(FLOWER_PALETTES) - 1))
+        out.append(dict(kind='flowers', x=x, z=z, rot=rng.uniform(0, 360), scale=rng.uniform(0.85, 1.1),
+                        seed=int(rng.randint(1 << 30)), variant=pal))
+    # --- pebbles
+    ok = half & edge & (wall_d < 1.1) & (G['grass'] > 0.35) & (G['water_d'] > 0.3) & (G['edge_d'] > 0.6) & ~base
+    for x, z in poisson(ok, 3.5, 0.45, 30000):
+        out.append(dict(kind='pebbles', x=x, z=z, rot=rng.uniform(0, 360), scale=rng.uniform(0.85, 1.25),
+                        seed=int(rng.randint(1 << 30)), variant=0))
     # --- fallen leaves around the plants growing on the jungle walls
     for (px, pz) in wall_plants:
         if px >= -0.3:
@@ -318,8 +404,8 @@ def placements(classes, foot, ao, wall_plants):
                 a = rng.uniform(0, 2 * math.pi); d = rng.uniform(0.6, 2.6)
                 x, z = px + math.cos(a) * d, pz + math.sin(a) * d
                 r, c = _cell(x, z)
-                if 0 <= r < H and 0 <= c < W and wall_d[r, c] > 0.15 and G['cover'][r, c] and not G['lane'][r, c] \
-                        and G['water'][r, c] < 0.4:
+                if 0 <= r < H and 0 <= c < W and 0.15 < wall_d[r, c] < 2.2 and G['cover'][r, c] \
+                        and G['grass'][r, c] > 0.35 and not G['lane'][r, c] and G['water'][r, c] < 0.4:
                     out.append(dict(kind='leaf', x=x, z=z, rot=rng.uniform(0, 360), scale=rng.uniform(0.85, 1.3),
                                     seed=int(rng.randint(1 << 30)), variant=0))
                     break
@@ -339,12 +425,16 @@ def placements(classes, foot, ao, wall_plants):
     return out + mirrored
 
 
-ORDER = {'stain': 0, 'leaf': 1, 'carcass': 2}
+ORDER = {'stain': 0, 'leaf': 1, 'pebbles': 2, 'flowers': 3, 'carcass': 4}
 
 
 def make_sprite(d):
     rng = np.random.RandomState(d['seed'])
     k = d['kind']
+    if k == 'flowers':
+        return sprite_flowers(rng, FLOWER_PALETTES[d['variant']])
+    if k == 'pebbles':
+        return sprite_pebbles(rng)
     if k == 'leaf':
         return sprite_leaf(rng)
     if k == 'carcass':

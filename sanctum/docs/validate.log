@@ -2,7 +2,7 @@ GalleryCenter.unity3d: identical
 PVP_003_add.unity3d: identical
 PVP_003wall_add.unity3d: identical
 PVP_009.unity3d: identical
-PVP_049_add.unity3d: 10062779 -> 63606213 bytes
+PVP_049_add.unity3d: 10062779 -> 63618084 bytes
 PVP_049_highwall_add.unity3d: identical
 PVP_049_low.unity3d: identical
 PVP_101wall_add.unity3d: identical
@@ -10,7 +10,7 @@ added objects: {(True, 'Texture2D'): 3, (True, 'Material'): 3, (False, 'GameObje
 objects re-read: 1422 | water materials with stronger reflection: 0
 cubemap 5v5_cube_water: 128px fmt 50 mips 8 ok
 textures checked: 73
-effects: 32 particle systems, ~274 particles alive in total
-trees: 7 new trees (14 parts), 7 diffmap entries; closest geometry 5.0 m beyond the playable diamond (walls at 2.5-4.75 m), closest camera sight-line ground hit 5.0 m beyond it
+effects: 32 particle systems, ~268 particles alive in total
+trees: 7 new trees (14 parts), 7 diffmap entries; nothing above walkable ground (closest vertex -0.10 m from the measured walkable edge), no camera sight line onto it (closest -0.14 m)
 
 PROBLEMS: 0
