@@ -1,6 +1,6 @@
-# Sanctum Island — HD Remaster (grafik High)
+# Sanctum Island — HD Remaster v4 "clean premium" (grafik High)
 
-**Unduh:** [`release/Sanctum_Island_Map_HD.zip`](release/Sanctum_Island_Map_HD.zip) (59 MB) — menggantikan
+**Unduh:** [`release/Sanctum_Island_Map_HD.zip`](release/Sanctum_Island_Map_HD.zip) (67 MB) — menggantikan
 `Sanctum_Island_Map.zip`.
 
 Struktur zip, nama file, urutan entri, dan kompresinya sama persis dengan file asli (`Scenes/android/...`). Cara
@@ -26,22 +26,68 @@ gambar tampak atas adalah posisi tower.
 
 ![Peta sebelum / sesudah](docs/previews/1_peta_sebelum_sesudah.png)
 
-## Yang baru di versi ini
+## Yang baru di v4: tekstur bersih, tidak burik lagi
 
-- **Pewarnaan lebih gelap di seluruh peta:** tanah, props/bangunan, tebing, dan langit, rata-rata ±25–30% lebih gelap
-  dari aslinya, dengan bayangan lebih dalam. Warna tetap kaya, jadi tidak kusam. Props dan bangunan juga mendapat
-  kontras lokal dan relief, jadi lebih detail.
-- **Rumput dan tanah lebih detail:** serat helai rumput, butiran tanah dan kerikil, plus kontras lokal dua skala.
+Di versi sebelumnya tekstur terlihat **burik**: berbintik, bergaris halus, dan kotor kalau dilihat dekat. Ada tiga
+penyebab, dan ketiganya sudah dibuang:
+
+1. **Butiran buatan.** Untuk menambah "detail", versi sebelumnya menanam helai rumput dan butiran tanah dari noise,
+   lalu mempertajamnya. Di layar HP, hasilnya terlihat sebagai pola garis halus yang kotor.
+2. **AI yang "mengarang" tekstur.** Upscaler AI dipakai dengan 80% model tanpa *denoise*. Akibatnya kotak-kotak
+   kompresi ASTC 8x8 dari tekstur asli ikut dibesarkan dan berubah menjadi pola acak.
+3. **Kontras lokal dan sharpening di semua piksel.** Bercak dan butiran jadi makin menonjol.
+
+Yang dilakukan v4, untuk **semua** tekstur (tanah, props, langit, rumput dan daun 3D):
+
+- **Upscale AI yang bersih.** Campuran AI sekarang 45% model *denoise*. Artefak kompresi hilang, tapi sapuan
+  lukisan aslinya tetap ada.
+- **Filter painterly Kuwahara.** Setiap piksel mengambil warna dari sisi lingkungannya yang paling rata. Bintik,
+  bercak, dan sisa kompresi berubah menjadi bidang lukisan yang bersih. Tepi tetap tajam (ukiran, retakan, tepi batu,
+  trim emas), karena filter ini tidak pernah merata-ratakan melintasi tepi.
+- **Tanpa noise buatan sama sekali.** Fungsi pembuat butiran dari versi sebelumnya sudah dihapus dari kode.
+- **Sharpening hanya di struktur nyata.** Ukiran lane, tepi batu, dan trim dipertegas. Area rata seperti rumput dan
+  air tidak pernah dipertajam.
+- **Ukiran batu lebih timbul.** Relief di batu lane, paving, dan ukiran lantai hampir 3× lebih dalam daripada di
+  rumput, jadi batu terlihat dipahat sementara rumput tetap lembut.
+- **Palet premium:**
+  - Rumput ke arah hijau emerald.
+  - Tanah coklat tetap hangat, jadi jalur lane tidak berubah jadi hijau kusam.
+  - Air dan dasar pit berwarna toska gelap yang bersih, tanpa bercak.
+- **Ornamen berkilau.** Trim emas dan rune biru di lantai, bangunan, patung, dan kristal lebih bercahaya, dengan
+  halo lembut.
+- **Props sekarang ASTC 6x6** (sebelumnya 8x8), jadi tepi bangunan dan trim tidak berblok.
+
+Hasil terukur pada 16 petak tanah:
+
+- Energi butiran per piksel **turun 59%** dibanding versi sebelumnya.
+- Kecerahan rata-rata hanya **1,5% lebih gelap**, jadi nuansa gelap yang diminta tetap sama.
+- Kompresi ASTC 6x6 pada tekstur yang bersih mencapai PSNR **45–50 dB** terhadap versi tanpa kompresi.
+
+Perbandingan dengan versi sebelumnya (kiri) dan v4 (kanan):
+
+![v4 vs sebelumnya: lane + jungle, skala game](docs/previews/10_v4_vs_sebelumnya_lane.png)
+![v4 vs sebelumnya: pit Lord/Turtle + sungai](docs/previews/11_v4_vs_sebelumnya_pit.png)
+![v4 vs sebelumnya: base](docs/previews/12_v4_vs_sebelumnya_base.png)
+
+Di skala game (1 m = 100 px, kira-kira satu texel tanah per piksel layar), dibanding peta asli:
+
+![Close-up skala game](docs/previews/9_closeup_skala_game.png)
+
+## Fitur yang tetap ada dari versi sebelumnya
+
+- **Pewarnaan lebih gelap di seluruh peta:** tanah, props/bangunan, tebing, dan langit, rata-rata ±33–43% lebih
+  gelap dari aslinya, dengan bayangan lebih dalam. Warnanya tetap kaya, jadi tidak kusam.
 - **Bayangan setiap bangunan:** 181 bangunan dan props memberi bayangan nyata ke tanah, mengikuti arah cahaya peta.
 - **AO:** gelap kontak di kaki bangunan, ditambah AO celah di dalam tekstur.
 - **Emboss / relief:** permukaan batu, ukiran lane, dan props terlihat timbul.
 - **Kilau ala PBR:** batu dan logam memantulkan cahaya, sedangkan rumput tetap matte.
 - **Pantulan air ala SSR:** cubemap pantulan sungai 32 → 128 px, lebih tajam dan diberi grading gelap yang sama.
+- **12 efek ambient** (lihat bagian 6).
 
 ### Perbaikan: garis lurus / "terpotong" di dalam game
 
-Di versi sebelumnya ada area berkabut dengan garis lurus di sekitar sungai dan pit, seperti layar terpotong. Ada dua
-penyebab, dan keduanya sudah diperbaiki:
+Di salah satu versi sebelumnya ada area berkabut dengan garis lurus di sekitar sungai dan pit, seperti layar
+terpotong. Ada dua penyebab, dan keduanya sudah diperbaiki:
 
 1. **Efek kabut sungai.** Partikelnya besar (hingga ±8 m) dan selalu menghadap kamera. Shader efek game tidak punya
    *soft particle*, jadi bidang kabut terpotong lurus di tempat ia menembus tanah, pohon, atau batu. Area di
@@ -61,13 +107,13 @@ penyebab, dan keduanya sudah diperbaiki:
 
 ## 1. Tekstur sangat HD
 
-Semua tekstur asli berformat ASTC 8x8 (kompresi paling kasar) tanpa mipmap. Tanah hanya punya ±39 texel per meter,
+Semua tekstur asli berformat ASTC 8x8 (kompresi paling kasar) tanpa mipmap. Tanah hanya punya ±52 texel per meter,
 jadi di layar HP ia diperbesar ±2×. Itu sebabnya tanah terlihat buram dan berblok.
 
 | Tekstur | Sebelum | Sesudah |
 |---|---|---|
 | 16 petak tanah + sungai (`hedaobake`) | 1024², ASTC 8x8 | **2048²**, ASTC 6x6, mipmap penuh |
-| 40 props (patung, pohon, bangunan, tembok, kamp buff, tebing, kristal, …) | 512², ASTC 8x8 | **1024²**, ASTC 8x8, mipmap penuh |
+| 40 props (patung, pohon, bangunan, tembok, kamp buff, tebing, kristal, …) | 512², ASTC 8x8 | **1024²**, ASTC 6x6, mipmap penuh |
 | Langit / pulau melayang (`skybox`) | 512² | **1024²**, ASTC 6x6 |
 | Rumput & daun 3D (cut-out) | 512² | **1024²**, ASTC 6x6, alpha di-upscale terpisah supaya tepi daun tetap tajam |
 | 7 lightmap | 1024² / 512², ASTC 8x8 | ukuran sama, artefak blok dihaluskan, ASTC 6x6 |
@@ -77,21 +123,25 @@ jadi di layar HP ia diperbesar ±2×. Itu sebabnya tanah terlihat buram dan berb
 Cara upscale-nya:
 
 - **AI super-resolution:** Real-ESRGAN compact (`realesr-general-x4v3`, lisensi BSD-3), dijalankan lokal via
-  ONNX Runtime. Saya pakai campuran 20% model *denoise* dan 80% model *no-denoise*, supaya tepi retakan batu dan
-  garis ukiran jadi tajam tapi butiran rumput dan batu tidak hilang. Hasil ×4 diturunkan ke ×2 (supersampling).
-- **Detail restore:** tekstur halus (rumput, kerikil) yang dihaluskan AI dikembalikan dari versi Lanczos, lalu
-  dipertajam ringan.
-- **Kualitas kompresi:** dibanding versi HD tanpa kompresi, ASTC 6x6 pada 2048 mencapai PSNR 43 dB (8x8: 40 dB).
+  ONNX Runtime. Bobotnya campuran 45% model *denoise* dan 55% model *no-denoise*: artefak kompresi hilang, sapuan
+  lukisan tetap ada. Hasil ×4 diturunkan ke ×2 (supersampling).
+- **Pembersihan painterly (Kuwahara umum, 8 sektor):** radius 2 texel di tanah, 3 texel di props, 2 texel di
+  rumput/daun 3D. Langit memakai *guided filter*, supaya gradasinya mulus.
+- **Sharpening tepi saja:** sharpening hanya bekerja di piksel yang punya gradien nyata (masker tepi). Area rata
+  tidak disentuh.
 
-## 2. Rumput dan tanah lebih detail
+## 2. Rumput, tanah, dan batu: bersih tapi detail
 
-Di petak tanah (sekitar 1,3 cm per texel setelah 2×), sungai sengaja dibiarkan halus dan bersih. Yang ditambahkan:
+Satu texel tanah setelah 2× kira-kira 1 cm di dunia game. Pengaturannya:
 
-- **Rumput:** helai pendek dibuat dari noise yang diseret mengikuti arah yang berubah perlahan, jadi tidak terlihat
-  berpola. Ada gumpalan rumput lebih gelap, ujung helai sedikit lebih hangat, dan pangkalnya lebih dingin.
-- **Tanah, batu, jalur lane:** butiran halus dan bintik kerikil kecil.
-- **Kontras lokal dua skala (1,3 px dan 4 px):** detail lukisan asli (helai, retakan, kerikil) lebih menonjol.
-- **Rumput dan daun 3D** (sprite cut-out) mendapat kontras lokal dan relief ringan.
+- **Rumput:** sapuan lukisan aslinya dipertahankan dan dibersihkan, tanpa helai buatan. Rumput hijau murni digeser
+  ke palet emerald.
+- **Batu lane, paving, ukiran lantai:** relief dalam (emboss 0,11), AO celah, dan kilau batu. Di rumput relief
+  dibuat lembut (0,04).
+- **Tanah coklat:** tetap hangat, dengan palet tanah sendiri.
+- **Sungai dan pit:** bersih dan dalam, berwarna toska gelap. Dasar pit dan ukiran lantainya tetap terlihat.
+- **Rumput dan daun 3D** (sprite cut-out): Kuwahara radius 2. Warna di area transparannya memang sudah diisi oleh
+  artist aslinya, jadi tidak muncul pinggiran gelap.
 
 ![Close-up 1](docs/previews/2_closeup_1.png)
 ![Close-up 2](docs/previews/3_closeup_2.png)
@@ -109,8 +159,9 @@ Di petak tanah (sekitar 1,3 cm per texel setelah 2×), sungai sengaja dibiarkan 
 - **AO kontak:** jejak geometri dalam 0,9 m dari tanah dibuat gelap lembut di sekeliling kaki bangunan, tembok,
   batu, dan pohon (40%).
 - **AO celah:** retakan dan sambungan batu di dalam tekstur menjadi lebih gelap.
-- **Emboss / relief:** normal dihitung dari luminansi tekstur, lalu disinari dari arah cahaya peta. Untuk tanah,
-  arah cahaya dihitung per petak di ruang tekstur. Hasilnya permukaan terlihat timbul.
+- **Emboss / relief:** normal dihitung dari luminansi tekstur yang sudah bersih, lalu disinari dari arah cahaya
+  peta. Untuk tanah, arah cahaya dihitung per petak di ruang tekstur. Batu dan ukiran mendapat relief lebih dalam
+  daripada rumput.
 - **Kilau ala PBR:** specular dengan *half-vector* cahaya-kamera hanya di area batu dan logam (saturasi rendah,
   terang). Rumput dan daun hampir tanpa kilau, jadi materialnya terbedakan.
 - **Pantulan air (pengganti SSR):**
@@ -131,9 +182,11 @@ Grading sinematik yang sama untuk tanah, props, langit, dan lightmap, jadi semua
   - props dan bangunan: gamma 1,10, exposure 0,90
   - langit: gamma 1,07, exposure 0,92
   - Lightmap props ikut digelapkan.
+- **Palet premium** (gradasi warna kurasi): emerald untuk rumput, coklat hangat untuk tanah, toska untuk air.
+- **Ornamen berkilau:** trim emas +35% (props +21%), rune biru/toska +40% (props +24%), plus halo lembut.
 - *Vibrance*: hijau rumput dan pohon lebih pekat, air lebih toska.
 - *Split-tone*: highlight hangat, bayangan sedikit dingin.
-- *Clarity*: ukiran lane, retakan batu, dan tepi semak lebih tegas.
+- *Clarity* dikurangi (tanah 0,08, props 0,06). Kontras lokal yang terlalu kuat ikut membuat tampilan burik.
 
 ## 5. Halus dan ringan
 
@@ -147,8 +200,10 @@ Grading sinematik yang sama untuk tanah, props, langit, dan lightmap, jadi semua
   - Tanpa modul Noise atau Collision.
   - Simulasi world-space dengan *prewarm*, plus culling otomatis.
   - Hanya 4 tekstur kecil.
-- **Konsekuensi memori:** tekstur High naik dari 8,3 MB menjadi 57,5 MB. Bundle High naik dari 10,1 MB ke
-  54,7 MB. Untuk perangkat yang memakai grafik High, ini masih wajar. Versi Low tidak tersentuh.
+- **Konsekuensi memori:**
+  - Tekstur High naik dari 8,3 MB menjadi 68,4 MB. Sekitar 11 MB dari kenaikan itu karena props sekarang ASTC 6x6.
+  - Bundle High naik dari 10,1 MB menjadi 62,9 MB.
+  - Untuk perangkat yang memakai grafik High, ini masih wajar. Versi Low tidak tersentuh.
 
 ## 6. Efek baru di peta
 
@@ -204,25 +259,25 @@ curl -LO https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/reale
 curl -LO https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-wdn-x4v3.pth
 #   sha256 8dc7edb9ac80ccdc30c3a5dca6616509367f05fbc184ad95b731f05bece96292  realesr-general-x4v3.pth
 #   sha256 1641f8c4464b9f097c9fdda5589273713f67cf59f3d909e0bd688f0cee269dca  realesr-general-wdn-x4v3.pth
-python tools/sr_model.py realesr-general-x4v3.pth realesr-general-wdn-x4v3.pth 0.2 sr_dni20.onnx
-#   sha256 640731aa2d0c7026899e445bf7fddb6707b1579a89360803862247eb922768a4  sr_dni20.onnx
+python tools/sr_model.py realesr-general-x4v3.pth realesr-general-wdn-x4v3.pth 0.45 sr_dni45.onnx
+#   sha256 c203fe1195582e3ae7f95f4d0f8657ccda78baa98a0255103babe41a8f146f37  sr_dni45.onnx
 unzip Sanctum_Island_Map.zip -d orig        # -> orig/Scenes/android/...
-python tools/build_map.py orig/Scenes/android out/Scenes/android report.json sr_dni20.onnx 4
+python tools/build_map.py orig/Scenes/android out/Scenes/android report.json sr_dni45.onnx 4
 python tools/validate_map.py orig/Scenes/android out/Scenes/android
 python tools/map_previews.py orig/Scenes/android/PVP_049_add.unity3d out/Scenes/android/PVP_049_add.unity3d previews
 python tools/pack_like.py Sanctum_Island_Map.zip out Sanctum_Island_Map_HD.zip
 ```
 
-Build dari nol memakan ±15 menit dengan 4 core. Kalau variabel `MAP_SR_CACHE=<folder>` diisi, hasil AI disimpan di
-cache dan build berikutnya ±6 menit, dengan hasil yang identik. Zip-nya (SHA-256
-`6a67828208a664c2e8244b8ef1d1083f857ed2c4725df8552665d6bbd4cd9eed`) bisa direproduksi. Inferensi AI-nya
-deterministik pada jumlah thread yang sama.
+Build dari nol memakan ±13 menit dengan 4 core. Kalau variabel `MAP_SR_CACHE=<folder>` diisi, hasil AI
+disimpan di cache dan build berikutnya ±5 menit, dengan hasil yang identik. Zip-nya (SHA-256
+`6aeb40088b4dd457996613efbf2ea9fc28e3ba6f42a82733f2bfd5554a47e5e4`) bisa direproduksi: build ulang dari nol
+tanpa cache menghasilkan zip yang identik. Inferensi AI-nya deterministik pada jumlah thread yang sama.
 
 | Tool | Fungsi |
 |---|---|
 | `sr_model.py` | muat bobot Real-ESRGAN tanpa torch, campur denoise, ekspor ONNX, upscale ×2 per tile |
-| `map_hd.py` | grading (lebih gelap), detail rumput/tanah, kontras lokal, detail restore, sharpening |
-| `map_bake.py` | bayangan bangunan + AO dari geometri, posisi dunia per texel, emboss/AO celah/kilau PBR, cubemap air |
+| `map_hd.py` | pembersihan painterly (Kuwahara), palet premium, kilau ornamen, sharpening tepi, grading (lebih gelap) |
+| `map_bake.py` | bayangan bangunan + AO dari geometri, posisi dunia per texel, relief/AO celah/kilau PBR, cubemap air |
 | `map_fx.py` + `map_fx_templates.json` | efek ambient baru dan penyisipannya ke scene (template tipe ParticleSystem Unity 2019.4.33f1) |
 | `build_map.py` | build lengkap scene High |
 | `validate_map.py` | validasi di atas |

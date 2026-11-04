@@ -12,7 +12,7 @@ byte-identical.
   * masks 2x Lanczos, water noise 64 -> 256 (tileable)
   * new ambient effects (map_fx): fireflies, river sparkles + mist, Lord/Turtle pit aura, base sparkles, light motes
 """
-import sys, os, json, shutil, time, collections, zlib
+import sys, os, json, shutil, time, collections
 from concurrent.futures import ProcessPoolExecutor
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np
@@ -45,7 +45,7 @@ def kind_of(name):
 
 
 #            fmt  mips   filter aniso
-PLAN = {'ground': (50, True, 2, 4), 'prop': (51, True, 2, 2), 'sky': (50, False, 1, 1), 'foliage': (50, False, 1, 1),
+PLAN = {'ground': (50, True, 2, 4), 'prop': (50, True, 2, 2), 'sky': (50, False, 1, 1), 'foliage': (50, False, 1, 1),
         'lightmap': (50, False, 1, 1), 'mask': (51, False, 1, 1), 'noise': (51, False, 1, 1)}
 
 
@@ -79,29 +79,33 @@ def process_image(kind, rgba, sr, name='', bake=None):
     rgb, a = rgba[..., :3], rgba[..., 3]
     H, W = a.shape
     if kind in ('ground', 'prop', 'sky', 'foliage'):
-        up = sr.x2(rgb)
-        lz = np.clip(cv2.resize(rgb, (W * 2, H * 2), interpolation=cv2.INTER_LANCZOS4), 0, 1)
-        x = map_hd.detail_restore(up, lz, {'ground': 0.45, 'foliage': 0.3}.get(kind, 0.25))
+        # v4 "clean premium": denoising AI upscale -> Kuwahara painterly clean-up (grain, blotches and compression
+        # noise flattened, every edge kept sharp) -> palette / ornaments -> sharpening only on real structure.
+        # Nothing adds synthetic grain or noise.
+        x = sr.x2(rgb)
         if kind == 'ground':
-            # grass / soil / stone get extra detail, water stays clean
-            grass, water, soil = map_hd.masks(x)
-            x = map_hd.local_detail(x, (grass + soil) * (1 - water), 0.35, 0.18)
-            x = map_hd.detail_synth(x, seed=zlib.crc32(name.encode()) & 0xFFFF)
+            x = map_hd.kuwahara(x, r=2)
+            x = map_hd.palette(x)                               # emerald grass, warm soil kept, teal water
+            x = map_hd.ornament_glow(x)
+            x = map_hd.structure_sharpen(x, 0.35, 1.6)          # crisp lane engravings / stone edges
+            stone = map_hd.stone_mask(x)
             if bake is not None and name in bake['tiles']:
                 xz, cov, tex_dir = bake['tiles'][name]
-                x = map_bake.relief_pbr(x, tex_dir, emboss=0.09, cavity=0.14, sheen=0.08, kind='ground')
+                x = map_bake.relief_ground(x, tex_dir, stone)   # carved stone / lane engravings, soft grass
                 x = map_bake.apply_shadow_ao(x, xz, bake['shadow'], bake['ao'])
             else:
-                x = map_bake.relief_pbr(x, emboss=0.09, cavity=0.14, sheen=0.08, kind='ground')
-        elif kind == 'foliage':
-            x = map_hd.local_detail(x, np.clip(cv2.resize(a, (W * 2, H * 2)), 0, 1), 0.45, 0.2)
-            x = map_bake.relief_pbr(x, emboss=0.06, cavity=0.12, sheen=0.02, kind='prop')
+                x = map_bake.relief_ground(x, (-0.6, -0.8), stone)
         elif kind == 'prop':
-            # buildings, walls, rocks, trees, statues, cliffs: same darker look + more detail as the ground
-            x = map_hd.local_detail(x, np.ones(x.shape[:2], np.float32), 0.30, 0.15)
-            x = map_bake.relief_pbr(x, emboss=0.12, cavity=0.18, sheen=0.09, kind='prop')
+            x = map_hd.kuwahara(x, r=3)
+            x = map_hd.ornament_glow(x, 0.6)                   # gold trims, blue runes and crystals shine more
+            x = map_hd.structure_sharpen(x, 0.35, 1.4)
+            x = map_bake.relief_pbr(x, emboss=0.06, cavity=0.10, sheen=0.08, kind='prop')
+        elif kind == 'foliage':
+            x = map_hd.kuwahara(x, r=2)                        # transparent texels hold dilated colour: no fringes
+        elif kind == 'sky':
+            x = map_hd.clean_surface(x, r=4, eps=0.0030)       # smooth gradients: guided filter, not painterly
         x = map_hd.grade(x, {'ground': 'ground', 'prop': 'prop', 'sky': 'sky', 'foliage': 'prop'}[kind])
-        x = map_hd.sharpen(x, 0.25 if kind != 'sky' else 0.15, 0.8)
+        x = map_hd.structure_sharpen(x, 0.45 if kind != 'sky' else 0.25, 1.2)
         if a.min() < 0.999:
             a2 = np.clip(cv2.resize(a, (W * 2, H * 2), interpolation=cv2.INTER_LANCZOS4), 0, 1)
             a2 = np.clip(a2 + (a2 - cv2.GaussianBlur(a2, (0, 0), 1.0)) * 0.5, 0, 1)
@@ -109,7 +113,7 @@ def process_image(kind, rgba, sr, name='', bake=None):
             a2 = np.ones((H * 2, W * 2), np.float32)
         return np.dstack([x, a2])
     if kind == 'lightmap':
-        x = cv2.bilateralFilter(rgb.astype(np.float32), 7, 0.05, 3.0)
+        x = cv2.bilateralFilter(rgb.astype(np.float32), 9, 0.06, 4.0)       # smooth, clean lighting
         x = map_hd.grade(x, 'lightmap')
         return np.dstack([x, a])
     if kind == 'mask':

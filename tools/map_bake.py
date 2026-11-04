@@ -265,6 +265,14 @@ def relief_pbr(rgb, light_dir_tex=(-0.6, -0.8), emboss=0.10, cavity=0.16, sheen=
     return np.clip(out, 0, 1).astype(np.float32)
 
 
+def relief_ground(rgb, light_dir_tex, stone):
+    """Ground relief: a deeper carved look on lane stone, paving and engravings (stone mask), gentle on grass."""
+    hard = relief_pbr(rgb, light_dir_tex, emboss=0.11, cavity=0.13, sheen=0.08, kind='ground')
+    soft = relief_pbr(rgb, light_dir_tex, emboss=0.04, cavity=0.07, sheen=0.05, kind='ground')
+    s = stone[..., None]
+    return (hard * s + soft * (1 - s)).astype(np.float32)
+
+
 # ------------------------------------------------------------------ reflection cubemap (SSR substitute)
 def upgrade_cubemap(tt, encode_astc, size=128):
     """Sharper, higher resolution water reflection: each 32 px face (face-major data) -> 128 px, graded like the

@@ -3,8 +3,9 @@
 > **Skin lain di repo ini:** [Shisui x Suyou — Dark Green Revamp](shisui/README.md). Semua efek dominan hijau
 > gelap, lebih besar dan brutal, tekstur HD 2×, fade-in/out di semua efek, plus ikon skill baru.
 >
-> **Map:** [Sanctum Island — HD Remaster (grafik High)](sanctum/README.md). Tekstur di-upscale AI 2×, warna lebih
-> gelap, rumput/tanah lebih detail, bayangan bangunan + AO + emboss/PBR (baked), pantulan air lebih tajam,
+> **Map:** [Sanctum Island — HD Remaster v4 "clean premium" (grafik High)](sanctum/README.md). Tekstur di-upscale
+> AI 2× lalu dibersihkan dengan filter painterly (tidak burik, tepi tetap tajam), warna gelap premium, ukiran batu
+> timbul, trim emas dan rune berkilau, bayangan bangunan + AO + emboss/PBR (baked), pantulan air lebih tajam,
 > mipmap untuk tampilan halus, dan 12 efek ambient baru.
 
 **Unduh:** [`release/Hidan.Revamp.v4.zip`](release/Hidan.Revamp.v4.zip)

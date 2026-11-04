@@ -61,6 +61,12 @@ for i, ext in enumerate(((-30, -12, 0, 10), (-8, 8, 15, 28))):
     b = map_render.render(en, px_per_m=56, extent=ext)
     pair(a, b, f'Close-up {i + 1} (1 m = 56 px)').save(os.path.join(out, f'{2 + i}_closeup_{i + 1}.png'))
 
+# 1b. close-up at about the in-game zoom (1 m = 100 px, roughly one ground texel per screen pixel), with props
+ext_game = (-15, -3, -9, -1)
+a, b = (map_render.render(e, px_per_m=200, extent=ext_game, layers=(17, 10)) for e in (eo, en))
+a, b = (im.resize((im.width // 2, im.height // 2), Image.BOX) for im in (a, b))
+pair(a, b, 'Close-up skala game (1 m = 100 px)').save(os.path.join(out, '9_closeup_skala_game.png'))
+
 
 # 2. props textures
 def textures(env):
