@@ -46,28 +46,32 @@ class Scene:
             M = M @ trs_matrix(t)
         return M
 
-    def renderers(self):
-        """-> list of (go name, layer, world matrix, mesh pid, [material pids])"""
+    def renderers(self, with_mr=False):
+        """-> list of (go name, layer, world matrix, mesh pid, [material pids][, MeshRenderer pid])"""
         out = []
         for gid, g in self.gos.items():
-            mr = mf = None
+            mr = mf = mrp = None
             for c in g['m_Component']:
                 p = c['component']['m_PathID']
-                if p in self.mr: mr = self.mr[p]
+                if p in self.mr: mr = self.mr[p]; mrp = p
                 if p in self.mf: mf = self.mf[p]
             if mr is None or mf is None or not g['m_IsActive'] or not mr['m_Enabled']:
                 continue
-            out.append((g['m_Name'], g['m_Layer'], self.world(self.go_tr[gid]), mf['m_Mesh']['m_PathID'],
-                        [m['m_PathID'] for m in mr['m_Materials']]))
+            row = (g['m_Name'], g['m_Layer'], self.world(self.go_tr[gid]), mf['m_Mesh']['m_PathID'],
+                   [m['m_PathID'] for m in mr['m_Materials']])
+            out.append(row + (mrp,) if with_mr else row)
         return out
 
 
-def raster(img, zbuf, P, UV, tex, height=None):
-    """img HxWx3 float, P: Nx3 (px, py, depth) triangle verts in image space, UV Nx2, tex float HxWx3/4."""
+def raster(img, zbuf, P, UV, tex, height=None, UV2=None, lm=None, lm_gain=2.0):
+    """img HxWx3 float, P: Nx3 (px, py, depth) triangle verts in image space, UV Nx2, tex float HxWx3/4.
+    With a 4th column (1/w of a perspective camera) UVs are interpolated perspective-correct and 1/w is the depth."""
+    persp = P.shape[1] == 4
     H, W = img.shape[:2]
     th, tw = tex.shape[:2]
     for tri in range(0, len(P), 3):
         p = P[tri:tri + 3]; uv = UV[tri:tri + 3]
+        uv2 = UV2[tri:tri + 3] if lm is not None else None
         x0, x1 = int(np.floor(p[:, 0].min())), int(np.ceil(p[:, 0].max()))
         y0, y1 = int(np.floor(p[:, 1].min())), int(np.ceil(p[:, 1].max()))
         x0, y0 = max(x0, 0), max(y0, 0); x1, y1 = min(x1, W - 1), min(y1, H - 1)
@@ -85,12 +89,30 @@ def raster(img, zbuf, P, UV, tex, height=None):
         m = (w0 >= -1e-4) & (w1 >= -1e-4) & (w2 >= -1e-4)
         if not m.any():
             continue
-        d = w0 * p[0, 2] + w1 * p[1, 2] + w2 * p[2, 2]
-        u = w0 * uv[0, 0] + w1 * uv[1, 0] + w2 * uv[2, 0]
-        v = w0 * uv[0, 1] + w1 * uv[1, 1] + w2 * uv[2, 1]
+        if persp:
+            iw = p[:, 3]
+            d = w0 * iw[0] + w1 * iw[1] + w2 * iw[2]
+            dd = np.maximum(d, 1e-12)
+            u = (w0 * uv[0, 0] * iw[0] + w1 * uv[1, 0] * iw[1] + w2 * uv[2, 0] * iw[2]) / dd
+            v = (w0 * uv[0, 1] * iw[0] + w1 * uv[1, 1] * iw[1] + w2 * uv[2, 1] * iw[2]) / dd
+            if uv2 is not None:
+                u2 = (w0 * uv2[0, 0] * iw[0] + w1 * uv2[1, 0] * iw[1] + w2 * uv2[2, 0] * iw[2]) / dd
+                v2 = (w0 * uv2[0, 1] * iw[0] + w1 * uv2[1, 1] * iw[1] + w2 * uv2[2, 1] * iw[2]) / dd
+        else:
+            d = w0 * p[0, 2] + w1 * p[1, 2] + w2 * p[2, 2]
+            u = w0 * uv[0, 0] + w1 * uv[1, 0] + w2 * uv[2, 0]
+            v = w0 * uv[0, 1] + w1 * uv[1, 1] + w2 * uv[2, 1]
+            if uv2 is not None:
+                u2 = w0 * uv2[0, 0] + w1 * uv2[1, 0] + w2 * uv2[2, 0]
+                v2 = w0 * uv2[0, 1] + w1 * uv2[1, 1] + w2 * uv2[2, 1]
         tx = np.clip(((u % 1.0) * tw).astype(int), 0, tw - 1)
         ty = np.clip(((1 - (v % 1.0)) * th).astype(int), 0, th - 1)
         col = tex[ty, tx, :3]
+        if uv2 is not None:                         # baked lightmap / diffmap (dLDR: x2)
+            lh, lw = lm.shape[:2]
+            lx = np.clip((np.clip(u2, 0, 1) * lw).astype(int), 0, lw - 1)
+            ly = np.clip(((1 - np.clip(v2, 0, 1)) * lh).astype(int), 0, lh - 1)
+            col = col * np.clip(lm[ly, lx, :3] * lm_gain, 0, 2)
         if tex.shape[2] == 4:                       # alpha-tested foliage
             m &= tex[ty, tx, 3] >= 0.5
         zz = zbuf[ys, xs]
@@ -98,6 +120,100 @@ def raster(img, zbuf, P, UV, tex, height=None):
         yy, xx = ys[m], xs[m]
         img[yy, xx] = col[m]
         zbuf[yy, xx] = d[m]
+
+
+def _diffmaps(env, sc):
+    """BattleSceneDiffmapStorage: MeshRenderer path id -> (diffmap texture path id, scale/offset)"""
+    for o in env.objects:
+        if o.type.name != 'MonoBehaviour' or o.assets_file.name.endswith('sharedAssets'):
+            continue
+        try:
+            t = o.read_typetree()
+        except Exception:
+            continue
+        if 'rendererDiffmapInfos' in t:
+            texs = [p['m_PathID'] for p in t['diffmapTextures']]
+            return {e['renderer']['m_PathID']: (texs[e['diffmapIndex']], e['diffmapScaleOffset'])
+                    for e in t['rendererDiffmapInfos'] if 0 <= e['diffmapIndex'] < len(texs)}
+    return {}
+
+
+def _draw_list(env, textures, layers, names=None, lit=False):
+    """-> [(world-space triangle verts Nx3, uv Nx2, texture array, lightmap uv Nx2 | None, lightmap | None)]"""
+    sc = Scene(env)
+    tex_cache, meshes, out = {}, {}, []
+    mats = {pid: o.read_typetree() for pid, o in sc.shared.items() if o.type.name == 'Material'}
+    tex_objs = {pid: o for pid, o in sc.shared.items() if o.type.name == 'Texture2D'}
+    dmap = _diffmaps(env, sc) if lit else {}
+
+    def tex_array(pid):
+        to = tex_objs[pid]
+        tname = to.read_typetree()['m_Name']
+        if tname not in tex_cache:
+            im = textures[tname] if textures and tname in textures else to.read().image
+            arr = np.asarray(im.convert('RGBA'), np.float32) / 255.0
+            tex_cache[tname] = arr if arr[..., 3].min() < 0.99 else arr[..., :3]
+        return tex_cache[tname]
+
+    for name, layer, M, mesh_pid, mat_pids, mr_pid in sc.renderers(with_mr=True):
+        if layer not in layers or (names and not any(n in name for n in names)):
+            continue
+        if mesh_pid not in meshes:
+            try:
+                meshes[mesh_pid] = decode(sc.shared[mesh_pid].read_typetree())
+            except Exception:
+                meshes[mesh_pid] = {}
+        d = meshes[mesh_pid]
+        mt = mats.get(mat_pids[0]) if mat_pids else None
+        if 'uv0' not in d or mt is None:
+            continue
+        envs = dict(mt['m_SavedProperties']['m_TexEnvs'])
+        tp = envs.get('_MainTex')
+        if not tp or tp['m_Texture']['m_PathID'] not in tex_objs:
+            continue
+        tarr = tex_array(tp['m_Texture']['m_PathID'])
+        pos = d['pos'][:, :3].astype(np.float64)
+        wp = (M @ np.c_[pos, np.ones(len(pos))].T).T[:, :3]
+        idx = d['index'].astype(np.int64)
+        uv2 = lmarr = None
+        if lit and 'uv1' in d:
+            lp = envs.get('_Lightmap')
+            if lp and lp['m_Texture']['m_PathID'] in tex_objs:
+                sc_, of_ = lp['m_Scale'], lp['m_Offset']
+                uv2 = d['uv1'][idx].astype(np.float64) * [sc_['x'], sc_['y']] + [of_['x'], of_['y']]
+                lmarr = tex_array(lp['m_Texture']['m_PathID'])
+            elif mr_pid in dmap and dmap[mr_pid][0] in tex_objs:
+                tid, so = dmap[mr_pid]
+                uv2 = d['uv1'][idx].astype(np.float64) * [so['x'], so['y']] + [so['z'], so['w']]
+                lmarr = tex_array(tid)
+        out.append((wp[idx], d['uv0'][idx].astype(np.float64), tarr, uv2, lmarr))
+    return out
+
+
+def render_view(env, eye, fwd, up=(0.0, 1.0, 0.0), fov=30.0, size=(1600, 900), textures=None, layers=(17, 10),
+                sky=(0.05, 0.06, 0.07), lit=True, names=None):
+    """Perspective render from a camera (e.g. the game's 3DCamera_11 orientation), perspective-correct UVs."""
+    W, H = size
+    f = np.asarray(fwd, np.float64); f /= np.linalg.norm(f)
+    r = np.cross(f, np.asarray(up, np.float64)); r /= np.linalg.norm(r)
+    u = np.cross(r, f)
+    eye = np.asarray(eye, np.float64)
+    fpx = (H / 2) / np.tan(np.radians(fov) / 2)
+    img = np.zeros((H, W, 3), np.float32) + np.asarray(sky, np.float32)
+    zbuf = np.full((H, W), -1e9, np.float32)
+    for tri, uv, tex, uv2, lm in _draw_list(env, textures, layers, names=names, lit=lit):
+        rel = tri - eye
+        zc = rel @ f
+        keep = (zc.reshape(-1, 3) > 0.3).all(1)
+        if not keep.any():
+            continue
+        keep3 = np.repeat(keep, 3)
+        rel, zc, uv = rel[keep3], zc[keep3], uv[keep3]
+        uv2 = uv2[keep3] if uv2 is not None else None
+        sx = W / 2 + (rel @ r) / zc * fpx
+        sy = H / 2 - (rel @ u) / zc * fpx
+        raster(img, zbuf, np.stack([sx, sy, zc, 1.0 / zc], -1), uv, tex, UV2=uv2, lm=lm)
+    return Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8))
 
 
 def render(env, textures=None, px_per_m=24, extent=(-64, 64, -50, 50), layers=(17,), names=None):

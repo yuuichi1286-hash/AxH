@@ -20,7 +20,9 @@ from PIL import Image
 import UnityPy
 
 import map_hd
+import map_decor
 import map_fx
+import map_trees
 import map_bake
 import fx_tex_hd
 
@@ -85,23 +87,29 @@ def process_image(kind, rgba, sr, name='', bake=None):
         x = sr.x2(rgb)
         if kind == 'ground':
             x = map_hd.kuwahara(x, r=2)
-            x = map_hd.palette(x)                               # emerald grass, warm soil kept, teal water
+            x = map_hd.naturalize(x, 'ground')                  # natural earthy palette (no blue / teal cast)
+            x = map_hd.palette(x)                               # grass ramp, warm soil kept, teal-green water
             x = map_hd.ornament_glow(x)
             x = map_hd.structure_sharpen(x, 0.35, 1.6)          # crisp lane engravings / stone edges
             stone = map_hd.stone_mask(x)
             if bake is not None and name in bake['tiles']:
                 xz, cov, tex_dir = bake['tiles'][name]
                 x = map_bake.relief_ground(x, tex_dir, stone)   # carved stone / lane engravings, soft grass
+                # flowers, monster carcasses, fallen leaves, pebbles (lit + contact shadows, off the lanes)
+                x = map_decor.apply(x, xz, cov, tex_dir, map_decor.tile_decals(bake['decor'], xz, cov), bake['sprites'])
                 x = map_bake.apply_shadow_ao(x, xz, bake['shadow'], bake['ao'])
             else:
                 x = map_bake.relief_ground(x, (-0.6, -0.8), stone)
         elif kind == 'prop':
             x = map_hd.kuwahara(x, r=3)
+            if not any(k in name for k in ('crystal', 'qiu')):     # magic crystals / team-colour orbs keep their hue
+                x = map_hd.naturalize(x, 'prop')
             x = map_hd.ornament_glow(x, 0.6)                   # gold trims, blue runes and crystals shine more
             x = map_hd.structure_sharpen(x, 0.35, 1.4)
-            x = map_bake.relief_pbr(x, emboss=0.06, cavity=0.10, sheen=0.08, kind='prop')
+            x = map_bake.relief_pbr(x, emboss=0.10, cavity=0.12, sheen=0.09, kind='prop', fine=0.5)
         elif kind == 'foliage':
             x = map_hd.kuwahara(x, r=2)                        # transparent texels hold dilated colour: no fringes
+            x = map_hd.naturalize(x, 'foliage')                # teal bushes / leaves -> natural green
         elif kind == 'sky':
             x = map_hd.clean_surface(x, r=4, eps=0.0030)       # smooth gradients: guided filter, not painterly
         x = map_hd.grade(x, {'ground': 'ground', 'prop': 'prop', 'sky': 'sky', 'foliage': 'prop'}[kind])
@@ -139,7 +147,7 @@ def bake_context(env):
     ground, _ = map_bake.scene_meshes(env, (17,))
     props, failed = map_bake.scene_meshes(env, (10,))
     hm = map_bake.ground_heightmap(ground)
-    shadow, ao = map_bake.shadow_ao_maps(props, hm)
+    shadow, ao, foot = map_bake.shadow_ao_maps(props, hm, with_footprint=True)
     from map_render import Scene
     sc = Scene(env)
     mats = {pid: o.read_typetree() for pid, o in sc.shared.items() if o.type.name == 'Material'}
@@ -159,14 +167,24 @@ def bake_context(env):
     for tname, (t, meshes) in users.items():
         size = (t['m_Width'] * 2, t['m_Height'] * 2)
         tiles[tname] = map_bake.tile_position_map(meshes, size)
+    # ground decoration: world-space placement from the ORIGINAL ground colours (grass / lanes / water), the props
+    # footprint (walls) and the plants growing on the jungle walls
+    tex_by_name = {o.read_typetree()['m_Name']: o for o in env.objects if o.type.name == 'Texture2D'}
+    orig = {n: (np.asarray(tex_by_name[n].read().image.convert('RGB'), np.float32) / 255.0, tiles[n][0], tiles[n][1])
+            for n in tiles if n in tex_by_name}
+    classes = map_decor.world_classes(orig)
+    plants = [tuple(M[[0, 2], 3]) for gname, layer, M, mesh_pid, mat_pids in sc.renderers()
+              if gname.startswith('PVP_049_2026s3_leaf_')]
+    decor = map_decor.placements(classes, foot, ao, plants)
     return {'shadow': shadow, 'ao': ao, 'tiles': tiles, 'props': len(props), 'props_failed': failed,
-            'shadow_cover': float((shadow > 0.5).mean())}
+            'shadow_cover': float((shadow > 0.5).mean()), 'decor': decor, 'sprites': {}}
 
 
 def process_high(env, report, sr, pool):
     bake = bake_context(env)
     report['bake'] = {'props_casting': bake['props'], 'props_skipped_undecodable': bake['props_failed'],
                       'ground_tiles_shadowed': sorted(bake['tiles']), 'light_to': map_bake.TO_LIGHT.round(3).tolist()}
+    report['decor'] = dict(collections.Counter(d['kind'] for d in bake['decor']))
     tex_objs = [o for o in env.objects if o.type.name == 'Texture2D']
     jobs = {}
     meta = {}
@@ -216,6 +234,8 @@ def process_high(env, report, sr, pool):
                 if map_bake.tweak_water_material(tt):
                     o.save_typetree(tt)
                     report.setdefault('water_materials', []).append(tt['m_Name'])
+    # new trees (clones of the map's edge tree) on the outer cliff rim, then the ambient effects
+    report['trees'] = map_trees.inject(env, map_trees.plan(env), map_fx._new_object)
     report['effects'] = map_fx.inject(env, TEMPLATES, fx_tex_hd.encode)
 
 

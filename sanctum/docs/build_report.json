@@ -26,6 +26,11 @@
    -0.35
   ]
  },
+ "decor": {
+  "leaf": 252,
+  "stain": 4,
+  "carcass": 4
+ },
  "textures": {
   "PVP_049_2026s3_tree_02": {
    "kind": "prop",
@@ -1101,6 +1106,64 @@
    ]
   }
  },
+ "trees": {
+  "trees": 7,
+  "parts": 14,
+  "scene_objects_added": 58,
+  "diffmap_entries_added": 7,
+  "root": "Sanctum_NewTrees",
+  "placements": [
+   {
+    "x": 20.6,
+    "z": 36.9,
+    "surface_y": -0.84,
+    "yaw": 75.0,
+    "scale": 1.6
+   },
+   {
+    "x": 44.7,
+    "z": -14.8,
+    "surface_y": -4.78,
+    "yaw": 180.0,
+    "scale": 1.6
+   },
+   {
+    "x": 19.7,
+    "z": -36.9,
+    "surface_y": -2.13,
+    "yaw": 180.0,
+    "scale": 1.6
+   },
+   {
+    "x": -28.0,
+    "z": -34.0,
+    "surface_y": -2.47,
+    "yaw": 0.0,
+    "scale": 1.6
+   },
+   {
+    "x": -45.0,
+    "z": -18.0,
+    "surface_y": -4.96,
+    "yaw": 0.0,
+    "scale": 1.6
+   },
+   {
+    "x": -17.3,
+    "z": 38.4,
+    "surface_y": -0.91,
+    "yaw": 0.0,
+    "scale": 1.6
+   },
+   {
+    "x": 15.3,
+    "z": -42.4,
+    "surface_y": -0.26,
+    "yaw": 165.0,
+    "scale": 1.6
+   }
+  ]
+ },
  "effects": {
   "effects": [
    "FX_Fireflies_1",
@@ -1114,11 +1177,31 @@
    "FX_Base_Sparkles_2",
    "FX_Light_Motes",
    "FX_Falling_Leaves_1",
-   "FX_Falling_Leaves_2"
+   "FX_Falling_Leaves_2",
+   "FX_Falling_Leaves_3",
+   "FX_Falling_Leaves_4",
+   "FX_Falling_Leaves_5",
+   "FX_Falling_Leaves_6",
+   "FX_Falling_Leaves_7",
+   "FX_Falling_Leaves_8",
+   "FX_Falling_Leaves_9",
+   "FX_Falling_Leaves_10",
+   "FX_Falling_Leaves_11",
+   "FX_Falling_Leaves_12",
+   "FX_Falling_Leaves_13",
+   "FX_Falling_Leaves_14",
+   "FX_Falling_Leaves_15",
+   "FX_Falling_Leaves_16",
+   "FX_Falling_Leaves_17",
+   "FX_Falling_Leaves_18",
+   "FX_Falling_Leaves_19",
+   "FX_Falling_Leaves_20",
+   "FX_Falling_Leaves_21",
+   "FX_Falling_Leaves_22"
   ],
-  "scene_objects_added": 50,
+  "scene_objects_added": 130,
   "shared_objects_added": 6,
-  "estimated_particles_alive": 228,
+  "estimated_particles_alive": 274,
   "materials": 3,
   "textures": [
    "FX_Sanctum_glow",
@@ -1126,9 +1209,9 @@
    "FX_Sanctum_leaf"
   ]
  },
- "_build_seconds": 314.6,
+ "_build_seconds": 428.6,
  "_size": {
   "before": 10062779,
-  "after": 62889193
+  "after": 63606213
  }
 }

@@ -1,11 +1,12 @@
-"""Sanctum Island (PVP_049 High) texture remaster, v4 "clean premium".
+"""Sanctum Island (PVP_049 High) texture remaster (v5).
 
 AI 2x super-resolution (denoising mix) -> Kuwahara painterly clean-up (grain / blotches / compression noise
-flattened, edges kept razor sharp) -> curated palette ramps -> glowing gold / rune ornaments -> edge-only
-sharpening -> cinematic grade. Nothing adds synthetic grain or noise.
+flattened, edges kept razor sharp) -> natural palette (naturalize: one cohesive earthy palette, referenced on the
+user's Dota 2 screenshots) -> grass ramp -> glowing gold / rune ornaments -> edge-only sharpening -> grade.
+Nothing adds synthetic grain or noise.
 
-grade(): dehaze levels, darker gamma / exposure, mild clarity, mid-tone S-curve, vibrance (protects saturated
-colours), lusher greens, clearer turquoise water, warm-highlight / cool-shadow split tone.
+grade(): dehaze levels, mild clarity, mid-tone S-curve, moderate vibrance (protects saturated colours), warm-sunlight
+/ neutral-cool-shade split tone.
 """
 import numpy as np
 
@@ -30,11 +31,12 @@ def rgb_hsv(x):
 
 
 PRESETS = {
+    # natural palette (v5): moderate vibrance, no extra green / water push, warm sun, neutral-cool shade
     #            levels  contrast vibrance greens water  split  clarity gamma  exposure
-    'ground':   (0.030,  0.14,    0.30,    0.10,  0.20,  1.0,   0.08,   1.08,  0.92),
-    'prop':     (0.020,  0.12,    0.26,    0.08,  0.14,  0.8,   0.06,   1.10,  0.90),
-    'sky':      (0.015,  0.08,    0.24,    0.05,  0.16,  0.6,   0.06,   1.07,  0.92),
-    'lightmap': (0.000,  0.06,    0.00,    0.00,  0.00,  1.2,   0.00,   1.06,  0.95),
+    'ground':   (0.030,  0.20,    0.18,    0.04,  0.10,  1.0,   0.08,   1.00,  1.00),
+    'prop':     (0.020,  0.15,    0.14,    0.03,  0.06,  0.8,   0.06,   1.02,  0.98),
+    'sky':      (0.015,  0.08,    0.12,    0.00,  0.06,  0.6,   0.06,   1.02,  0.97),
+    'lightmap': (0.000,  0.06,    0.00,    0.00,  0.00,  1.0,   0.00,   1.00,  1.00),
 }
 
 
@@ -71,8 +73,8 @@ def grade(rgb, kind='ground'):
     # 5. split tone: cool shadows, warm highlights
     if split:
         t = _ss(0.2, 0.85, L)[..., None]
-        cool = np.array([0.975, 0.995, 1.035], np.float32)
-        warm = np.array([1.03, 1.012, 0.972], np.float32)
+        cool = np.array([0.985, 1.0, 1.018], np.float32)        # neutral-cool shade (no teal cast)
+        warm = np.array([1.042, 1.016, 0.955], np.float32)      # warm sunlight
         tint = cool + (warm - cool) * t
         x = x * (1 + (tint - 1) * split)
     return np.clip(x, 0, 1).astype(np.float32)
@@ -179,7 +181,7 @@ def ornament_glow(rgb, amount=1.0):
 
 
 def palette(rgb):
-    """Curated premium palette for the ground: pure greens are nudged toward the emerald ramp (olive / brown dirt is
+    """Curated palette for the ground: pure greens are nudged toward the natural grass ramp (olive / brown dirt is
     left alone, so lanes keep their warm earth tones), brown soil toward the warm soil ramp, water toward teal."""
     grass, water, _ = masks(rgb)
     h, _, _ = rgb_hsv(rgb)
@@ -191,6 +193,55 @@ def stone_mask(rgb):
     import cv2
     grass, water, _ = masks(rgb)
     return cv2.GaussianBlur(np.clip(1 - grass - water, 0, 1).astype(np.float32), (0, 0), 2.0)
+
+
+def hsv_rgb(h, s, v):
+    """inverse of rgb_hsv (h in degrees)"""
+    h = (h % 360.0) / 60.0
+    i = np.floor(h)
+    f = h - i
+    p, q, t = v * (1 - s), v * (1 - s * f), v * (1 - s * (1 - f))
+    i = i.astype(np.int32) % 6
+    r = np.choose(i, [v, q, p, p, t, v])
+    g = np.choose(i, [t, v, v, q, p, p])
+    b = np.choose(i, [p, p, t, v, v, q])
+    return np.stack([r, g, b], -1).astype(np.float32)
+
+
+# Natural palette (reference: the user's Dota 2 screenshots, measured): grass hue ~76 deg in sunlight -> ~100 deg in
+# shade at saturation ~0.35-0.5, dirt a warm ochre ~40 deg, stone almost neutral (saturation ~0.12), river a dark
+# teal-green. One cohesive earthy palette instead of the map's blue / teal cast: not colourful, but rich.
+def naturalize(rgb, kind='ground'):
+    h, s, v = rgb_hsv(rgb)
+    hn, sn = h.copy(), s.copy()
+    if kind == 'foliage':
+        # bushes / leaves (pale teal in the original): every green-teal texel -> a deeper, richer natural green
+        band = _ss(40, 60, h) * (1 - _ss(205, 220, h))
+        hn = hn + (108.0 - 18.0 * _ss(0.15, 0.6, v) - hn) * band * 0.85
+        sn = sn + (np.clip(sn, 0.42, 0.62) - sn) * band * 0.8
+        return np.clip(hsv_rgb(hn, np.clip(sn, 0, 1), v), 0, 1)
+    vivid = _ss(0.16, 0.26, s)                  # a real colour (grass, moss, water) vs greyish stone
+    # 1. greens and teals (grass, moss) -> natural grass green, yellower where lit, deeper green in shade
+    band = _ss(48, 66, h) * (1 - _ss(176, 192, h)) * vivid
+    hn = hn + (96.0 - 22.0 * _ss(0.12, 0.55, v) - hn) * band * 0.85
+    sn = sn + (np.clip(sn, 0.34, 0.52) - sn) * band * 0.75
+    # 2. river water (saturated teal / blue, ground only) -> dark teal-green, a little less saturated
+    if kind == 'ground':
+        water = _ss(176, 190, h) * (1 - _ss(240, 255, h)) * _ss(0.3, 0.45, s)
+        hn = hn + (178.0 - hn) * water * 0.7
+        sn = sn * (1 - 0.2 * water)
+    # 3. greyish stone of any cool hue (lanes, paving, walls) -> near-neutral grey
+    grey = (1 - vivid) * _ss(50, 70, h) * (1 - _ss(262, 275, h))
+    sn = sn * (1 - 0.55 * grey)
+    # 4. props: the blue-grey stone of buildings / statues calmer; glowing runes and crystals (very saturated) kept
+    if kind == 'prop':
+        blue = _ss(176, 192, h) * (1 - _ss(250, 265, h)) * vivid * (1 - _ss(0.45, 0.62, s))
+        sn = sn * (1 - 0.45 * blue)
+    # 5. dirt / bark -> warm ochre
+    dirt = _ss(8, 18, h) * (1 - _ss(52, 62, h)) * _ss(0.1, 0.22, s)
+    hn = hn + (38.0 - hn) * dirt * 0.5
+    sn = sn + (np.clip(sn, 0.25, 0.45) - sn) * dirt * 0.5
+    return np.clip(hsv_rgb(hn, np.clip(sn, 0, 1), v), 0, 1)
 
 
 def kuwahara(rgb, r=4, q=8.0, sectors=8):

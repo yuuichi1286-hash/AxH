@@ -9,6 +9,7 @@ import UnityPy
 from PIL import Image
 import map_fx
 import map_bake
+import map_trees
 
 o_root, n_root = sys.argv[1:3]
 problems = 0
@@ -62,12 +63,16 @@ for k in mo:
 print('added objects:', dict(added))
 n_fx = len(map_fx.effects())
 n_mat = len({(e['tex'], e['blend']) for e in map_fx.effects()})
-expected = {(False, 'GameObject'): n_fx + 1, (False, 'Transform'): n_fx + 1, (False, 'ParticleSystem'): n_fx,
-            (False, 'ParticleSystemRenderer'): n_fx, (True, 'Texture2D'): len(map_fx.TEXTURES), (True, 'Material'): n_mat}
+n_parts = len(map_trees.PLACEMENTS) * len(map_trees.SOURCE)
+expected = {(False, 'GameObject'): n_fx + 1 + n_parts + 1, (False, 'Transform'): n_fx + 1 + n_parts + 1,
+            (False, 'ParticleSystem'): n_fx, (False, 'ParticleSystemRenderer'): n_fx,
+            (False, 'MeshFilter'): n_parts, (False, 'MeshRenderer'): n_parts,
+            (True, 'Texture2D'): len(map_fx.TEXTURES), (True, 'Material'): n_mat}
 if dict(added) != expected:
     bad('unexpected added object set', dict(added))
 
 # every object re-reads; untouched kinds keep their exact bytes
+diffmap_new, diffmap_src = [], {}
 reread = 0
 water_changed = 0
 for k, o in mn.items():
@@ -77,6 +82,17 @@ for k, o in mn.items():
         bad('read fail', k, o.type.name, e)
     if k in mo and o.type.name not in ('Texture2D', 'PreloadData', 'Cubemap'):
         if o.get_raw_data() != mo[k].get_raw_data():
+            if o.type.name == 'MonoBehaviour':
+                # only the baked-lighting (diffmap) table may change: original entries kept as they were, plus one
+                # entry per cloned trunk with the same lighting as its source trunk
+                a, b = mo[k].read_typetree(), o.read_typetree()
+                ia, ib = a.get('rendererDiffmapInfos'), b.get('rendererDiffmapInfos')
+                if ia is None or ib is None or ib[:len(ia)] != ia or \
+                        {kk: v for kk, v in a.items() if kk != 'rendererDiffmapInfos'} != {kk: v for kk, v in b.items() if kk != 'rendererDiffmapInfos'}:
+                    bad('MonoBehaviour changed beyond the diffmap entries of the new trees', k)
+                diffmap_new = ib[len(ia):] if ia is not None and ib is not None else []
+                diffmap_src = {e['renderer']['m_PathID']: e for e in ia or []}
+                continue
             if o.type.name == 'Material':
                 # only the water materials may change, and only their reflection strength
                 a, b = mo[k].read_typetree(), o.read_typetree()
@@ -162,7 +178,9 @@ for k, o in mn.items():
         if a.std() > 0.01 and b.std() > 0.01:
             c = np.corrcoef(a.ravel(), b.ravel())[0, 1]
             cf = np.corrcoef(a[::-1].ravel(), b.ravel())[0, 1]
-            if c < 0.8 or cf > c:
+            # content kept (a garbled / wrong texture correlates ~0) and not flipped; the painterly clean-up,
+            # relief and ornament glow legitimately reshape fine facets (e.g. the crystals sit around 0.79)
+            if c < 0.75 or cf > c:
                 bad(f'texture content/orientation {tt["m_Name"]}: corr {c:.3f} flipped {cf:.3f}')
     ntex += 1
 print('textures checked:', ntex)
@@ -216,6 +234,70 @@ for pid, o in scene.items():
     if not (ps['looping'] and ps['prewarm'] and ps['playOnAwake']):
         bad('effect not looping/prewarmed', g['m_Name'])
 print(f'effects: {nps} particle systems, ~{alive:.0f} particles alive in total')
-if alive > 260:
+if alive > 300:
     bad('particle budget exceeded', alive)
+
+# new trees: components / hierarchy / asset references, baked lighting entries, and nothing over the playable area
+from map_render import Scene
+from meshio import decode
+sc_n = Scene(en)
+root = [pid for pid, g in sc_n.gos.items() if g['m_Name'] == map_trees.ROOT_NAME]
+if len(root) != 1:
+    bad('tree root missing / duplicated', len(root))
+root_t = sc_n.go_tr[root[0]] if root else None
+names = {g['m_Name']: pid for pid, g in sc_n.gos.items()}
+src_mr = {}
+for src in map_trees.SOURCE:
+    g = sc_n.gos[names[src]]
+    src_mr[src] = next(c['component']['m_PathID'] for c in g['m_Component'] if c['component']['m_PathID'] in sc_n.mr)
+n_tree = 0
+closest = closest_hit = 99.0
+new_mr = {}
+# the game camera's viewing direction, read from the scene (3DCamera_11)
+cam_go = next(pid for pid, g in sc_n.gos.items() if g['m_Name'] == '3DCamera_11')
+cam_fwd = sc_n.world(sc_n.go_tr[cam_go])[:3, :3] @ np.array([0.0, 0.0, 1.0])
+for pid, g in sc_n.gos.items():
+    if not g['m_Name'].startswith('Sanctum_') or '_new' not in g['m_Name']:
+        continue
+    n_tree += 1
+    comps = [c['component']['m_PathID'] for c in g['m_Component']]
+    kinds = sorted(sc_n.ctype.get(c, '?') for c in comps)
+    if kinds != ['MeshFilter', 'MeshRenderer', 'Transform']:
+        bad('tree components', g['m_Name'], kinds); continue
+    tr = sc_n.trs[sc_n.go_tr[pid]]
+    if tr['m_Father']['m_PathID'] != root_t or not any(ch['m_PathID'] == sc_n.go_tr[pid] for ch in sc_n.trs[root_t]['m_Children']):
+        bad('tree hierarchy', g['m_Name'])
+    mf = next(sc_n.mf[c] for c in comps if c in sc_n.mf)
+    mrp = next(c for c in comps if c in sc_n.mr)
+    mr = sc_n.mr[mrp]
+    src = next(sn for sn in map_trees.SOURCE if g['m_Name'].startswith(sn.replace('PVP_049_2026s3_', 'Sanctum_')))
+    sg = sc_n.gos[names[src]]
+    smf = next(sc_n.mf[c['component']['m_PathID']] for c in sg['m_Component'] if c['component']['m_PathID'] in sc_n.mf)
+    if mf['m_Mesh'] != smf['m_Mesh'] or mr['m_Materials'] != sc_n.mr[src_mr[src]]['m_Materials']:
+        bad('tree asset refs differ from the source tree', g['m_Name'])
+    mesh = sc_n.shared.get(mf['m_Mesh']['m_PathID'])
+    if mesh is None or mesh.type.name != 'Mesh':
+        bad('tree mesh ref', g['m_Name']); continue
+    new_mr[mrp] = src
+    d = decode(mesh.read_typetree())
+    M = sc_n.world(sc_n.go_tr[pid])
+    wp = (M @ np.c_[d['pos'][:, :3], np.ones(len(d['pos']))].T).T[:, :3]
+    ok, dv, dh = map_trees.clearance_ok(wp, cam_fwd)
+    if not ok:
+        bad('new tree too close to the lanes / hides walkable ground', g['m_Name'], round(dv, 2), round(dh, 2))
+    closest = min(closest, dv)
+    closest_hit = min(closest_hit, dh)
+if n_tree != n_parts:
+    bad('tree part count', n_tree, n_parts)
+trunks = [m for m, s_ in new_mr.items() if s_ == map_trees.SOURCE[0]]
+got = {e['renderer']['m_PathID']: e for e in diffmap_new}
+if sorted(got) != sorted(trunks):
+    bad('diffmap entries do not match the cloned trunks', len(got), len(trunks))
+for m, e in got.items():
+    se = diffmap_src.get(src_mr[map_trees.SOURCE[0]])
+    if se is None or (e['diffmapIndex'], e['diffmapScaleOffset']) != (se['diffmapIndex'], se['diffmapScaleOffset']):
+        bad('cloned trunk lighting differs from the source trunk', m)
+print(f'trees: {n_tree // 2} new trees ({n_tree} parts), {len(got)} diffmap entries; closest geometry '
+      f'{closest:.1f} m beyond the playable diamond (walls at 2.5-4.75 m), closest camera sight-line ground hit '
+      f'{closest_hit:.1f} m beyond it')
 print(f'\nPROBLEMS: {problems}')

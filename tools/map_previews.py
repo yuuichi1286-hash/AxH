@@ -109,6 +109,9 @@ def simulate(extent, ppm, enlarge, seed=3):
             size = rng.uniform(*e['size']) * (e.get('grow', 1.0) ** u)
             al = np.interp(u, [t for t, _ in e['alphas']], [a for _, a in e['alphas']])
             col = np.array([np.interp(u, [t for t, _ in e['colors']], [c[k] for _, c in e['colors']]) for k in range(3)])
+            if e.get('tint2'):                     # per-particle start colour between two tints (falling leaves)
+                t1, t2 = (np.asarray(c, np.float64) for c in e['tint2'])
+                col = col * (t1 + (t2 - t1) * rng.uniform())
             px, pz = (p[0] - x0) * ppm, (z1 - p[2]) * ppm
             r = max(1, int(size * ppm * 0.5 * enlarge))
             ya, xa = int(pz) - r, int(px) - r
@@ -127,7 +130,7 @@ def simulate(extent, ppm, enlarge, seed=3):
 views = [('Sungai + lubang Lord/Turtle: kilau sungai, aura', (-11, 11, 12, 30), 40),
          ('Jungle: kunang-kunang + debu cahaya', (-27, -5, 6, 24), 40),
          ('Base: kilau naik di sekitar orb', (-58, -42, -7, 7), 50),
-         ('Tepi atas: daun berguguran', (-12, 12, 34, 50), 34)]
+         ('Pohon tepi atas: daun jatuh dari kanopi', (2, 26, 30, 48), 34)]
 tiles = [simulate(ext, ppm, 1.6) for _, ext, ppm in views]
 Ht = max(t.size[1] for t in tiles)
 canvas = Image.new('RGB', (sum(t.size[0] for t in tiles) + 16 * (len(tiles) - 1), Ht + 70), (12, 13, 15))
@@ -173,3 +176,22 @@ for i in range(6):
     c.paste(fa[i], (i * 200, 40)); c.paste(fb[i], (i * 200, 40 + 222))
 c.save(os.path.join(out, '8_pantulan_air.png'))
 print('ok 6-8')
+
+
+# 10+. game-camera perspective (orientation / FOV of the game's 3DCamera_11, baked lighting applied):
+# original (left) vs new (right): new trees, flowers, monster carcasses, pebbles, fallen leaves, relief
+FWD = np.array([0.542, -0.707, 0.455]); UP = np.array([0.542, 0.707, 0.455])
+
+
+def cam(env, x, z, dist=24.0, size=(1280, 720)):
+    eye = np.array([x, 0.0, z]) - FWD / np.linalg.norm(FWD) * dist
+    return map_render.render_view(env, eye, FWD, UP, fov=30, size=size)
+
+
+cam_views = [('Jungle: bangkai monster, daun gugur, warna alami (kamera game)', -14.0, -10.0, 22.0),
+             ('Pohon baru di tebing pinggir map (kamera game)', 17.0, 32.0, 30.0),
+             ('Jungle atas: warna alami (kamera game)', -18.0, 20.0, 22.0),
+             ('Lane bawah + pohon baru (kamera game)', 12.0, -34.0, 26.0)]
+for i, (title, x, z, dist) in enumerate(cam_views):
+    pair(cam(eo, x, z, dist), cam(en, x, z, dist), title).save(os.path.join(out, f'{13 + i}_kamera_game_{i + 1}.png'))
+print('ok 10+')

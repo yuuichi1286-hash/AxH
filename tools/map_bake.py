@@ -140,8 +140,8 @@ def clip_above(tris, d, eps=0.02):
     return np.concatenate(out) if out else np.zeros((0, 3, 3))
 
 
-def shadow_ao_maps(props, hm):
-    """World-space (grid) cast-shadow and contact-AO maps, both 0..1."""
+def shadow_ao_maps(props, hm, with_footprint=False):
+    """World-space (grid) cast-shadow and contact-AO maps, both 0..1 (+ the props' ground footprint if asked)."""
     import cv2
     H, W = grid_size()
     shadow = np.zeros((H, W), np.float32)
@@ -178,6 +178,8 @@ def shadow_ao_maps(props, hm):
     soft = cv2.GaussianBlur(shadow, (0, 0), 0.12 * px) * 0.65 + cv2.GaussianBlur(shadow, (0, 0), 0.45 * px) * 0.35
     ao = np.clip(cv2.GaussianBlur(foot, (0, 0), 0.55 * px) * 1.6, 0, 1) * (1 - foot)
     ao = np.maximum(ao, cv2.GaussianBlur(foot, (0, 0), 1.6 * px) * 0.6 * (1 - foot))
+    if with_footprint:
+        return np.clip(soft, 0, 1), np.clip(ao, 0, 1), foot
     return np.clip(soft, 0, 1), np.clip(ao, 0, 1)
 
 
@@ -223,19 +225,23 @@ def apply_shadow_ao(rgb, xz, shadow, ao, s_strength=0.55, ao_strength=0.40):
     sh = sample_grid(shadow, xz)
     oc = sample_grid(ao, xz)
     mul = (1 - s_strength * sh) * (1 - ao_strength * oc)
-    cool = 1 + (np.array([0.965, 0.99, 1.045], np.float32) - 1) * sh[..., None]   # sky-lit shadows are cooler
+    cool = 1 + (np.array([0.975, 0.995, 1.02], np.float32) - 1) * sh[..., None]   # sky-lit shadows slightly cooler
     return np.clip(rgb * mul[..., None] * cool, 0, 1).astype(np.float32)
 
 
 # ------------------------------------------------------------------ texture-space relief / cavity / sheen
-def relief_pbr(rgb, light_dir_tex=(-0.6, -0.8), emboss=0.10, cavity=0.16, sheen=0.09, kind='ground'):
+def relief_pbr(rgb, light_dir_tex=(-0.6, -0.8), emboss=0.10, cavity=0.16, sheen=0.09, kind='ground', fine=0.0):
     """Emboss relief from a luminance height proxy, cavity AO in crevices and a PBR-like specular sheen on
-    stone / metal (low saturation, bright); vegetation gets relief and AO but almost no sheen."""
+    stone / metal (low saturation, bright); vegetation gets relief and AO but almost no sheen.
+    fine > 0 mixes in a sharp, small-scale height (0.4 x the base radius): engravings, trims and stone edges get a
+    crisp raised / carved look instead of a soft one."""
     import cv2
     from map_hd import lum, rgb_hsv
     Lm = lum(rgb).astype(np.float32)
     k = max(1.0, min(rgb.shape[:2]) / 1024.0)
     hgt = cv2.GaussianBlur(Lm, (0, 0), 1.2 * k)
+    if fine:
+        hgt = hgt * (1 - fine) + cv2.GaussianBlur(Lm, (0, 0), 0.5 * k) * fine * 1.4
     gx = cv2.Sobel(hgt, cv2.CV_32F, 1, 0, ksize=3)
     gy = cv2.Sobel(hgt, cv2.CV_32F, 0, 1, ksize=3)
     sc = 6.0
@@ -266,8 +272,8 @@ def relief_pbr(rgb, light_dir_tex=(-0.6, -0.8), emboss=0.10, cavity=0.16, sheen=
 
 
 def relief_ground(rgb, light_dir_tex, stone):
-    """Ground relief: a deeper carved look on lane stone, paving and engravings (stone mask), gentle on grass."""
-    hard = relief_pbr(rgb, light_dir_tex, emboss=0.11, cavity=0.13, sheen=0.08, kind='ground')
+    """Ground relief: a deeper, crisp carved look on lane stone, paving and engravings (stone mask), gentle on grass."""
+    hard = relief_pbr(rgb, light_dir_tex, emboss=0.13, cavity=0.15, sheen=0.09, kind='ground', fine=0.55)
     soft = relief_pbr(rgb, light_dir_tex, emboss=0.04, cavity=0.07, sheen=0.05, kind='ground')
     s = stone[..., None]
     return (hard * s + soft * (1 - s)).astype(np.float32)

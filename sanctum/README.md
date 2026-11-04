@@ -1,6 +1,6 @@
-# Sanctum Island — HD Remaster v4 "clean premium" (grafik High)
+# Sanctum Island — HD Remaster v5 (grafik High)
 
-**Unduh:** [`release/Sanctum_Island_Map_HD.zip`](release/Sanctum_Island_Map_HD.zip) (67 MB) — menggantikan
+**Unduh:** [`release/Sanctum_Island_Map_HD.zip`](release/Sanctum_Island_Map_HD.zip) (68 MB) — menggantikan
 `Sanctum_Island_Map.zip`.
 
 Struktur zip, nama file, urutan entri, dan kompresinya sama persis dengan file asli (`Scenes/android/...`). Cara
@@ -15,6 +15,11 @@ identik byte-per-byte: versi Low `PVP_049_low`, data jalur/tembok A* (`*wall_add
 - 16 dari 16 petak tanah, termasuk sungai.
 - 40 dari 40 tekstur props: bangunan base, patung, tembok, batu jungle, pohon, tebing luar, pilar, kristal.
 - Langit dan pulau melayang, 7 lightmap, rumput dan daun 3D, serta pantulan air.
+- Baru di v5:
+  - Warna alami ala referensi Dota 2, tidak warna-warni.
+  - 7 pohon baru di tebing pinggir dan 22 efek daun jatuh dari setiap pohon.
+  - Bangkai monster dan daun gugur di tanah.
+  - Relief yang lebih timbul.
 
 Gambar di bawah adalah seluruh peta beserta bangunannya: atas asli, bawah remaster.
 
@@ -26,7 +31,96 @@ gambar tampak atas adalah posisi tower.
 
 ![Peta sebelum / sesudah](docs/previews/1_peta_sebelum_sesudah.png)
 
-## Yang baru di v4: tekstur bersih, tidak burik lagi
+## Yang baru di v5: warna alami, pohon baru, bangkai monster, daun jatuh, relief lebih timbul
+
+Gambar-gambar di bagian ini dirender dengan **sudut dan FOV kamera game asli** (`3DCamera_11` di scene) dan
+pencahayaan baked map: kiri asli, kanan v5.
+
+![Jungle: bangkai monster, daun gugur, warna alami](docs/previews/13_kamera_game_1.png)
+
+### Warna alami, referensinya screenshot Dota 2 (tidak warna-warni)
+
+Warna di screenshot referensi saya ukur, lalu palet map dibuat mengikutinya. Hasilnya satu palet tanah-dan-hutan yang
+menyatu. Nuansa biru-toska yang menutupi map aslinya dibuang:
+
+| | Referensi Dota 2 | v4 | v5 |
+|---|---|---|---|
+| Rumput (hue / saturasi) | 82–88° / 0,34–0,51 | 109° / 0,58 (hijau kebiruan) | ±90° / ±0,5 |
+| Tanah | oker 30–46° | oker | oker hangat ±39° |
+| Batu (saturasi) | 0,11–0,13 | biru-abu | netral ±0,10 |
+
+- **Rumput:** hijau-kuning saat kena matahari dan hijau tua di bayangan. Saturasinya dijaga di kisaran alami, jadi
+  kaya warna tapi tidak mencolok.
+- **Semak 3D dan daun pohon:** sebelumnya toska pucat, sekarang hijau alami yang lebih pekat.
+- **Batu lane, paving, bangunan, dan patung:** abu-abu netral, bukan biru.
+- **Tanah:** oker hangat.
+- **Sungai:** toska-hijau gelap.
+- **Cahaya:** matahari hangat di bagian terang, dan bayangan netral, tidak kebiruan.
+- Kecerahan tanah naik 23% dari v4, tapi tetap ±30% lebih gelap dari peta aslinya dan lebih gelap dari referensi.
+- **Aksen magis tetap:** lingkaran rune biru, trim emas, serta kristal dan orb warna tim. Kristal dan orb sengaja tidak
+  diubah warnanya karena warnanya diatur game per tim.
+
+### 7 pohon baru di tebing pinggir map
+
+- **Pohonnya** adalah kloning pohon pinggir map itu sendiri: batang `tree_04` dengan kanopi `outsideleaf_05`.
+  Ukurannya 1,6×, diputar berbeda-beda, dan ditanam di 7 titik tebing luar yang masih kosong.
+- **Tidak menghalangi jalur sama sekali**, dan ini diperiksa otomatis oleh validator:
+  - Dinding lane berada 2,5–4,75 m di luar garis lane. Setiap bagian pohon baru berada minimal 5 m di luar garis
+    itu, dan minimal 9,5 m di ujung atas/bawah map, tempat dindingnya lebih jauh.
+  - Garis pandang kamera game yang melewati daun atau batang pohon jatuh ke tanah di luar dinding. Jadi pohon tidak
+    pernah menutupi lane, jalur jungle, atau hero. Arah kamera dibaca langsung dari kamera game di scene.
+- **Pencahayaannya sama dengan pohon aslinya.** Batang mendapat entri lightmap yang sama di
+  `BattleSceneDiffmapStorage`, sedangkan lightmap daun ada di materialnya.
+- **Tanpa aset baru.** Pohon baru memakai mesh dan material yang sama, sehingga tambahannya hanya 14 renderer
+  (±4.800 segitiga).
+
+![Pohon baru di tebing](docs/previews/14_kamera_game_2.png)
+![Lane bawah + pohon baru](docs/previews/16_kamera_game_4.png)
+
+### Daun jatuh yang cocok dengan pohonnya
+
+- Daun **jatuh dari tempat daunnya berada**: ada satu emitter kecil di setiap kanopi, yaitu 15 pohon pinggir map dan
+  7 pohon baru, sehingga totalnya 22.
+- **Bentuk daun** sama dengan daun pohon map: oval dengan ujung runcing dan tangkai, terlipat di tulang daun, dengan
+  urat halus.
+- **Warnanya hijau alami** seperti daun pohonnya. Tekstur daun pohon ikut diubah dari toska ke hijau alami, dan tiap
+  daun jatuh acak di antara dua nada hijau. Daun kuning keemasan versi sebelumnya sudah diganti.
+- Total ±60 daun hidup sekaligus. Seluruh efek ambient sekarang ±274 partikel dari 32 sistem.
+
+### Dekorasi tanah baru
+
+Semua dekorasi ini dilukis ke tekstur 16 petak tanah, jadi tidak ada objek tambahan, beban FPS-nya nol, dan tidak ada
+yang bisa menghalangi gerakan.
+
+| Dekorasi | Jumlah | Tempat |
+|---|---|---|
+| Bangkai monster: tengkorak bertanduk dengan gigi dan rongga mata, tulang belakang, dan tulang rusuk. Sebagian terkubur, berlumut, dengan noda tanah | 4 | di dalam jungle, tidak pernah di lane atau sungai |
+| Daun gugur: hijau, menguning, atau cokelat kering | 252 | sekitar tanaman yang tumbuh di dinding jungle |
+
+- **Ditempatkan di koordinat dunia**, sehingga menyambung mulus antar petak.
+- **Dicerminkan lewat pusat peta**, jadi kedua tim mendapat pemandangan yang sama.
+- **Tiap dekorasi punya height map sendiri:**
+  - Disinari dari arah cahaya peta.
+  - Punya bayangan kontak.
+  - Ikut terkena bayangan bangunan dan AO.
+  - Digambar dengan supersampling 2×, jadi tajam, tanpa blur dan tanpa bintik.
+
+![Jungle atas, warna alami](docs/previews/15_kamera_game_3.png)
+
+### Relief lebih timbul dan tetap tajam
+
+Relief sekarang ditambah lapisan halus (radius 0,4× dari relief dasar). Hasilnya, tepi blok batu, trim emas, ukiran
+lantai, dan retakan batu terlihat seperti dipahat, dan tidak ada yang jadi buram.
+
+- **Batu lane, paving, dan ukiran lantai:** emboss 0,11 → 0,13, ditambah lapisan halus. Rumput tetap lembut (0,04).
+- **Semua props** (bangunan, patung, tembok, batu): emboss 0,06 → 0,10, ditambah lapisan halus.
+
+![Relief lama vs baru](docs/previews/17_relief_lama_vs_baru.png)
+
+## v4: tekstur bersih, tidak burik lagi
+
+> Pembersihan tekstur dari v4 di bawah ini tetap dipakai. Palet warnanya sudah diganti palet natural v5 (lihat di
+> atas).
 
 Di versi sebelumnya tekstur terlihat **burik**: berbintik, bergaris halus, dan kotor kalau dilihat dekat. Ada tiga
 penyebab, dan ketiganya sudah dibuang:
@@ -75,14 +169,15 @@ Di skala game (1 m = 100 px, kira-kira satu texel tanah per piksel layar), diban
 
 ## Fitur yang tetap ada dari versi sebelumnya
 
-- **Pewarnaan lebih gelap di seluruh peta:** tanah, props/bangunan, tebing, dan langit, rata-rata ±33–43% lebih
-  gelap dari aslinya, dengan bayangan lebih dalam. Warnanya tetap kaya, jadi tidak kusam.
+- **Pewarnaan gelap dan dalam:** tanah tetap ±30% lebih gelap dari aslinya, dengan bayangan yang dalam. Di v5 tanah
+  sedikit lebih terang dari v4 (+23%) mengikuti referensi. Props dan bangunan kecerahannya setara aslinya, tapi warnanya
+  netral dan lebih kontras.
 - **Bayangan setiap bangunan:** 181 bangunan dan props memberi bayangan nyata ke tanah, mengikuti arah cahaya peta.
 - **AO:** gelap kontak di kaki bangunan, ditambah AO celah di dalam tekstur.
 - **Emboss / relief:** permukaan batu, ukiran lane, dan props terlihat timbul.
 - **Kilau ala PBR:** batu dan logam memantulkan cahaya, sedangkan rumput tetap matte.
 - **Pantulan air ala SSR:** cubemap pantulan sungai 32 → 128 px, lebih tajam dan diberi grading gelap yang sama.
-- **12 efek ambient** (lihat bagian 6).
+- **Efek ambient**: kunang-kunang, kilau sungai, aura pit, kilau base, debu cahaya (lihat bagian 6).
 
 ### Perbaikan: garis lurus / "terpotong" di dalam game
 
@@ -134,12 +229,11 @@ Cara upscale-nya:
 
 Satu texel tanah setelah 2× kira-kira 1 cm di dunia game. Pengaturannya:
 
-- **Rumput:** sapuan lukisan aslinya dipertahankan dan dibersihkan, tanpa helai buatan. Rumput hijau murni digeser
-  ke palet emerald.
-- **Batu lane, paving, ukiran lantai:** relief dalam (emboss 0,11), AO celah, dan kilau batu. Di rumput relief
-  dibuat lembut (0,04).
+- **Rumput:** sapuan lukisan aslinya dipertahankan dan dibersihkan, tanpa helai buatan, dengan warna hijau rumput alami.
+- **Batu lane, paving, ukiran lantai:** relief dalam (emboss 0,13 plus lapisan halus), AO celah, dan kilau batu. Di
+  rumput relief dibuat lembut (0,04).
 - **Tanah coklat:** tetap hangat, dengan palet tanah sendiri.
-- **Sungai dan pit:** bersih dan dalam, berwarna toska gelap. Dasar pit dan ukiran lantainya tetap terlihat.
+- **Sungai dan pit:** bersih dan dalam, berwarna toska-hijau gelap. Dasar pit dan ukiran lantainya tetap terlihat.
 - **Rumput dan daun 3D** (sprite cut-out): Kuwahara radius 2. Warna di area transparannya memang sudah diisi oleh
   artist aslinya, jadi tidak muncul pinggiran gelap.
 
@@ -174,19 +268,24 @@ Satu texel tanah setelah 2× kira-kira 1 cm di dunia game. Pengaturannya:
 
 ## 4. Pewarnaan
 
-Grading sinematik yang sama untuk tanah, props, langit, dan lightmap, jadi semuanya tetap serasi:
+Satu palet natural yang sama untuk tanah, props, foliage, langit, dan lightmap, jadi semuanya serasi (lihat juga
+"Warna alami" di atas):
 
-- *Dehaze* dan kontras mid-tone.
-- **Mid-tone lebih gelap** dan *exposure* diturunkan:
-  - tanah: gamma 1,08, exposure 0,92
-  - props dan bangunan: gamma 1,10, exposure 0,90
-  - langit: gamma 1,07, exposure 0,92
-  - Lightmap props ikut digelapkan.
-- **Palet premium** (gradasi warna kurasi): emerald untuk rumput, coklat hangat untuk tanah, toska untuk air.
-- **Ornamen berkilau:** trim emas +35% (props +21%), rune biru/toska +40% (props +24%), plus halo lembut.
-- *Vibrance*: hijau rumput dan pohon lebih pekat, air lebih toska.
-- *Split-tone*: highlight hangat, bayangan sedikit dingin.
-- *Clarity* dikurangi (tanah 0,08, props 0,06). Kontras lokal yang terlalu kuat ikut membuat tampilan burik.
+- **Palet natural (`naturalize`)** menyusun ulang hue dan saturasi per kelompok warna:
+  - Hijau dan toska jadi hijau rumput alami: ±74° di bagian terang, ±96° di bayangan, saturasi 0,34–0,52.
+  - Foliage jadi hijau yang lebih pekat (±90–108°, saturasi 0,42–0,62).
+  - Batu keabu-abuan jadi netral.
+  - Batu biru bangunan dibuat lebih tenang.
+  - Sungai jadi toska-hijau.
+  - Tanah dan kulit kayu jadi oker hangat.
+- **Grading:** *dehaze*, kontras mid-tone (tanah 0,20, props 0,15), dan *vibrance* sedang (0,12–0,18), supaya warnanya
+  tidak mencolok:
+  - tanah: gamma 1,00, exposure 1,00
+  - props dan bangunan: gamma 1,02, exposure 0,98
+  - langit: gamma 1,02, exposure 0,97
+- **Split-tone:** sinar matahari hangat di highlight dan bayangan netral sedikit dingin, tanpa nuansa toska.
+- **Ornamen berkilau:** trim emas +35% (props +21%) dan rune biru/toska +40% (props +24%), plus halo lembut.
+- **Clarity rendah** (tanah 0,08, props 0,06), karena kontras lokal yang terlalu kuat membuat tampilan burik.
 
 ## 5. Halus dan ringan
 
@@ -196,13 +295,15 @@ Grading sinematik yang sama untuk tanah, props, langit, dan lightmap, jadi semua
 - Rumput dan daun cut-out sengaja tanpa mipmap, supaya tidak menipis.
 - Bayangan, AO, relief, dan kilau semuanya baked, jadi tidak ada biaya render tambahan.
 - **Efek baru dibuat seringan mungkin:**
-  - Total ±228 partikel dari 12 sistem.
+  - Total ±274 partikel dari 32 sistem (22 di antaranya emitter daun kecil, masing-masing paling banyak 6 daun).
   - Tanpa modul Noise atau Collision.
   - Simulasi world-space dengan *prewarm*, plus culling otomatis.
   - Hanya 4 tekstur kecil.
+- **Pohon baru:** 14 renderer dan ±4.800 segitiga, tanpa tekstur atau mesh tambahan.
+- **Dekorasi tanah** ada di dalam tekstur yang sudah ada, jadi ukurannya tidak bertambah.
 - **Konsekuensi memori:**
   - Tekstur High naik dari 8,3 MB menjadi 68,4 MB. Sekitar 11 MB dari kenaikan itu karena props sekarang ASTC 6x6.
-  - Bundle High naik dari 10,1 MB menjadi 62,9 MB.
+  - Bundle High naik dari 10,1 MB menjadi 63,6 MB.
   - Untuk perangkat yang memakai grafik High, ini masih wajar. Versi Low tidak tersentuh.
 
 ## 6. Efek baru di peta
@@ -214,7 +315,7 @@ Grading sinematik yang sama untuk tanah, props, langit, dan lightmap, jadi semua
 | Aura lubang Lord / Turtle (2) | kedua *pit* | partikel cahaya toska → ungu naik perlahan |
 | Kilau base (2) | sekitar orb kedua base | bintang putih-emas naik berputar. Warnanya netral, jadi tetap cocok saat warna tim ditukar |
 | Debu cahaya | seluruh peta | butiran cahaya kecil melayang di udara |
-| Daun berguguran (2) | tepi atas & bawah peta | daun hijau → kuning keemasan jatuh berputar dan bergoyang |
+| Daun berguguran (22) | di bawah setiap kanopi pohon (15 pohon pinggir + 7 pohon baru) | daun hijau alami berbentuk daun pohon map, jatuh berputar dan bergoyang |
 
 ![Efek baru (simulasi)](docs/previews/5_efek_baru_simulasi.png)
 
@@ -240,13 +341,22 @@ Cara efek disisipkan:
   pengecualian:
   - PreloadData: ditambah 2 shader efek.
   - Cubemap air: diganti versi 128 px (orientasi sama, tidak lebih terang).
-- 1284 objek terbaca ulang lewat typetree.
+- 1422 objek terbaca ulang lewat typetree.
 - 73 tekstur ter-decode. Ukuran data cocok dengan format dan mipmap. Isi dan orientasinya berkorelasi dengan
   aslinya, tidak ada yang terbalik.
 - Cubemap: ukuran per sisi dan total cocok. Keenam sisinya berisi, dengan orientasi yang sama seperti aslinya.
-- Objek yang ditambahkan persis sesuai rencana: 12 sistem efek + 1 root, 3 material, 3 tekstur. Semua referensinya
-  valid (komponen, hierarki, material → tekstur dan shader, PreloadData).
-- Kapasitas partikel cukup. Total partikel di bawah anggaran 260.
+- Objek yang ditambahkan persis sesuai rencana:
+  - 32 sistem efek + 1 root, 3 material, 3 tekstur.
+  - 7 pohon (14 bagian) + 1 root.
+  - Semua referensinya valid (komponen, hierarki, mesh, material → tekstur dan shader, PreloadData).
+- Pohon baru:
+  - Mesh dan material sama dengan pohon sumbernya.
+  - Pencahayaan baked sama dengan pohon sumbernya.
+  - Setiap bagian ≥5 m di luar garis lane (≥9,5 m di ujung map).
+  - Garis pandang kamera game yang melewatinya tidak mengenai lane.
+- Satu-satunya script yang berubah adalah tabel lightmap `BattleSceneDiffmapStorage`. Entri lamanya tetap sama
+  persis, dan hanya 7 entri batang pohon baru yang ditambahkan.
+- Kapasitas partikel cukup. Total partikel di bawah anggaran 300.
 
 Catatan: validasi ini memeriksa struktur file. Tampilan di dalam game belum bisa saya uji langsung di HP.
 
@@ -268,18 +378,22 @@ python tools/map_previews.py orig/Scenes/android/PVP_049_add.unity3d out/Scenes/
 python tools/pack_like.py Sanctum_Island_Map.zip out Sanctum_Island_Map_HD.zip
 ```
 
-Build dari nol memakan ±13 menit dengan 4 core. Kalau variabel `MAP_SR_CACHE=<folder>` diisi, hasil AI
-disimpan di cache dan build berikutnya ±5 menit, dengan hasil yang identik. Zip-nya (SHA-256
-`6aeb40088b4dd457996613efbf2ea9fc28e3ba6f42a82733f2bfd5554a47e5e4`) bisa direproduksi: build ulang dari nol
-tanpa cache menghasilkan zip yang identik. Inferensi AI-nya deterministik pada jumlah thread yang sama.
+Build dari nol memakan ±15 menit dengan 4 core. Kalau variabel `MAP_SR_CACHE=<folder>` diisi, hasil AI
+disimpan di cache dan build berikutnya ±8 menit, dengan hasil yang identik.
+
+Zip-nya bisa direproduksi: build ulang dari nol tanpa cache menghasilkan zip yang identik, dengan SHA-256
+`f508c0937e7c1faee1b38402eee29835ff6d5ed1dc542442e2edc66b75af7f8f`. Inferensi AI-nya deterministik pada
+jumlah thread yang sama, dan penempatan dekorasi memakai seed tetap.
 
 | Tool | Fungsi |
 |---|---|
 | `sr_model.py` | muat bobot Real-ESRGAN tanpa torch, campur denoise, ekspor ONNX, upscale ×2 per tile |
-| `map_hd.py` | pembersihan painterly (Kuwahara), palet premium, kilau ornamen, sharpening tepi, grading (lebih gelap) |
-| `map_bake.py` | bayangan bangunan + AO dari geometri, posisi dunia per texel, relief/AO celah/kilau PBR, cubemap air |
+| `map_hd.py` | pembersihan painterly (Kuwahara), palet natural (referensi Dota 2), kilau ornamen, sharpening tepi, grading |
+| `map_decor.py` | bangkai monster dan daun gugur: sprite prosedural dengan height map, penempatan di koordinat dunia, pencahayaan dan bayangan kontak |
+| `map_trees.py` | pohon baru: kloning pohon pinggir map ke tebing luar, aturan jarak dari lane dan garis pandang kamera |
+| `map_bake.py` | bayangan bangunan + AO dari geometri, posisi dunia per texel, relief (dua skala)/AO celah/kilau PBR, cubemap air |
 | `map_fx.py` + `map_fx_templates.json` | efek ambient baru dan penyisipannya ke scene (template tipe ParticleSystem Unity 2019.4.33f1) |
 | `build_map.py` | build lengkap scene High |
 | `validate_map.py` | validasi di atas |
-| `map_render.py`, `map_previews.py` | render peta tampak atas (dengan props dan foliage alpha-test) dan pratinjau |
+| `map_render.py`, `map_previews.py` | render peta tampak atas dan dari kamera game (perspektif, lightmap baked, foliage alpha-test) serta pratinjau |
 | `pack_like.py` | zip dengan entri / urutan / kompresi sama seperti zip asli |
