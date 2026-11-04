@@ -115,6 +115,31 @@ def ground_heightmap(ground):
     return hm.astype(np.float32)
 
 
+def clip_above(tris, d, eps=0.02):
+    """Clip triangles (N,3,3) to the part where d > 0 (d = height above the local ground per vertex).
+    Returns triangles (M,3,3); fully buried triangles disappear, partly buried ones are cut at the ground."""
+    pos = d > eps
+    full = pos.all(1)
+    out = [tris[full]]
+    mixed = np.where(pos.any(1) & ~full)[0]
+    extra = []
+    for i in mixed:
+        P, dd = tris[i], d[i]
+        poly = []
+        for a in range(3):
+            b = (a + 1) % 3
+            if dd[a] > eps:
+                poly.append(P[a])
+            if (dd[a] > eps) != (dd[b] > eps):
+                u = (dd[a] - eps) / (dd[a] - dd[b])
+                poly.append(P[a] + (P[b] - P[a]) * u)
+        for k in range(1, len(poly) - 1):
+            extra.append((poly[0], poly[k], poly[k + 1]))
+    if extra:
+        out.append(np.array(extra))
+    return np.concatenate(out) if out else np.zeros((0, 3, 3))
+
+
 def shadow_ao_maps(props, hm):
     """World-space (grid) cast-shadow and contact-AO maps, both 0..1."""
     import cv2
@@ -131,24 +156,23 @@ def shadow_ao_maps(props, hm):
         if any(s in name.lower() for s in SKIP_PROPS):
             continue
         tris = world_tris(M, d)
-        # buried geometry casts nothing: drop triangles fully under the ground, lift partly buried vertices
-        hv = h_at(tris[..., 0].ravel(), tris[..., 2].ravel()).reshape(-1, 3)
-        keep = (tris[..., 1] > hv + 0.03).any(1)
-        tris = tris[keep].copy()
-        hv = hv[keep]
-        tris[..., 1] = np.maximum(tris[..., 1], hv)
-        P = tris.reshape(-1, 3)
+        # only the part ABOVE the ground casts a shadow: clip every triangle at the local ground height
+        dv = tris[..., 1] - h_at(tris[..., 0].ravel(), tris[..., 2].ravel()).reshape(-1, 3)
+        polys = clip_above(tris, dv)
+        if not len(polys):
+            continue
+        P = polys.reshape(-1, 3)
         t = np.maximum((P[:, 1] - h_at(P[:, 0], P[:, 2])) / -L[1], 0)
         Q = P + L * t[:, None]
         t = np.maximum((P[:, 1] - h_at(Q[:, 0], Q[:, 2])) / -L[1], 0)
         Q = P + L * t[:, None]
         gx, gy = to_grid(Q[:, 0], Q[:, 2])
         fill_tris(shadow, np.stack([gx, gy], -1).reshape(-1, 3, 2))
-        # contact footprint: geometry within 0.9 m of the ground, projected straight down
+        # contact footprint: above-ground geometry within 0.9 m of the ground, projected straight down
         above = (P[:, 1] - h_at(P[:, 0], P[:, 2])).reshape(-1, 3)
         low = above.min(1) < 0.9
         if low.any():
-            fx, fy = to_grid(tris[low][..., 0], tris[low][..., 2])
+            fx, fy = to_grid(polys[low][..., 0], polys[low][..., 2])
             fill_tris(foot, np.stack([fx, fy], -1))
     px = PPM
     soft = cv2.GaussianBlur(shadow, (0, 0), 0.12 * px) * 0.65 + cv2.GaussianBlur(shadow, (0, 0), 0.45 * px) * 0.35
@@ -243,8 +267,8 @@ def relief_pbr(rgb, light_dir_tex=(-0.6, -0.8), emboss=0.10, cavity=0.16, sheen=
 
 # ------------------------------------------------------------------ reflection cubemap (SSR substitute)
 def upgrade_cubemap(tt, encode_astc, size=128):
-    """Sharper, higher resolution water reflection: each 32 px face (face-major data) -> 128 px with a richer
-    sky gradient and a crisper sun glint; full mip chain, ASTC 6x6."""
+    """Sharper, higher resolution water reflection: each 32 px face (face-major data) -> 128 px, graded like the
+    darker ground (never brighter than the original); full mip chain, ASTC 6x6."""
     import cv2
     import texture2ddecoder
     from PIL import Image
@@ -265,10 +289,10 @@ def upgrade_cubemap(tt, encode_astc, size=128):
         o = 2 * size // w
         big = np.clip(big[o:o + size, o:o + size], 0, 1)
         rgb = big[..., :3]
-        Lm = rgb @ np.array([0.299, 0.587, 0.114], np.float32)
-        glint = _ss(0.45, 0.8, Lm)[..., None]
-        rgb = rgb * (1 + 0.35 * glint) + (rgb - cv2.GaussianBlur(rgb, (0, 0), 2.0)) * 0.6
-        rgb = rgb * np.array([0.96, 1.0, 1.06], np.float32)          # cleaner, slightly deeper blue sky
+        # same darker grade as the ground (the river surface mesh also covers the banks: a brighter reflection
+        # than the original would show the mesh outline as a lighter, hard-edged layer); only sharper, no boost
+        rgb = np.clip(rgb + (rgb - cv2.GaussianBlur(rgb, (0, 0), 2.0)) * 0.4, 0, 1)
+        rgb = (rgb ** 1.08) * 0.92
         big[..., :3] = np.clip(rgb, 0, 1)
         new_faces.append(Image.fromarray((big * 255 + 0.5).astype(np.uint8), 'RGBA'))
     mips = int(math.log2(size)) + 1
@@ -286,7 +310,9 @@ def upgrade_cubemap(tt, encode_astc, size=128):
     return tt
 
 
-WATER_TWEAKS = {'_Water_Cube_Intensity': 0.8, '_Reflection_Fresnel_Intensity': 0.85}
+# The river surface meshes cover the banks too (their vertex mask is full everywhere), so any stronger
+# reflection than the original shows their rectangular outline in game. Water materials stay untouched.
+WATER_TWEAKS = {}
 
 
 def tweak_water_material(tt):

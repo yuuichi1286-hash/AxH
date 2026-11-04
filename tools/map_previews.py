@@ -118,7 +118,7 @@ def simulate(extent, ppm, enlarge, seed=3):
     return Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8))
 
 
-views = [('Sungai + lubang Lord/Turtle: kilau, kabut, aura', (-11, 11, 12, 30), 40),
+views = [('Sungai + lubang Lord/Turtle: kilau sungai, aura', (-11, 11, 12, 30), 40),
          ('Jungle: kunang-kunang + debu cahaya', (-27, -5, 6, 24), 40),
          ('Base: kilau naik di sekitar orb', (-58, -42, -7, 7), 50),
          ('Tepi atas: daun berguguran', (-12, 12, 34, 50), 34)]

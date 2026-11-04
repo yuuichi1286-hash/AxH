@@ -36,7 +36,20 @@ gambar tampak atas adalah posisi tower.
 - **AO:** gelap kontak di kaki bangunan, ditambah AO celah di dalam tekstur.
 - **Emboss / relief:** permukaan batu, ukiran lane, dan props terlihat timbul.
 - **Kilau ala PBR:** batu dan logam memantulkan cahaya, sedangkan rumput tetap matte.
-- **Pantulan air ala SSR:** cubemap pantulan sungai 32 → 128 px dan pantulan sedikit lebih kuat.
+- **Pantulan air ala SSR:** cubemap pantulan sungai 32 → 128 px, lebih tajam dan diberi grading gelap yang sama.
+
+### Perbaikan: garis lurus / "terpotong" di dalam game
+
+Di versi sebelumnya ada area berkabut dengan garis lurus di sekitar sungai dan pit, seperti layar terpotong. Ada dua
+penyebab, dan keduanya sudah diperbaiki:
+
+1. **Efek kabut sungai.** Partikelnya besar (hingga ±8 m) dan selalu menghadap kamera. Shader efek game tidak punya
+   *soft particle*, jadi bidang kabut terpotong lurus di tempat ia menembus tanah, pohon, atau batu. Area di
+   belakangnya terlihat seperti lapisan kabut bertepi tajam. **Efek kabut dihapus.** Kilau sungai juga dinaikkan
+   supaya tidak menembus permukaan air.
+2. **Pantulan air.** Mesh permukaan air menutupi sungai, pit, dan tepiannya dalam bentuk persegi panjang. Kalau
+   pantulannya lebih terang dari aslinya, tepi persegi itu ikut terlihat. Material air sekarang **kembali ke nilai
+   aslinya**, dan cubemap dibuat sedikit lebih gelap, tidak lebih terang.
 
 > **Kenapa "baked":** SSR, shader PBR, dan shadow real-time adalah fitur renderer dan shader game. Keduanya ada di
 > engine dan bundle shader MLBB, bukan di file map, jadi tidak bisa dinyalakan dari map. Karena itu semuanya saya
@@ -101,8 +114,9 @@ Di petak tanah (sekitar 1,3 cm per texel setelah 2×), sungai sengaja dibiarkan 
 - **Kilau ala PBR:** specular dengan *half-vector* cahaya-kamera hanya di area batu dan logam (saturasi rendah,
   terang). Rumput dan daun hampir tanpa kilau, jadi materialnya terbedakan.
 - **Pantulan air (pengganti SSR):**
-  - Cubemap pantulan sungai 32 → 128 px dengan kilau matahari lebih tegas.
-  - Pada 8 material air, intensitas cubemap dinaikkan 0,6 → 0,8 dan fresnel 0,7 → 0,85.
+  - Cubemap pantulan sungai 32 → 128 px, lebih tajam, dengan grading gelap yang sama seperti tanah.
+  - Material air tidak diubah. Mesh air menutupi tepian sungai juga, jadi pantulan yang lebih kuat akan membuat tepi
+    mesh-nya terlihat.
 
 ![Pantulan air](docs/previews/8_pantulan_air.png)
 ![Tekstur props](docs/previews/4_tekstur_props.png)
@@ -129,7 +143,7 @@ Grading sinematik yang sama untuk tanah, props, langit, dan lightmap, jadi semua
 - Rumput dan daun cut-out sengaja tanpa mipmap, supaya tidak menipis.
 - Bayangan, AO, relief, dan kilau semuanya baked, jadi tidak ada biaya render tambahan.
 - **Efek baru dibuat seringan mungkin:**
-  - Total ±237 partikel dari 13 sistem.
+  - Total ±228 partikel dari 12 sistem.
   - Tanpa modul Noise atau Collision.
   - Simulasi world-space dengan *prewarm*, plus culling otomatis.
   - Hanya 4 tekstur kecil.
@@ -142,7 +156,6 @@ Grading sinematik yang sama untuk tanah, props, langit, dan lightmap, jadi semua
 |---|---|---|
 | Kunang-kunang (4 area) | keempat area jungle | titik cahaya emas-hijau, melayang meliuk, berkedip |
 | Kilau sungai | permukaan sungai | bintang kecil toska-putih berkelip, berputar |
-| Kabut sungai | rendah di atas sungai | gumpalan kabut tipis bergerak pelan, membesar sambil memudar |
 | Aura lubang Lord / Turtle (2) | kedua *pit* | partikel cahaya toska → ungu naik perlahan |
 | Kilau base (2) | sekitar orb kedua base | bintang putih-emas naik berputar. Warnanya netral, jadi tetap cocok saat warna tim ditukar |
 | Debu cahaya | seluruh peta | butiran cahaya kecil melayang di udara |
@@ -168,15 +181,15 @@ Cara efek disisipkan:
 
 - 7 file selain scene High identik byte-per-byte.
 - Header bundle dan nama file internal sama. Tidak ada objek asli yang hilang atau berubah tipe.
-- Semua objek asli selain tekstur identik byte-per-byte, dengan tiga pengecualian:
+- Semua objek asli selain tekstur identik byte-per-byte, termasuk semua material (juga 8 material air). Ada dua
+  pengecualian:
   - PreloadData: ditambah 2 shader efek.
-  - Cubemap air: diganti versi 128 px.
-  - 8 material air: hanya dua nilai pantulan yang berubah, dan ini diperiksa.
-- 1290 objek terbaca ulang lewat typetree.
-- 74 tekstur ter-decode. Ukuran data cocok dengan format dan mipmap. Isi dan orientasinya berkorelasi dengan
+  - Cubemap air: diganti versi 128 px (orientasi sama, tidak lebih terang).
+- 1284 objek terbaca ulang lewat typetree.
+- 73 tekstur ter-decode. Ukuran data cocok dengan format dan mipmap. Isi dan orientasinya berkorelasi dengan
   aslinya, tidak ada yang terbalik.
 - Cubemap: ukuran per sisi dan total cocok. Keenam sisinya berisi, dengan orientasi yang sama seperti aslinya.
-- Objek yang ditambahkan persis sesuai rencana: 13 sistem efek + 1 root, 4 material, 4 tekstur. Semua referensinya
+- Objek yang ditambahkan persis sesuai rencana: 12 sistem efek + 1 root, 3 material, 3 tekstur. Semua referensinya
   valid (komponen, hierarki, material → tekstur dan shader, PreloadData).
 - Kapasitas partikel cukup. Total partikel di bawah anggaran 260.
 
@@ -202,7 +215,7 @@ python tools/pack_like.py Sanctum_Island_Map.zip out Sanctum_Island_Map_HD.zip
 
 Build dari nol memakan ±15 menit dengan 4 core. Kalau variabel `MAP_SR_CACHE=<folder>` diisi, hasil AI disimpan di
 cache dan build berikutnya ±6 menit, dengan hasil yang identik. Zip-nya (SHA-256
-`48cc163c5c244357bd4a58d5336a98915d6abb00b84d7cd1c862d3dd38a1a54f`) bisa direproduksi. Inferensi AI-nya
+`6a67828208a664c2e8244b8ef1d1083f857ed2c4725df8552665d6bbd4cd9eed`) bisa direproduksi. Inferensi AI-nya
 deterministik pada jumlah thread yang sama.
 
 | Tool | Fungsi |

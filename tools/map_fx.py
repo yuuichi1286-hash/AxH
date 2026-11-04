@@ -124,7 +124,8 @@ def tex_glow(n=64):
     r = np.sqrt(x * x + y * y)
     a = np.exp(-(r / 0.42) ** 2) * 0.75 + np.exp(-(r / 0.13) ** 2) * 0.6
     a = np.clip(a * np.clip(1 - r, 0, 1) ** 0.5, 0, 1)
-    return np.dstack([np.ones_like(a)] * 3 + [a])
+    rgb = np.clip(a * 2.5, 0, 1)            # white where visible, black outside: right with or without alpha use
+    return np.dstack([rgb, rgb, rgb, a])
 
 
 def tex_sparkle(n=64):
@@ -133,7 +134,9 @@ def tex_sparkle(n=64):
     ray = np.exp(-(np.abs(x) / 0.035)) * np.exp(-(np.abs(y) / 0.75) ** 2) + np.exp(-(np.abs(y) / 0.035)) * np.exp(-(np.abs(x) / 0.75) ** 2)
     diag = (np.exp(-np.abs(x - y) / 0.05) + np.exp(-np.abs(x + y) / 0.05)) * np.exp(-(r / 0.35) ** 2) * 0.35
     a = np.clip(ray + diag + np.exp(-(r / 0.12) ** 2), 0, 1) * np.clip(1 - r, 0, 1)
-    return np.dstack([np.ones_like(a)] * 3 + [np.clip(a, 0, 1)])
+    a = np.clip(a, 0, 1)
+    rgb = np.clip(a * 2.5, 0, 1)
+    return np.dstack([rgb, rgb, rgb, a])
 
 
 def tex_mist(n=128, seed=7):
@@ -149,7 +152,8 @@ def tex_mist(n=128, seed=7):
     fall = np.clip(1 - r, 0, 1) ** 1.6
     a = np.clip((acc * 0.75 + 0.25) * fall * 1.25, 0, 1)
     a = cv2.GaussianBlur(a, (0, 0), 1.2)
-    return np.dstack([np.ones_like(a)] * 3 + [a])
+    rgb = np.clip(a * 3.0, 0, 1)
+    return np.dstack([rgb, rgb, rgb, a])
 
 
 def tex_leaf(n=64):
@@ -163,12 +167,11 @@ def tex_leaf(n=64):
     veins = 0.12 * (np.sin((xr * 9 + np.abs(yr) * 7) * np.pi) > 0.6) * np.clip(half - np.abs(yr), 0, 1) / 0.36
     shade = 0.72 + 0.28 * (1 - np.abs(yr) / 0.36) - 0.18 * rib - veins
     a = cv2.GaussianBlur(inside.astype(np.float32), (0, 0), 0.6)
-    v = np.clip(shade, 0, 1)
+    v = np.clip(shade, 0, 1) * np.clip(a * 3.0, 0, 1)   # nothing visible outside the leaf in any channel
     return np.dstack([v, v, v, a])
 
 
-TEXTURES = {'FX_Sanctum_glow': tex_glow, 'FX_Sanctum_sparkle': tex_sparkle, 'FX_Sanctum_mist': tex_mist,
-            'FX_Sanctum_leaf': tex_leaf}
+TEXTURES = {'FX_Sanctum_glow': tex_glow, 'FX_Sanctum_sparkle': tex_sparkle, 'FX_Sanctum_leaf': tex_leaf}
 
 
 # ------------------------------------------------------------------ the ambient effects
@@ -181,14 +184,12 @@ def effects():
         E.append(dict(name=f'FX_Fireflies_{i + 1}', pos=(x, 1.1, z), box=(20, 1.6, 20), tex='FX_Sanctum_glow', blend='add',
                       rate=3.5, life=(4.0, 6.5), size=(0.16, 0.3), vel=((-0.25, 0.25), (-0.05, 0.12), (-0.25, 0.25)),
                       colors=gold, alphas=flicker, wave=0.35, maxp=40))
-    E.append(dict(name='FX_River_Sparkles', pos=(0, 0.12, 0), box=(10, 0.05, 56), tex='FX_Sanctum_sparkle', blend='add',
+    E.append(dict(name='FX_River_Sparkles', pos=(0, 0.3, 0), box=(10, 0.05, 56), tex='FX_Sanctum_sparkle', blend='add',
                   rate=18.0, life=(0.5, 1.0), size=(0.2, 0.4), vel=((0, 0), (0, 0.02), (0, 0)),
                   colors=[(0.0, (0.75, 1.0, 1.0)), (1.0, (0.55, 0.9, 1.0))],
                   alphas=[(0.0, 0.0), (0.25, 1.0), (0.55, 0.8), (1.0, 0.0)], spin=(40, 120), maxp=24))
-    E.append(dict(name='FX_River_Mist', pos=(0, 0.35, 0), box=(9, 0.2, 54), tex='FX_Sanctum_mist', blend='blend',
-                  rate=0.75, life=(9.0, 13.0), size=(3.5, 6.0), vel=((-0.12, 0.12), (0.0, 0.03), (-0.2, 0.2)),
-                  colors=[(0.0, (0.82, 0.97, 1.0)), (1.0, (0.9, 1.0, 1.0))],
-                  alphas=[(0.0, 0.0), (0.3, 0.16), (0.7, 0.14), (1.0, 0.0)], spin=(-8, 8), grow=1.35, maxp=16))
+    # (no river mist: large camera-facing quads are cut by the ground / trees in game - the effect shaders have
+    #  no soft particles - which showed as hard straight-edged haze)
     for i, z in enumerate((21.4, -21.4)):
         E.append(dict(name=f'FX_Pit_Aura_{i + 1}', pos=(0.4 if z > 0 else -0.4, 0.6, z), box=(6.5, 0.3, 6.5), tex='FX_Sanctum_glow',
                       blend='add', rate=7.0, life=(2.5, 4.0), size=(0.12, 0.26), vel=((-0.08, 0.08), (0.45, 0.9), (-0.08, 0.08)),

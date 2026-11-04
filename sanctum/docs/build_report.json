@@ -1087,16 +1087,6 @@
   "foliage": 2,
   "noise": 1
  },
- "water_materials": [
-  "PVP_049_2026s3_hedaobake_03",
-  "PVP_049_2026s3_hedaobake_06",
-  "PVP_049_2026s3_hedaobake_07",
-  "PVP_049_2026s3_hedaobake_08",
-  "PVP_049_2026s3_hedaobake_09",
-  "PVP_049_2026s3_hedaobake_10",
-  "PVP_049_2026s3_hedaobake_11",
-  "PVP_049_2026s3_hedaobake_14"
- ],
  "cubemap": {
   "5v5_cube_water": {
    "before": [
@@ -1118,7 +1108,6 @@
    "FX_Fireflies_3",
    "FX_Fireflies_4",
    "FX_River_Sparkles",
-   "FX_River_Mist",
    "FX_Pit_Aura_1",
    "FX_Pit_Aura_2",
    "FX_Base_Sparkles_1",
@@ -1127,20 +1116,19 @@
    "FX_Falling_Leaves_1",
    "FX_Falling_Leaves_2"
   ],
-  "scene_objects_added": 54,
-  "shared_objects_added": 8,
-  "estimated_particles_alive": 237,
-  "materials": 4,
+  "scene_objects_added": 50,
+  "shared_objects_added": 6,
+  "estimated_particles_alive": 228,
+  "materials": 3,
   "textures": [
    "FX_Sanctum_glow",
    "FX_Sanctum_sparkle",
-   "FX_Sanctum_mist",
    "FX_Sanctum_leaf"
   ]
  },
- "_build_seconds": 388.1,
+ "_build_seconds": 190.7,
  "_size": {
   "before": 10062779,
-  "after": 54602831
+  "after": 54593666
  }
 }

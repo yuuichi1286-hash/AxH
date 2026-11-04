@@ -5,7 +5,7 @@
 >
 > **Map:** [Sanctum Island — HD Remaster (grafik High)](sanctum/README.md). Tekstur di-upscale AI 2×, warna lebih
 > gelap, rumput/tanah lebih detail, bayangan bangunan + AO + emboss/PBR (baked), pantulan air lebih tajam,
-> mipmap untuk tampilan halus, dan 13 efek ambient baru.
+> mipmap untuk tampilan halus, dan 12 efek ambient baru.
 
 **Unduh:** [`release/Hidan.Revamp.v4.zip`](release/Hidan.Revamp.v4.zip)
 
