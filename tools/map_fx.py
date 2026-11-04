@@ -191,30 +191,14 @@ TEXTURES = {'FX_Sanctum_glow': tex_glow, 'FX_Sanctum_sparkle': tex_sparkle, 'FX_
 
 
 # ------------------------------------------------------------------ the ambient effects
-# Leaf canopies of every tree: (x, canopy top y, z, size x, size z). The 15 edge trees' canopies (outsideleaf_01-15)
-# are measured from their meshes (10-90 % range of the upper leaf cards); the last 7 are the new trees of
-# map_trees.PLACEMENTS.
+# Leaf canopies of the map's 15 edge trees (outsideleaf_01-15): (x, canopy top y, z, size x, size z), measured from
+# their meshes (10-90 % range of the upper leaf cards).
 CANOPIES = [
     (-53.7, 4.2, -7.5, 16.0, 7.2), (-43.3, 2.5, 12.4, 9.6, 9.7), (52.0, 0.9, 5.1, 12.1, 7.5), (6.5, 2.9, 44.4, 13.6, 9.2),
     (-37.7, -0.1, 21.7, 13.1, 2.5), (-22.0, 2.1, 31.2, 2.4, 1.6), (37.6, 0.6, -17.5, 4.2, 6.1), (54.7, 1.5, -5.8, 13.0, 5.0),
     (-56.9, 7.1, 3.9, 9.3, 4.3), (13.9, 1.5, -39.4, 1.2, 2.7), (7.6, 6.4, -47.4, 3.3, 4.0), (-31.6, 0.9, -22.1, 8.5, 7.7),
     (-11.5, 2.3, -42.6, 8.1, 9.6), (34.8, 0.9, 20.2, 4.5, 3.8), (-7.8, 2.9, 46.6, 8.4, 3.5),
-    (22.1, 3.5, 34.4, 4.2, 8.0), (44.0, 0.4, -12.0, 6.7, 4.9), (32.7, 1.7, -23.6, 7.6, 5.6), (-23.2, 2.5, -33.2, 6.7, 6.6),
-    (-44.8, 1.6, -11.6, 8.3, 6.1), (-22.4, 1.8, 32.8, 5.8, 6.0), (14.4, 4.8, -47.7, 9.3, 6.8),
 ]
-
-
-# Blossom canopies (map_trees.BLOSSOM_LANE, then BLOSSOM_WALL): (x, canopy top y, z, size x, size z, variant)
-BLOSSOM_CANOPIES = [
-    (18.0, 2.6, 41.8, 7.1, 3.4, 'pink'), (26.1, 3.4, 27.9, 6.6, 4.9, 'lilac'), (44.6, 1.7, 11.6, 6.6, 4.9, 'pink'),
-    (-16.2, 1.1, 41.9, 3.9, 6.8, 'lilac'), (22.3, 1.7, -32.8, 4.9, 6.6, 'lilac'), (-40.1, 1.0, -17.7, 3.7, 7.1, 'pink'),
-    (-30.4, 1.6, 25.8, 4.9, 6.6, 'pink'),
-    (24.9, 2.9, -13.7, 2.1, 3.6, 'pink'), (-17.3, 3.3, 21.4, 2.5, 3.4, 'lilac'), (7.6, 3.3, -30.7, 2.1, 3.6, 'lilac'),
-    (-9.1, 3.8, 28.7, 1.9, 3.7, 'pink'), (16.6, 3.0, -21.9, 2.1, 3.6, 'pink'), (-14.1, 4.0, -16.1, 3.1, 1.5, 'pink'),
-    (-17.3, 3.0, 13.2, 2.1, 2.9, 'pink'), (3.8, 2.8, 32.4, 1.6, 3.1, 'lilac'), (-12.9, 2.6, -5.0, 2.8, 1.5, 'lilac'),
-    (11.2, 2.6, 14.5, 2.6, 1.9, 'lilac'),
-]
-PETAL_TINTS = {'pink': ((0.80, 0.58, 0.64), (0.94, 0.76, 0.80)), 'lilac': ((0.62, 0.58, 0.80), (0.82, 0.78, 0.93))}
 
 
 def effects():
@@ -246,7 +230,7 @@ def effects():
                   rate=6.0, life=(7.0, 10.0), size=(0.08, 0.15), vel=((-0.15, 0.15), (-0.03, 0.08), (-0.15, 0.15)),
                   colors=[(0.0, (1.0, 0.97, 0.88)), (1.0, (0.92, 1.0, 0.95))],
                   alphas=[(0.0, 0.0), (0.2, 0.55), (0.8, 0.5), (1.0, 0.0)], wave=0.25, maxp=80))
-    # leaves fall from where the leaves are: one small emitter inside every tree canopy, the leaf shape of the map's
+    # leaves fall from where the leaves are: one small emitter inside every edge-tree canopy, the leaf shape of the map's
     # own trees and their natural green (the leaf texture is recoloured from teal to natural green in the build)
     leaf_tints = ((0.24, 0.36, 0.15), (0.34, 0.47, 0.20))
     for i, (x, ytop, z, sx, sz) in enumerate(CANOPIES):
@@ -257,17 +241,6 @@ def effects():
                       colors=[(0.0, (1.0, 1.0, 1.0)), (1.0, (0.9, 0.92, 0.9))], tint2=leaf_tints,
                       alphas=[(0.0, 0.0), (0.1, 0.95), (0.8, 0.9), (1.0, 0.0)], wave=0.45, spin=(-110, 110),
                       maxp=int(math.ceil(rate * 6.5 * 1.4)) + 2))
-    # petals drift down from the blossom trees: same leaf sprite, smaller, in the canopy's own muted pink / lilac
-    for i, (x, ytop, z, sx, sz, var) in enumerate(BLOSSOM_CANOPIES):
-        bx, bz = max(sx, 1.5), max(sz, 1.5)
-        big = bx * bz > 12
-        rate = 0.3 if big else 0.2
-        E.append(dict(name=f'FX_Blossom_Petals_{i + 1}', pos=(x, ytop - 0.4, z), box=(bx, 0.6, bz), tex='FX_Sanctum_leaf',
-                      blend='blend', rate=rate, life=(4.0, 6.0) if big else (3.5, 5.0), size=(0.12, 0.2),
-                      vel=((-0.25, 0.25), (-0.45, -0.3), (-0.2, 0.2)),
-                      colors=[(0.0, (1.0, 1.0, 1.0)), (1.0, (0.95, 0.95, 0.95))], tint2=PETAL_TINTS[var],
-                      alphas=[(0.0, 0.0), (0.12, 0.95), (0.8, 0.85), (1.0, 0.0)], wave=0.5, spin=(-140, 140),
-                      maxp=int(math.ceil(rate * (6.0 if big else 5.0) * 1.4)) + 2))
     return E
 
 

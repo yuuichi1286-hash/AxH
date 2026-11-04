@@ -17,10 +17,8 @@ identik byte-per-byte: versi Low `PVP_049_low`, data jalur/tembok A* (`*wall_add
 - Langit dan pulau melayang, 7 lightmap, rumput dan daun 3D, serta pantulan air.
 - Baru di v5:
   - Warna alami ala referensi Dota 2, tidak warna-warni.
-  - 7 pohon baru yang menempel di tembok lane, dan 22 efek daun jatuh dari setiap pohon.
-  - 17 pohon berbunga, salinan pohon asli map dengan warna pink kusam / lilac lembut yang senada dengan bunga di
-    tanah: 7 di tembok lane, 10 di atas tembok jungle, dengan kelopak yang berjatuhan.
-  - Bangkai monster, serta sedikit bunga kalem, kerikil, dan daun gugur di pinggiran rumput.
+  - Daun jatuh dari 15 pohon pinggir map, dengan bentuk dan warna daun pohonnya.
+  - Sedikit bunga kalem, kerikil, dan daun gugur di pinggiran rumput.
   - Relief yang lebih timbul.
 
 Gambar di bawah adalah seluruh peta beserta bangunannya: atas asli, bawah remaster.
@@ -33,12 +31,12 @@ gambar tampak atas adalah posisi tower.
 
 ![Peta sebelum / sesudah](docs/previews/1_peta_sebelum_sesudah.png)
 
-## Yang baru di v5: warna alami, pohon baru, bangkai monster, daun jatuh, relief lebih timbul
+## Yang baru di v5: warna alami, daun jatuh, dekorasi tanah, relief lebih timbul
 
 Gambar-gambar di bagian ini dirender dengan **sudut dan FOV kamera game asli** (`3DCamera_11` di scene) dan
 pencahayaan baked map: kiri asli, kanan v5.
 
-![Jungle: bangkai monster, warna alami](docs/previews/13_kamera_game_1.png)
+![Jungle: warna alami, daun gugur](docs/previews/13_kamera_game_1.png)
 
 ### Warna alami, referensinya screenshot Dota 2 (tidak warna-warni)
 
@@ -62,69 +60,27 @@ menyatu. Nuansa biru-toska yang menutupi map aslinya dibuang:
 - **Aksen magis tetap:** lingkaran rune biru, trim emas, serta kristal dan orb warna tim. Kristal dan orb sengaja tidak
   diubah warnanya karena warnanya diatur game per tim.
 
-### 7 pohon baru yang menempel di tembok lane
-
-- **Pohonnya** adalah kloning pohon pinggir map itu sendiri: batang `tree_04` dengan kanopi `outsideleaf_05`.
-  Ukurannya 1,15–1,6× dan rotasinya berbeda-beda.
-- **Menempel di tembok.** Batangnya berdiri tepat di kaki luar tembok lane (0,2–2 m dari sisi luar tembok), dengan
-  kanopi bersandar di puncak tembok atau di tebing di sebelahnya, seperti pohon pinggir map aslinya. Pohon tidak lagi
-  melayang jauh di tebing.
-- **Tidak menghalangi jalur sama sekali**, dan ini diperiksa otomatis oleh validator berdasarkan tepi area jalan yang
-  **diukur**, bukan ditebak:
-  - Seluruh geometri padat map dijadikan height map. Dari garis lane, map dipindai keluar tegak lurus setiap sisi
-    sampai bertemu puncak tembok (> 0,9 m) atau tebing turun (< -0,7 m). Titik itulah tepi area yang bisa dilewati.
-  - Tidak ada satu pun bagian pohon baru yang berada di atas area yang bisa dilewati.
-  - Garis pandang kamera game yang melewati daun atau batang pohon tidak jatuh ke area itu. Jadi pohon tidak pernah
-    menutupi lane, jalur jungle, atau hero. Arah kamera dibaca langsung dari kamera game di scene.
-  - Antarpohon berjarak minimal 8 m.
-- **Pencahayaannya sama dengan pohon aslinya.** Batang mendapat entri lightmap yang sama di
-  `BattleSceneDiffmapStorage`, sedangkan lightmap daun ada di materialnya.
-- **Tanpa aset baru.** Pohon baru memakai mesh dan material yang sama, sehingga tambahannya hanya 14 renderer
-  (±4.800 segitiga).
-
-![Pohon baru menempel di tembok lane](docs/previews/14_kamera_game_2.png)
-![Lane bawah + pohon baru di tembok](docs/previews/16_kamera_game_4.png)
-
-### 17 pohon berbunga, senada dengan bunga di tanah
-
-- **Salinan pohon asli map** (batang `tree_04` + kanopi `outsideleaf_05`), hanya warna kanopinya yang diganti.
-  Teksturnya dibuat dari atlas daun HD map: daun hijau diganti gradasi bunga mengikuti terang-gelap lukisan aslinya,
-  dan ±20% tetap berdaun hijau supaya alami.
-  - Batang dan akar tidak diubah.
-  - Tambahannya hanya 2 tekstur (1024², ASTC 6x6) dan 2 material, yaitu salinan material daun asli dengan peta warna
-    baru.
-- **Warna kalem** dari palet bunga di tanah, jadi tidak warna-warni: pink kusam ala sakura dan lilac lembut ala
-  wisteria.
-- **7 di tembok lane**, dengan aturan ketat yang sama seperti 7 pohon hijau: tidak ada bagian di atas area yang bisa
-  dilewati dan tidak menutupi jalur dari kamera.
-- **10 pohon ringkas di atas tembok jungle** (lebar 0,45–0,6×, tinggi 0,4–0,55×).
-  - Aturannya sama dengan semak asli di tembok jungle (`leaf_01`–`leaf_35`): kanopi menjorok paling jauh 0,5 m, dan
-    garis pandang kamera menembus paling jauh 0,75 m ke tepi jalur untuk paling banyak 25% titik.
-  - Pohon tidak punya collider, jadi gerakan hero tidak terhalang.
-- **Kelopak berjatuhan:** 17 emitter kecil, berwarna pink atau lilac sesuai pohonnya.
-
 ### Daun jatuh yang cocok dengan pohonnya
 
-- Daun **jatuh dari tempat daunnya berada**: ada satu emitter kecil di setiap kanopi, yaitu 15 pohon pinggir map dan
-  7 pohon baru, sehingga totalnya 22.
+- Daun **jatuh dari tempat daunnya berada**: ada satu emitter kecil di kanopi setiap pohon pinggir map, total 15.
 - **Bentuk daun** sama dengan daun pohon map: oval dengan ujung runcing dan tangkai, terlipat di tulang daun, dengan
   urat halus.
-- **Warnanya hijau alami** seperti daun pohonnya. Tekstur daun pohon ikut diubah dari toska ke hijau alami, dan tiap
-  daun jatuh acak di antara dua nada hijau. Daun kuning keemasan versi sebelumnya sudah diganti.
-- Total ±55 daun hidup sekaligus, ditambah ±20 kelopak dari 17 pohon berbunga. Seluruh efek ambient sekarang ±287
-  partikel dari 49 sistem.
+- **Warnanya hijau alami** seperti daun pohonnya, dan tiap daun acak di antara dua nada hijau.
+- Total ±40 daun hidup sekaligus. Seluruh efek ambient ±250 partikel dari 25 sistem.
+
+![Lane atas kiri + jungle](docs/previews/14_kamera_game_2.png)
+![Lane bawah](docs/previews/16_kamera_game_4.png)
 
 ### Dekorasi tanah baru
 
 Semua dekorasi ini dilukis ke tekstur 16 petak tanah, jadi tidak ada objek tambahan, beban FPS-nya nol, dan tidak ada
 yang bisa menghalangi gerakan.
 
-Semua dekorasi selain bangkai monster hanya muncul **di rumput dan di pinggiran**, yaitu di kaki tembok, batu, pohon,
+Semua dekorasi hanya muncul **di rumput dan di pinggiran**, yaitu di kaki tembok, batu, pohon,
 dan bangunan, 0,3–1,5 m dari tepinya. Tidak ada yang di tengah lane, di tanah terbuka, atau di air.
 
 | Dekorasi | Jumlah | Tempat |
 |---|---|---|
-| Bangkai monster: tengkorak bertanduk dengan gigi dan rongga mata, tulang belakang, dan tulang rusuk. Sebagian terkubur, berlumut, dengan noda tanah | 4 | di dalam jungle (posisinya dikunci), tidak pernah di lane atau sungai |
 | Rumpun bunga kecil: 3–8 bunga 5/6 kelopak dan daun | 116 (jarak antar rumpun ≥5,5 m) | rumput di kaki tembok dan batu |
 | Kelompok kerikil | 204 | rumput di kaki tembok dan batu |
 | Daun gugur: hijau, menguning, atau cokelat kering | 222 | rumput di sekitar tanaman yang tumbuh di dinding jungle |
@@ -331,13 +287,10 @@ Satu palet natural yang sama untuk tanah, props, foliage, langit, dan lightmap, 
 - Rumput dan daun cut-out sengaja tanpa mipmap, supaya tidak menipis.
 - Bayangan, AO, relief, dan kilau semuanya baked, jadi tidak ada biaya render tambahan.
 - **Efek baru dibuat seringan mungkin:**
-  - Total ±287 partikel dari 49 sistem. 39 di antaranya emitter daun atau kelopak kecil, masing-masing paling banyak
-    6 partikel.
+  - Total ±250 partikel dari 25 sistem. 15 di antaranya emitter daun kecil, masing-masing paling banyak 6 partikel.
   - Tanpa modul Noise atau Collision.
   - Simulasi world-space dengan *prewarm*, plus culling otomatis.
   - Hanya 4 tekstur kecil.
-- **Pohon baru:** 24 pohon (48 renderer, ±16.400 segitiga) memakai mesh yang sudah ada. Tambahannya hanya 2 tekstur
-  bunga (±0,9 MB) dan 2 material.
 - **Dekorasi tanah** ada di dalam tekstur yang sudah ada, jadi ukurannya tidak bertambah.
 - **Konsekuensi memori:**
   - Tekstur High naik dari 8,3 MB menjadi 68,4 MB. Sekitar 11 MB dari kenaikan itu karena props sekarang ASTC 6x6.
@@ -353,8 +306,8 @@ Satu palet natural yang sama untuk tanah, props, foliage, langit, dan lightmap, 
 | Aura lubang Lord / Turtle (2) | kedua *pit* | partikel cahaya toska → ungu naik perlahan |
 | Kilau base (2) | sekitar orb kedua base | bintang putih-emas naik berputar. Warnanya netral, jadi tetap cocok saat warna tim ditukar |
 | Debu cahaya | seluruh peta | butiran cahaya kecil melayang di udara |
-| Daun berguguran (22) | di bawah setiap kanopi pohon (15 pohon pinggir + 7 pohon baru) | daun hijau alami berbentuk daun pohon map, jatuh berputar dan bergoyang |
-| Kelopak berjatuhan (17) | di bawah setiap pohon berbunga | kelopak kecil pink kusam / lilac lembut, melayang turun |
+| Daun berguguran (15) | di bawah kanopi 15 pohon pinggir map | daun hijau alami berbentuk daun pohon map, jatuh berputar dan bergoyang |
+
 
 ![Efek baru (simulasi)](docs/previews/5_efek_baru_simulasi.png)
 
@@ -380,21 +333,13 @@ Cara efek disisipkan:
   pengecualian:
   - PreloadData: ditambah 2 shader efek.
   - Cubemap air: diganti versi 128 px (orientasi sama, tidak lebih terang).
-- 1422 objek terbaca ulang lewat typetree.
+- 1336 objek terbaca ulang lewat typetree.
 - 73 tekstur ter-decode. Ukuran data cocok dengan format dan mipmap. Isi dan orientasinya berkorelasi dengan
   aslinya, tidak ada yang terbalik.
 - Cubemap: ukuran per sisi dan total cocok. Keenam sisinya berisi, dengan orientasi yang sama seperti aslinya.
 - Objek yang ditambahkan persis sesuai rencana:
-  - 49 sistem efek + 1 root, 3 material efek, dan 3 tekstur efek.
-  - 24 pohon (48 bagian) + 1 root, ditambah 2 material bunga dan 2 tekstur bunga.
+  - 25 sistem efek + 1 root, 3 material efek, dan 3 tekstur efek.
   - Semua referensinya valid (komponen, hierarki, mesh, material → tekstur dan shader, PreloadData).
-- Pohon baru:
-  - Mesh dan material sama dengan pohon sumbernya.
-  - Pencahayaan baked sama dengan pohon sumbernya.
-  - Tidak ada bagian pohon di atas area yang bisa dilewati, berdasarkan tepi yang diukur dari geometri map.
-  - Garis pandang kamera game yang melewatinya tidak mengenai area itu.
-- Satu-satunya script yang berubah adalah tabel lightmap `BattleSceneDiffmapStorage`. Entri lamanya tetap sama
-  persis, dan hanya 24 entri batang pohon baru yang ditambahkan.
 - Kapasitas partikel cukup. Total partikel di bawah anggaran 300.
 
 Catatan: validasi ini memeriksa struktur file. Tampilan di dalam game belum bisa saya uji langsung di HP.
@@ -420,7 +365,7 @@ python tools/pack_like.py Sanctum_Island_Map.zip out Sanctum_Island_Map_HD.zip
 Build dari nol memakan ±15 menit dengan 4 core. Kalau variabel `MAP_SR_CACHE=<folder>` diisi, hasil AI
 disimpan di cache dan build berikutnya ±8 menit, dengan hasil yang identik.
 
-SHA-256 zip: `d5873a9ee667a7b370770931986dcdcf610ca4f334b75e22dd0dddf664932769`. Zip ini dibangun dengan cache hasil
+SHA-256 zip: `77512cbc90026d8999bec81ba946250124996d6d7b18dbda14df5c7a0f30479c`. Zip ini dibangun dengan cache hasil
 AI. Build-nya deterministik: inferensi AI memakai jumlah thread yang sama dan penempatan dekorasi memakai seed tetap.
 Versi sebelumnya sudah terbukti identik saat dibangun ulang dari nol tanpa cache.
 
@@ -428,9 +373,7 @@ Versi sebelumnya sudah terbukti identik saat dibangun ulang dari nol tanpa cache
 |---|---|
 | `sr_model.py` | muat bobot Real-ESRGAN tanpa torch, campur denoise, ekspor ONNX, upscale ×2 per tile |
 | `map_hd.py` | pembersihan painterly (Kuwahara), palet natural (referensi Dota 2), kilau ornamen, sharpening tepi, grading |
-| `map_decor.py` | bangkai monster, bunga kecil, kerikil, daun gugur: sprite prosedural dengan height map, penempatan di koordinat dunia (pinggiran rumput saja), pencahayaan dan bayangan kontak |
-| `map_trees.py` | pohon baru: kloning pohon pinggir map ke kaki luar tembok lane; height map geometri padat, tepi area jalan yang diukur, cek garis pandang kamera |
-| `map_bake.py` | bayangan bangunan + AO dari geometri, posisi dunia per texel, relief (dua skala)/AO celah/kilau PBR, cubemap air |
+| `map_decor.py` | bunga kecil, kerikil, daun gugur: sprite prosedural dengan height map, penempatan di koordinat dunia (pinggiran rumput saja), pencahayaan dan bayangan kontak |
 | `map_fx.py` + `map_fx_templates.json` | efek ambient baru dan penyisipannya ke scene (template tipe ParticleSystem Unity 2019.4.33f1) |
 | `build_map.py` | build lengkap scene High |
 | `validate_map.py` | validasi di atas |

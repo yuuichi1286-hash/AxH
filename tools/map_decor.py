@@ -1,12 +1,11 @@
 """Ground decoration for Sanctum Island (High), painted into the 16 ground tiles:
 
-* monster carcasses: a horned beast skull with spine and ribs, half sunk into the ground, mossy, with a soil stain
 * a few small flower clumps in muted colours, pebbles, and fallen leaves - only on grass along the edges (the foot of
   walls, rocks, trees and buildings), never in open lanes
 
 Placement is in WORLD space (seamless across tiles) with a fixed seed and mirrored through the map centre, so both
-teams get the same scenery. Lanes stay clear: the carcasses lie only inside the jungle (never on a lane or in the
-river), the fallen leaves never on the stone lanes. Every decal has its own height map: it is lit with the map's light direction, casts a short contact
+teams get the same scenery. Lanes stay clear: everything sits on grass at the foot of walls,
+rocks, trees and buildings. Every decal has its own height map: it is lit with the map's light direction, casts a short contact
 shadow, and is drawn anti-aliased from 2x supersampled sprites (crisp, no blur, no grain).
 """
 import math
@@ -201,103 +200,6 @@ def sprite_leaf(rng):
     return S.finish(0.5)
 
 
-def sprite_carcass(rng):
-    """horned beast skull + spine + ribs, half sunk, mossy (top view, ~4.6 m long)"""
-    import cv2
-    S = Sprite(5.8)
-    bone = np.array([0.70, 0.65, 0.53])                    # weathered bone (pre-grade)
-
-    def bone_col(t, rr):
-        k = 0.82 + 0.18 * (1 - np.clip(rr, 0, 1) ** 2)
-        return np.clip(bone * k[..., None], 0, 1)
-
-    L = rng.uniform(2.6, 3.2)                       # spine length
-    bend = rng.uniform(0.18, 0.35) * rng.choice([-1, 1])
-    ts = np.linspace(0, 1, 40)
-    sx = -0.9 + ts * L
-    sy = bend * np.sin(ts * math.pi * 1.2) + 0.05 * np.sin(ts * 9)
-
-    def spine(t):
-        i = min(int(t * 39), 38); f = t * 39 - i
-        p = np.array([sx[i] + (sx[i + 1] - sx[i]) * f, sy[i] + (sy[i + 1] - sy[i]) * f])
-        tg = np.array([sx[i + 1] - sx[i], sy[i + 1] - sy[i]]); tg /= np.linalg.norm(tg)
-        return p, tg, np.array([-tg[1], tg[0]])
-    # ribs first (lower), spine and skull on top
-    nr = rng.randint(6, 9)
-    for i in range(nr):
-        t = 0.06 + 0.5 * i / (nr - 1)
-        p, tg, nm = spine(t)
-        span = (1.0 - 0.45 * i / nr) * rng.uniform(0.85, 1.05)
-        for side in (-1, 1):
-            if rng.rand() < 0.12:
-                continue                              # a missing rib
-            smax = rng.uniform(0.6, 1.0) if rng.rand() < 0.3 else 1.0
-            ss_ = np.linspace(0, smax, 9)
-            pts = [p + nm * side * span * s + tg * (0.32 * s * s - 0.05 * s) for s in ss_]
-            S.tube(pts, list(0.075 - 0.04 * ss_), list(0.24 * (1 - 0.75 * ss_) + 0.02), bone_col)
-    nv = 18
-    for i in range(nv):
-        t = i / (nv - 1)
-        p, tg, nm = spine(t)
-        r = 0.16 - 0.10 * t
-        S.dome(p[0], p[1], r * 1.05, r * 0.8, math.atan2(tg[1], tg[0]), 0.26 - 0.16 * t,
-               _shade_fn(bone, tip=1.0, edge=0.35), power=0.6)
-        if i % 2 == 0 and t < 0.7:
-            S.dome(p[0], p[1], r * 0.3, r * 0.95, math.atan2(tg[1], tg[0]), 0.30 - 0.18 * t, _shade_fn(bone * 1.02))
-    # skull, looking toward -x
-    p, tg, nm = spine(0.0)
-    fwd = -tg
-    sk = p + fwd * 0.7
-    ang = math.atan2(fwd[1], fwd[0])
-    S.dome(sk[0], sk[1], 0.68, 0.52, ang, 0.55, _shade_fn(bone, tip=1.05, edge=0.3), power=0.55)
-    sn0 = sk + fwd * 0.38; sn1 = sk + fwd * 1.2
-    S.tube([sn0, sn1], [0.32, 0.18], [0.42, 0.26], bone_col)
-    for side in (-1, 1):                              # jaws + fangs
-        j0 = sk + nm * side * 0.3 + fwd * 0.2; j1 = sn1 + nm * side * 0.1 + fwd * 0.05
-        S.tube([j0, j1], [0.09, 0.06], [0.18, 0.13], bone_col)
-        for k in range(4):
-            q = j0 + (j1 - j0) * (0.35 + 0.17 * k) + nm * side * 0.05
-            S.dome(q[0], q[1], 0.045, 0.03, ang, 0.22, (0.80, 0.77, 0.68), power=0.4)
-    for side in (-1, 1):                              # horns sweeping back
-        b0 = sk + nm * side * 0.4 - fwd * 0.05
-        ss_ = np.linspace(0, 1, 12)
-        pts = [b0 + nm * side * (0.7 * s) - fwd * (1.3 * s - 0.4 * s ** 2.2) + nm * side * 0.3 * s ** 3 for s in ss_]
-        horn = np.array([0.50, 0.42, 0.32])                # dark horn
-        S.tube(pts, list(0.15 * (1 - ss_) + 0.015), list(0.5 * (1 - 0.55 * ss_)),
-               lambda t, rr, horn=horn: np.clip(horn * (0.8 + 0.25 * (1 - rr[..., None] ** 2)) * (1 - 0.25 * t[..., None]), 0, 1))
-    for side in (-1, 1):                              # eye sockets + nostrils
-        e = sk + fwd * 0.16 + nm * side * 0.26
-        S.dent(e[0], e[1], 0.15, 0.11, ang + side * 0.3, 0.18, (0.06, 0.05, 0.04))
-        nn = sn1 - fwd * 0.08 + nm * side * 0.06
-        S.dent(nn[0], nn[1], 0.04, 0.03, ang, 0.05, (0.1, 0.08, 0.07))
-    # moss on the low parts + half-buried: smooth low-frequency noise, never per-pixel grain
-    n = S.n
-    g = rng.rand(8, 8).astype(np.float32)
-    nz = cv2.resize(g, (n, n), interpolation=cv2.INTER_CUBIC)
-    low = np.clip(1 - S.h / 0.3, 0, 1)
-    S.c = S.c * (1 - 0.35 * low[..., None]) + np.array([0.30, 0.24, 0.16], np.float32) * 0.35 * low[..., None]
-    moss = _ss(0.5, 0.75, nz) * (S.h < 0.2) * (S.a > 0.5)
-    S.c = S.c * (1 - 0.8 * moss[..., None]) + np.array([0.24, 0.38, 0.16], np.float32) * 0.8 * moss[..., None]
-    g2 = rng.rand(6, 6).astype(np.float32)
-    bur = _ss(0.12, 0.3, cv2.resize(g2, (n, n), interpolation=cv2.INTER_CUBIC))
-    S.a *= np.where(S.h < 0.12, bur, 1.0)
-    return S.finish()
-
-
-def sprite_stain(rng, size=5.6):
-    """soft dark soil patch under a carcass"""
-    import cv2
-    S = Sprite(size)
-    n = S.n
-    y, x = (np.mgrid[0:n, 0:n].astype(np.float32) - n // 2) / SPPM
-    g = cv2.resize(rng.rand(6, 6).astype(np.float32), (n, n), interpolation=cv2.INTER_CUBIC)
-    r = np.sqrt((x / (size * 0.42)) ** 2 + (y / (size * 0.3)) ** 2) + (g - 0.5) * 0.25
-    S.a = (_ss(1.0, 0.45, r) * 0.32).astype(np.float32)
-    S.c[:] = np.array([0.30, 0.24, 0.16], np.float32)
-    S.c *= S.a[..., None]                                      # premultiplied, like finish()
-    return S
-
-
 # ================================================================== world classes + placement
 def world_classes(tiles):
     """tiles: {name: (original rgb HxWx3 (1024), xz map (2H x 2W x 2), coverage)} -> per grid cell colour masks"""
@@ -329,15 +231,6 @@ def _cell(x, z):
     return int((z1 - z) * GPPM), int((x - x0) * GPPM)
 
 
-# Monster carcasses on the blue half (mirrored through the map centre): x, z, rotation (deg), scale, sprite seed.
-# Found by a search for open jungle clearings (clear of walls and water, >= 9 m apart, never on a lane or in the
-# river) and then pinned to the spots the user approved, so later changes elsewhere can never move them.
-CARCASSES = [
-    (-20.95, -11.25, 128.935, 0.8697, 295269503),
-    (-10.45, -10.75, 177.972, 0.8842, 770912452),
-]
-
-
 def placements(classes, foot, wall_plants):
     """-> list of decals {kind, x, z, rot, scale, seed, variant}; generated on the blue half (x < 0) and mirrored
     through the map centre (x, z, rot) -> (-x, -z, rot + 180 deg)."""
@@ -354,13 +247,6 @@ def placements(classes, foot, wall_plants):
     zs_c = GRID[3] - (np.arange(H) + 0.5) / GPPM
     half = xs_c[None, :] < -0.3
     base = (np.abs(xs_c)[None, :] > 43) & (np.abs(zs_c)[:, None] < 13)
-    # lane model (the lanes here are mostly grass-coloured, so colour alone cannot find them): side lanes run along
-    # the diamond edges, the mid lane along z = 0, the river along x = 0
-    d_in = (1 - np.abs(xs_c)[None, :] / 50.0 - np.abs(zs_c)[:, None] / 44.0) * 33.0
-    side_lane = d_in < 8.5
-    mid_lane = (np.abs(zs_c)[:, None] < 5.5) & (np.abs(xs_c)[None, :] < 46)
-    river = np.abs(xs_c)[None, :] < 6.5
-    jungle = ~side_lane & ~mid_lane & ~river
 
     def poisson(ok, min_d, accept, n_try):
         ys, xs = np.nonzero(ok)
@@ -381,7 +267,7 @@ def placements(classes, foot, wall_plants):
             grid.setdefault((gi, gj), []).append((x, z)); pts.append((x, z))
         return pts
 
-    # everything except the carcasses lives only on GRASS along EDGES: the foot of walls, rocks, trees and buildings
+    # everything lives only on GRASS along EDGES: the foot of walls, rocks, trees and buildings
     edge = (wall_d > 0.3) & (wall_d < 1.5)
     # --- flowers: few small clumps in muted colours
     ok = half & edge & (G['grass'] > 0.65) & (G['water_d'] > 0.6) & (G['edge_d'] > 0.6)
@@ -409,23 +295,11 @@ def placements(classes, foot, wall_plants):
                     out.append(dict(kind='leaf', x=x, z=z, rot=rng.uniform(0, 360), scale=rng.uniform(0.85, 1.3),
                                     seed=int(rng.randint(1 << 30)), variant=0))
                     break
-    # --- monster carcasses: the pinned spots (see CARCASSES); each must still lie on open jungle ground, clear of
-    # walls and water, never on a lane or in the river
-    k = int(1.6 * GPPM)
-    clear = cv2.erode(((wall_d > 0.3) & (G['water_d'] > 0.2) & G['cover'] & (G['edge_d'] > 0.5)).astype(np.uint8),
-                      cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * k + 1, 2 * k + 1))) > 0
-    ok = clear & cv2.erode(jungle.astype(np.uint8), np.ones((31, 31), np.uint8)).astype(bool) & ~base
-    for x, z, rot, s, sd in CARCASSES:
-        r, c = _cell(x, z)
-        if not ok[r, c]:
-            raise ValueError(f'carcass at ({x}, {z}) is no longer on open jungle ground')
-        out.append(dict(kind='stain', x=x, z=z, rot=rot, scale=s, seed=sd, variant=0))
-        out.append(dict(kind='carcass', x=x, z=z, rot=rot, scale=s, seed=sd, variant=0))
     mirrored = [dict(d, x=-d['x'], z=-d['z'], rot=(d['rot'] + 180.0) % 360) for d in out]
     return out + mirrored
 
 
-ORDER = {'stain': 0, 'leaf': 1, 'pebbles': 2, 'flowers': 3, 'carcass': 4}
+ORDER = {'leaf': 0, 'pebbles': 1, 'flowers': 2}
 
 
 def make_sprite(d):
@@ -437,10 +311,6 @@ def make_sprite(d):
         return sprite_pebbles(rng)
     if k == 'leaf':
         return sprite_leaf(rng)
-    if k == 'carcass':
-        return sprite_carcass(rng)
-    if k == 'stain':
-        return sprite_stain(rng)
     raise ValueError(k)
 
 
@@ -494,10 +364,6 @@ def apply(rgb, xz, cov, tex_dir, decals, sprites):
         h = cv2.remap(S.h, mx, my, cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=0) * s
         a = a * cov[y0:y1, x0:x1]
         sl = (slice(y0, y1), slice(x0, x1))
-        if d['kind'] == 'stain':                               # flat tint of the ground only
-            C[sl] = C[sl] * (1 - a[..., None]) + c * a[..., None]
-            A[sl] = A[sl] + a * (1 - A[sl])
-            continue
         vis = a * (h >= Hh[sl] - 1e-4)
         C[sl] = C[sl] * (1 - vis[..., None]) + c * vis[..., None]
         A[sl] = A[sl] + vis * (1 - A[sl])

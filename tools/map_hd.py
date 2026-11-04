@@ -244,33 +244,6 @@ def naturalize(rgb, kind='ground'):
     return np.clip(hsv_rgb(hn, np.clip(sn, 0, 1), v), 0, 1)
 
 
-# Blossom canopies: muted tones that match the ground flowers (dusty pink, soft lilac), never saturated
-BLOSSOMS = {
-    'pink':  [(0.0, (0.36, 0.22, 0.27)), (0.35, (0.68, 0.47, 0.54)), (0.7, (0.90, 0.71, 0.77)), (1.0, (0.99, 0.89, 0.91))],
-    'lilac': [(0.0, (0.31, 0.28, 0.39)), (0.35, (0.57, 0.53, 0.69)), (0.7, (0.79, 0.76, 0.89)), (1.0, (0.94, 0.92, 0.98))],
-}
-
-
-def blossom(rgba, variant, seed=5):
-    """Leaf atlas -> blossom canopy: green leaf texels take the blossom ramp by brightness (keeping the painted
-    light / shade), with a few leafy green patches left (natural mix); bark, roots and transparent texels untouched."""
-    import cv2
-    x = rgba[..., :3].astype(np.float32)
-    h, s, v = rgb_hsv(x)
-    green = _ss(50, 70, h) * (1 - _ss(170, 190, h)) * _ss(0.12, 0.25, s)
-    L = cv2.GaussianBlur(lum(x), (0, 0), 0.6)
-    lo, hi = np.percentile(L[green > 0.5], [3, 97]) if (green > 0.5).any() else (0.05, 0.6)
-    t = np.clip((L - lo) / max(hi - lo, 1e-3), 0, 1)
-    target = _ramp(t, BLOSSOMS[variant])
-    H, W = L.shape
-    rng = np.random.RandomState(seed)
-    nz = cv2.resize(rng.rand(H // 48 + 2, W // 48 + 2).astype(np.float32), (W, H), interpolation=cv2.INTER_CUBIC)
-    keep_leaf = _ss(0.68, 0.8, nz)                 # ~20 % of the canopy stays green
-    w = (green * (1 - keep_leaf))[..., None]
-    out = x * (1 - w) + target * w
-    return np.dstack([np.clip(out, 0, 1), rgba[..., 3:4]]).astype(np.float32)
-
-
 def kuwahara(rgb, r=4, q=8.0, sectors=8):
     """Generalized Kuwahara filter (Papari et al. 2007): per pixel, the mean of the most uniform of 8 Gaussian-
     weighted angular sectors wins. Grain, blotches and compression noise flatten into clean painted shapes while

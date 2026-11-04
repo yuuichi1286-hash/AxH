@@ -179,7 +179,7 @@ print('ok 6-8')
 
 
 # 10+. game-camera perspective (orientation / FOV of the game's 3DCamera_11, baked lighting applied):
-# original (left) vs new (right): new trees, flowers, monster carcasses, pebbles, fallen leaves, relief
+# original (left) vs new (right): natural colours, flowers, pebbles, fallen leaves, relief
 FWD = np.array([0.542, -0.707, 0.455]); UP = np.array([0.542, 0.707, 0.455])
 
 
@@ -188,10 +188,10 @@ def cam(env, x, z, dist=24.0, size=(1280, 720)):
     return map_render.render_view(env, eye, FWD, UP, fov=30, size=size)
 
 
-cam_views = [('Jungle: bangkai monster, warna alami (kamera game)', -14.0, -10.0, 22.0),
-             ('Pohon baru menempel di tembok lane (kamera game)', -17.0, 29.0, 22.0),
-             ('Jungle atas: bunga kecil di kaki batu (kamera game)', -18.0, 20.0, 22.0),
-             ('Lane bawah + pohon baru di tembok (kamera game)', 27.0, -20.0, 24.0)]
+cam_views = [('Jungle: warna alami, daun gugur (kamera game)', -14.0, -10.0, 22.0),
+             ('Lane atas kiri + jungle (kamera game)', -17.0, 29.0, 22.0),
+             ('Jungle atas: bunga kecil di kaki batu (kamera game)', -14.0, 17.0, 22.0),
+             ('Lane bawah (kamera game)', 27.0, -20.0, 24.0)]
 for i, (title, x, z, dist) in enumerate(cam_views):
     pair(cam(eo, x, z, dist), cam(en, x, z, dist), title).save(os.path.join(out, f'{13 + i}_kamera_game_{i + 1}.png'))
 print('ok 10+')

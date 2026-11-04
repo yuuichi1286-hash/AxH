@@ -4,10 +4,9 @@
 > gelap, lebih besar dan brutal, tekstur HD 2×, fade-in/out di semua efek, plus ikon skill baru.
 >
 > **Map:** [Sanctum Island — HD Remaster v5 (grafik High)](sanctum/README.md). Tekstur AI 2× yang bersih (tidak
-> burik) dengan warna alami ala referensi Dota 2 (tidak warna-warni), 7 pohon baru yang menempel di tembok lane,
-> 17 pohon berbunga pink/lilac kalem (salinan pohon asli map, senada dengan bunga di tanah), daun dan kelopak jatuh
-> dari setiap pohon, bangkai monster, sedikit bunga kalem, kerikil, dan daun gugur di pinggiran rumput, relief lebih
-> timbul, bayangan bangunan + AO + emboss/PBR (baked), pantulan air lebih tajam, dan 49 efek ambient.
+> burik) dengan warna alami ala referensi Dota 2 (tidak warna-warni), daun jatuh dari pohon-pohon map, sedikit bunga
+> kalem, kerikil, dan daun gugur di pinggiran rumput, relief lebih timbul, bayangan bangunan + AO + emboss/PBR
+> (baked), pantulan air lebih tajam, dan 25 efek ambient.
 
 **Unduh:** [`release/Hidan.Revamp.v4.zip`](release/Hidan.Revamp.v4.zip)
 

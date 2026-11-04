@@ -9,7 +9,6 @@ import UnityPy
 from PIL import Image
 import map_fx
 import map_bake
-import map_trees
 
 o_root, n_root = sys.argv[1:3]
 problems = 0
@@ -63,17 +62,12 @@ for k in mo:
 print('added objects:', dict(added))
 n_fx = len(map_fx.effects())
 n_mat = len({(e['tex'], e['blend']) for e in map_fx.effects()})
-n_parts = len(map_trees.groups()) * len(map_trees.SOURCE)
-n_blossom = len({g[7] for g in map_trees.groups() if g[7]})
-expected = {(False, 'GameObject'): n_fx + 1 + n_parts + 1, (False, 'Transform'): n_fx + 1 + n_parts + 1,
-            (False, 'ParticleSystem'): n_fx, (False, 'ParticleSystemRenderer'): n_fx,
-            (False, 'MeshFilter'): n_parts, (False, 'MeshRenderer'): n_parts,
-            (True, 'Texture2D'): len(map_fx.TEXTURES) + n_blossom, (True, 'Material'): n_mat + n_blossom}
+expected = {(False, 'GameObject'): n_fx + 1, (False, 'Transform'): n_fx + 1, (False, 'ParticleSystem'): n_fx,
+            (False, 'ParticleSystemRenderer'): n_fx, (True, 'Texture2D'): len(map_fx.TEXTURES), (True, 'Material'): n_mat}
 if dict(added) != expected:
     bad('unexpected added object set', dict(added))
 
 # every object re-reads; untouched kinds keep their exact bytes
-diffmap_new, diffmap_src = [], {}
 reread = 0
 water_changed = 0
 for k, o in mn.items():
@@ -83,17 +77,6 @@ for k, o in mn.items():
         bad('read fail', k, o.type.name, e)
     if k in mo and o.type.name not in ('Texture2D', 'PreloadData', 'Cubemap'):
         if o.get_raw_data() != mo[k].get_raw_data():
-            if o.type.name == 'MonoBehaviour':
-                # only the baked-lighting (diffmap) table may change: original entries kept as they were, plus one
-                # entry per cloned trunk with the same lighting as its source trunk
-                a, b = mo[k].read_typetree(), o.read_typetree()
-                ia, ib = a.get('rendererDiffmapInfos'), b.get('rendererDiffmapInfos')
-                if ia is None or ib is None or ib[:len(ia)] != ia or \
-                        {kk: v for kk, v in a.items() if kk != 'rendererDiffmapInfos'} != {kk: v for kk, v in b.items() if kk != 'rendererDiffmapInfos'}:
-                    bad('MonoBehaviour changed beyond the diffmap entries of the new trees', k)
-                diffmap_new = ib[len(ia):] if ia is not None and ib is not None else []
-                diffmap_src = {e['renderer']['m_PathID']: e for e in ia or []}
-                continue
             if o.type.name == 'Material':
                 # only the water materials may change, and only their reflection strength
                 a, b = mo[k].read_typetree(), o.read_typetree()
@@ -238,100 +221,4 @@ print(f'effects: {nps} particle systems, ~{alive:.0f} particles alive in total')
 if alive > 300:
     bad('particle budget exceeded', alive)
 
-# new trees: components / hierarchy / asset references, baked lighting entries, and nothing over / hiding the paths
-from map_render import Scene
-from meshio import decode
-sc_n = Scene(en)
-root = [pid for pid, g in sc_n.gos.items() if g['m_Name'] == map_trees.ROOT_NAME]
-if len(root) != 1:
-    bad('tree root missing / duplicated', len(root))
-root_t = sc_n.go_tr[root[0]] if root else None
-names = {g['m_Name']: pid for pid, g in sc_n.gos.items()}
-src_mr, src_mf = {}, {}
-for src in map_trees.SOURCE:
-    g = sc_n.gos[names[src]]
-    src_mr[src] = next(c['component']['m_PathID'] for c in g['m_Component'] if c['component']['m_PathID'] in sc_n.mr)
-    src_mf[src] = next(c['component']['m_PathID'] for c in g['m_Component'] if c['component']['m_PathID'] in sc_n.mf)
-mats_n = {pid: o.read_typetree() for pid, o in sc_n.shared.items() if o.type.name == 'Material'}
-texs_n = {pid: o.read_typetree() for pid, o in sc_n.shared.items() if o.type.name == 'Texture2D'}
-src_mat = sc_n.mr[src_mr[map_trees.SOURCE[1]]]['m_Materials'][0]
-leaf_mat_tt = mats_n[src_mat['m_PathID']]
-cam_go = next(pid for pid, g in sc_n.gos.items() if g['m_Name'] == '3DCamera_11')
-cam_fwd = sc_n.world(sc_n.go_tr[cam_go])[:3, :3] @ np.array([0.0, 0.0, 1.0])
-hm_n = map_trees.solid_heightmap(en)
-walk_edge = map_trees.walk_edge(hm_n)
-walk_grid, walk_depth = map_trees.walkable_grid(hm_n, walk_edge)
-expected_parts = {p['name']: p for p in map_trees.plan(eo)}
-seen, new_mr = set(), {}
-worst = {'edge': [99.0, 99.0], 'lane': [99.0, 99.0], 'wall': [0.0, 0.0, 0.0]}
-for pid, g in sc_n.gos.items():
-    if not g['m_Name'].startswith('Sanctum_') or g['m_Name'] == map_trees.ROOT_NAME:
-        continue
-    if g['m_Name'] not in expected_parts:
-        bad('unexpected Sanctum_ object', g['m_Name']); continue
-    ep = expected_parts[g['m_Name']]
-    seen.add(g['m_Name'])
-    comps = [c['component']['m_PathID'] for c in g['m_Component']]
-    kinds = sorted(sc_n.ctype.get(c, '?') for c in comps)
-    if kinds != ['MeshFilter', 'MeshRenderer', 'Transform']:
-        bad('tree components', g['m_Name'], kinds); continue
-    tr = sc_n.trs[sc_n.go_tr[pid]]
-    if tr['m_Father']['m_PathID'] != root_t or not any(ch['m_PathID'] == sc_n.go_tr[pid] for ch in sc_n.trs[root_t]['m_Children']):
-        bad('tree hierarchy', g['m_Name'])
-    mf = next(sc_n.mf[c] for c in comps if c in sc_n.mf)
-    mrp = next(c for c in comps if c in sc_n.mr)
-    mr = sc_n.mr[mrp]
-    if mf['m_Mesh'] != sc_n.mf[src_mf[ep['src']]]['m_Mesh']:
-        bad('tree mesh differs from the source tree', g['m_Name'])
-    if ep['variant']:
-        m = mr['m_Materials'][0]
-        mt = mats_n.get(m['m_PathID'])
-        if m['m_FileID'] != src_mat['m_FileID'] or mt is None or mt['m_Name'] != map_trees.BLOSSOM_MAT.format(ep['variant']):
-            bad('blossom material ref', g['m_Name']); continue
-        a_ = dict(leaf_mat_tt); b_ = dict(mt)
-        ea, eb = dict(a_['m_SavedProperties']['m_TexEnvs']), dict(b_['m_SavedProperties']['m_TexEnvs'])
-        tp = eb['_MainTex']['m_Texture']
-        tx = texs_n.get(tp['m_PathID'])
-        if tp['m_FileID'] != 0 or tx is None or tx['m_Name'] != map_trees.BLOSSOM_TEX.format(ep['variant']):
-            bad('blossom texture ref', mt['m_Name'])
-        ea.pop('_MainTex'); eb.pop('_MainTex')
-        if ea != eb or a_['m_Shader'] != b_['m_Shader'] or a_['m_SavedProperties']['m_Floats'] != b_['m_SavedProperties']['m_Floats']:
-            bad('blossom material differs from the leaf material beyond its colour map', mt['m_Name'])
-    elif mr['m_Materials'] != sc_n.mr[src_mr[ep['src']]]['m_Materials']:
-        bad('tree material differs from the source tree', g['m_Name'])
-    mesh = sc_n.shared.get(mf['m_Mesh']['m_PathID'])
-    new_mr[mrp] = ep['src']
-    d = decode(mesh.read_typetree())
-    M = sc_n.world(sc_n.go_tr[pid])
-    if not np.allclose(M, ep['M'], atol=1e-3):
-        bad('tree transform differs from the plan', g['m_Name'])
-    wp = (M @ np.c_[d['pos'][:, :3], np.ones(len(d['pos']))].T).T[:, :3]
-    if ep['group'] == 'wall':
-        o_, s_, f_ = map_trees.wall_clearance(wp, cam_fwd, hm_n, walk_grid, walk_depth)
-        if o_ > map_trees.WALL_OVER_MAX + 1e-6 or s_ > map_trees.WALL_SIGHT_MAX + 1e-6 or f_ > map_trees.WALL_SIGHT_FRAC:
-            bad('inner-wall tree hides too much of the paths', g['m_Name'], round(o_, 2), round(s_, 2), round(f_, 2))
-        w = worst['wall']; w[0], w[1], w[2] = max(w[0], o_), max(w[1], s_), max(w[2], f_)
-    else:
-        n_over, n_hide, dv, dh = map_trees.clearance(wp, cam_fwd, walk_edge)
-        if n_over or n_hide:
-            bad('tree over / hiding walkable ground', g['m_Name'], n_over, n_hide, round(dv, 2), round(dh, 2))
-        w = worst[ep['group']]; w[0], w[1] = min(w[0], dv), min(w[1], dh)
-missing = set(expected_parts) - seen
-if missing:
-    bad('tree parts missing', sorted(missing)[:4])
-src_trunk_entry = diffmap_src.get(src_mr[map_trees.SOURCE[0]])
-trunks = [m for m, s_ in new_mr.items() if s_ == map_trees.SOURCE[0]]
-got = {e['renderer']['m_PathID']: e for e in diffmap_new}
-if sorted(got) != sorted(trunks):
-    bad('diffmap entries do not match the cloned trunks', len(got), len(trunks))
-for m, e in got.items():
-    if src_trunk_entry is None or (e['diffmapIndex'], e['diffmapScaleOffset']) != (src_trunk_entry['diffmapIndex'], src_trunk_entry['diffmapScaleOffset']):
-        bad('cloned trunk lighting differs from the source trunk', m)
-n_g = collections.Counter(p['group'] for p in expected_parts.values())
-print(f"trees: {len(seen) // 2} new trees ({len(seen)} parts: {n_g['edge'] // 2} green + {n_g['lane'] // 2} blossom along the "
-      f"lane walls + {n_g['wall'] // 2} blossom on the jungle walls), {len(got)} diffmap entries")
-print(f"  lane-wall trees: nothing above / no camera sight line onto walkable ground (closest "
-      f"{min(worst['edge'][0], worst['lane'][0]):+.2f} / {min(worst['edge'][1], worst['lane'][1]):+.2f} m from the measured edge)")
-print(f"  jungle-wall trees: canopy past the wall edge <= {worst['wall'][0]:.2f} m, sight lines into the path <= "
-      f"{worst['wall'][1]:.2f} m for <= {100 * worst['wall'][2]:.0f} % of the vertices (limits 0.5 m / 0.75 m / 25 %)")
 print(f'\nPROBLEMS: {problems}')
