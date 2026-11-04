@@ -129,7 +129,8 @@ def simulate(extent, ppm, enlarge, seed=3):
 
 views = [('Sungai + lubang Lord/Turtle: kilau sungai, aura', (-11, 11, 12, 30), 40),
          ('Jungle: kunang-kunang + debu cahaya', (-27, -5, 6, 24), 40),
-         ('Base: kilau naik di sekitar orb', (-58, -42, -7, 7), 50)]
+         ('Base: kilau naik di sekitar orb', (-58, -42, -7, 7), 50),
+         ('Pohon tepi atas: daun jatuh dari kanopi', (2, 26, 30, 48), 34)]
 tiles = [simulate(ext, ppm, 1.6) for _, ext, ppm in views]
 Ht = max(t.size[1] for t in tiles)
 canvas = Image.new('RGB', (sum(t.size[0] for t in tiles) + 16 * (len(tiles) - 1), Ht + 70), (12, 13, 15))
@@ -178,7 +179,7 @@ print('ok 6-8')
 
 
 # 10+. game-camera perspective (orientation / FOV of the game's 3DCamera_11, baked lighting applied):
-# original (left) vs new (right): natural colours, flowers, pebbles, fallen leaves, relief
+# original (left) vs new (right): new trees, flowers, pebbles, fallen leaves, relief
 FWD = np.array([0.542, -0.707, 0.455]); UP = np.array([0.542, 0.707, 0.455])
 
 
@@ -188,9 +189,9 @@ def cam(env, x, z, dist=24.0, size=(1280, 720)):
 
 
 cam_views = [('Jungle: warna alami, daun gugur (kamera game)', -14.0, -10.0, 22.0),
-             ('Lane atas kiri + jungle (kamera game)', -17.0, 29.0, 22.0),
-             ('Jungle atas: bunga kecil di kaki batu (kamera game)', -14.0, 17.0, 22.0),
-             ('Lane bawah (kamera game)', 27.0, -20.0, 24.0)]
+             ('Pohon baru menempel di tembok lane (kamera game)', -17.0, 29.0, 22.0),
+             ('Jungle atas: bunga kecil di kaki batu (kamera game)', -18.0, 20.0, 22.0),
+             ('Lane bawah + pohon baru di tembok (kamera game)', 27.0, -20.0, 24.0)]
 for i, (title, x, z, dist) in enumerate(cam_views):
     pair(cam(eo, x, z, dist), cam(en, x, z, dist), title).save(os.path.join(out, f'{13 + i}_kamera_game_{i + 1}.png'))
 print('ok 10+')

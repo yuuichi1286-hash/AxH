@@ -1106,6 +1106,64 @@
    ]
   }
  },
+ "trees": {
+  "trees": 7,
+  "parts": 14,
+  "scene_objects_added": 58,
+  "diffmap_entries_added": 7,
+  "root": "Sanctum_NewTrees",
+  "placements": [
+   {
+    "x": 21.63,
+    "z": 32.4,
+    "surface_y": -0.84,
+    "yaw": 120.0,
+    "scale": 1.3
+   },
+   {
+    "x": 42.43,
+    "z": -12.22,
+    "surface_y": -3.45,
+    "yaw": 195.0,
+    "scale": 1.15
+   },
+   {
+    "x": 31.0,
+    "z": -23.87,
+    "surface_y": -2.65,
+    "yaw": 195.0,
+    "scale": 1.3
+   },
+   {
+    "x": -24.08,
+    "z": -31.81,
+    "surface_y": -1.86,
+    "yaw": 270.0,
+    "scale": 1.3
+   },
+   {
+    "x": -46.23,
+    "z": -10.32,
+    "surface_y": -3.32,
+    "yaw": 255.0,
+    "scale": 1.45
+   },
+   {
+    "x": -21.1,
+    "z": 33.63,
+    "surface_y": -2.04,
+    "yaw": 0.0,
+    "scale": 1.15
+   },
+   {
+    "x": 12.24,
+    "z": -48.0,
+    "surface_y": -0.62,
+    "yaw": 195.0,
+    "scale": 1.6
+   }
+  ]
+ },
  "effects": {
   "effects": [
    "FX_Fireflies_1",
@@ -1117,20 +1175,43 @@
    "FX_Pit_Aura_2",
    "FX_Base_Sparkles_1",
    "FX_Base_Sparkles_2",
-   "FX_Light_Motes"
+   "FX_Light_Motes",
+   "FX_Falling_Leaves_1",
+   "FX_Falling_Leaves_2",
+   "FX_Falling_Leaves_3",
+   "FX_Falling_Leaves_4",
+   "FX_Falling_Leaves_5",
+   "FX_Falling_Leaves_6",
+   "FX_Falling_Leaves_7",
+   "FX_Falling_Leaves_8",
+   "FX_Falling_Leaves_9",
+   "FX_Falling_Leaves_10",
+   "FX_Falling_Leaves_11",
+   "FX_Falling_Leaves_12",
+   "FX_Falling_Leaves_13",
+   "FX_Falling_Leaves_14",
+   "FX_Falling_Leaves_15",
+   "FX_Falling_Leaves_16",
+   "FX_Falling_Leaves_17",
+   "FX_Falling_Leaves_18",
+   "FX_Falling_Leaves_19",
+   "FX_Falling_Leaves_20",
+   "FX_Falling_Leaves_21",
+   "FX_Falling_Leaves_22"
   ],
-  "scene_objects_added": 42,
-  "shared_objects_added": 4,
-  "estimated_particles_alive": 212,
-  "materials": 2,
+  "scene_objects_added": 130,
+  "shared_objects_added": 6,
+  "estimated_particles_alive": 268,
+  "materials": 3,
   "textures": [
    "FX_Sanctum_glow",
-   "FX_Sanctum_sparkle"
+   "FX_Sanctum_sparkle",
+   "FX_Sanctum_leaf"
   ]
  },
- "_build_seconds": 422.0,
+ "_build_seconds": 464.1,
  "_size": {
   "before": 10062779,
-  "after": 63608410
+  "after": 63618536
  }
 }

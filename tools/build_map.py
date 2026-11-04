@@ -22,6 +22,7 @@ import UnityPy
 import map_hd
 import map_decor
 import map_fx
+import map_trees
 import map_bake
 import fx_tex_hd
 
@@ -233,6 +234,8 @@ def process_high(env, report, sr, pool):
                 if map_bake.tweak_water_material(tt):
                     o.save_typetree(tt)
                     report.setdefault('water_materials', []).append(tt['m_Name'])
+    # new trees (clones of the map's edge tree) on the outer cliff rim, then the ambient effects
+    report['trees'] = map_trees.inject(env, map_trees.plan(env), map_fx._new_object)
     report['effects'] = map_fx.inject(env, TEMPLATES, fx_tex_hd.encode)
 
 
