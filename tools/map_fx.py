@@ -156,51 +156,10 @@ def tex_mist(n=128, seed=7):
     return np.dstack([rgb, rgb, rgb, a])
 
 
-def tex_leaf(n=128):
-    """Ovate leaf with a pointed tip and a short stalk, the same shape as the leaves of the map's trees (leaf_01
-    atlas), folded along the mid-rib (two-tone halves) with fine veins. Grey-white: the particle colour tints it the
-    teal-green of the canopies. Drawn 4x supersampled for crisp, clean edges."""
-    import cv2
-    ss = 4
-    N = n * ss
-    y, x = (np.mgrid[0:N, 0:N] + 0.5) / N * 2 - 1
-    c, s_ = np.cos(np.radians(40)), np.sin(np.radians(40))
-    xr, yr = x * c + y * s_, -x * s_ + y * c                     # leaf axis along the diagonal
-    t = (xr + 0.78) / 1.56                                         # 0 at the base, 1 at the tip
-    tc = np.clip(t, 0, 1)
-    w = 0.37 * np.sin(np.pi * tc ** 0.72) ** 0.8 * (1 - 0.12 * tc)    # broad ovate: rounded base, short pointed tip
-    yy = yr - 0.05 * np.sin(np.pi * tc)                            # gently curved mid-rib
-    inside = ((t >= 0) & (t <= 1) & (np.abs(yy) <= w)).astype(np.float32)
-    stalk = ((t < 0) & (t > -0.11) & (np.abs(yr) < 0.016)).astype(np.float32)
-    rel = np.abs(yy) / np.maximum(w, 1e-3)
-    half = np.where(yy > 0, 0.95, 0.76)                            # folded leaf: one half catches more light
-    rib = np.exp(-(yy / 0.011) ** 2)
-    ph = (t * 6.5 - rel * 1.1) % 1.0                               # side veins angled toward the tip
-    veins = np.exp(-((ph - 0.5) / 0.06) ** 2) * (rel > 0.08) * (rel < 0.9)
-    shade = half * (0.84 + 0.16 * (1 - rel)) + 0.10 * rib - 0.07 * veins
-    shade = np.where(stalk > 0, 0.7, shade)
-    a = np.clip(inside + stalk, 0, 1)
-    a = cv2.resize(a, (n, n), interpolation=cv2.INTER_AREA)
-    v = cv2.resize((np.clip(shade, 0, 1) * np.clip(inside + stalk, 0, 1)).astype(np.float32), (n, n),
-                   interpolation=cv2.INTER_AREA)
-    v = np.clip(v / np.maximum(a, 1e-3), 0, 1) * np.clip(a * 3.0, 0, 1)     # nothing visible outside the leaf
-    return np.dstack([v, v, v, a]).astype(np.float32)
-
-
-TEXTURES = {'FX_Sanctum_glow': tex_glow, 'FX_Sanctum_sparkle': tex_sparkle, 'FX_Sanctum_leaf': tex_leaf}
+TEXTURES = {'FX_Sanctum_glow': tex_glow, 'FX_Sanctum_sparkle': tex_sparkle}
 
 
 # ------------------------------------------------------------------ the ambient effects
-# Leaf canopies of the map's 15 edge trees (outsideleaf_01-15): (x, canopy top y, z, size x, size z), measured from
-# their meshes (10-90 % range of the upper leaf cards).
-CANOPIES = [
-    (-53.7, 4.2, -7.5, 16.0, 7.2), (-43.3, 2.5, 12.4, 9.6, 9.7), (52.0, 0.9, 5.1, 12.1, 7.5), (6.5, 2.9, 44.4, 13.6, 9.2),
-    (-37.7, -0.1, 21.7, 13.1, 2.5), (-22.0, 2.1, 31.2, 2.4, 1.6), (37.6, 0.6, -17.5, 4.2, 6.1), (54.7, 1.5, -5.8, 13.0, 5.0),
-    (-56.9, 7.1, 3.9, 9.3, 4.3), (13.9, 1.5, -39.4, 1.2, 2.7), (7.6, 6.4, -47.4, 3.3, 4.0), (-31.6, 0.9, -22.1, 8.5, 7.7),
-    (-11.5, 2.3, -42.6, 8.1, 9.6), (34.8, 0.9, 20.2, 4.5, 3.8), (-7.8, 2.9, 46.6, 8.4, 3.5),
-]
-
-
 def effects():
     """name, position, box size, texture, blend, rate, life, size, speed(xyz lo/hi), colours, alpha keys, max, extra"""
     E = []
@@ -230,17 +189,6 @@ def effects():
                   rate=6.0, life=(7.0, 10.0), size=(0.08, 0.15), vel=((-0.15, 0.15), (-0.03, 0.08), (-0.15, 0.15)),
                   colors=[(0.0, (1.0, 0.97, 0.88)), (1.0, (0.92, 1.0, 0.95))],
                   alphas=[(0.0, 0.0), (0.2, 0.55), (0.8, 0.5), (1.0, 0.0)], wave=0.25, maxp=80))
-    # leaves fall from where the leaves are: one small emitter inside every edge-tree canopy, the leaf shape of the map's
-    # own trees and their natural green (the leaf texture is recoloured from teal to natural green in the build)
-    leaf_tints = ((0.24, 0.36, 0.15), (0.34, 0.47, 0.20))
-    for i, (x, ytop, z, sx, sz) in enumerate(CANOPIES):
-        bx, bz = max(sx, 4.0), max(sz, 4.0)
-        rate = round(min(max(bx * bz / 90.0, 0.3), 0.6), 2)
-        E.append(dict(name=f'FX_Falling_Leaves_{i + 1}', pos=(x, ytop - 0.5, z), box=(bx, 1.0, bz), tex='FX_Sanctum_leaf',
-                      blend='blend', rate=rate, life=(4.5, 6.5), size=(0.2, 0.32), vel=((-0.25, 0.25), (-0.7, -0.45), (-0.2, 0.2)),
-                      colors=[(0.0, (1.0, 1.0, 1.0)), (1.0, (0.9, 0.92, 0.9))], tint2=leaf_tints,
-                      alphas=[(0.0, 0.0), (0.1, 0.95), (0.8, 0.9), (1.0, 0.0)], wave=0.45, spin=(-110, 110),
-                      maxp=int(math.ceil(rate * 6.5 * 1.4)) + 2))
     return E
 
 

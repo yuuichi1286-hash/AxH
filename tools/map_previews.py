@@ -129,8 +129,7 @@ def simulate(extent, ppm, enlarge, seed=3):
 
 views = [('Sungai + lubang Lord/Turtle: kilau sungai, aura', (-11, 11, 12, 30), 40),
          ('Jungle: kunang-kunang + debu cahaya', (-27, -5, 6, 24), 40),
-         ('Base: kilau naik di sekitar orb', (-58, -42, -7, 7), 50),
-         ('Pohon tepi atas: daun jatuh dari kanopi', (2, 26, 30, 48), 34)]
+         ('Base: kilau naik di sekitar orb', (-58, -42, -7, 7), 50)]
 tiles = [simulate(ext, ppm, 1.6) for _, ext, ppm in views]
 Ht = max(t.size[1] for t in tiles)
 canvas = Image.new('RGB', (sum(t.size[0] for t in tiles) + 16 * (len(tiles) - 1), Ht + 70), (12, 13, 15))

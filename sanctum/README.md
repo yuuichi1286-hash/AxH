@@ -17,7 +17,6 @@ identik byte-per-byte: versi Low `PVP_049_low`, data jalur/tembok A* (`*wall_add
 - Langit dan pulau melayang, 7 lightmap, rumput dan daun 3D, serta pantulan air.
 - Baru di v5:
   - Warna alami ala referensi Dota 2, tidak warna-warni.
-  - Daun jatuh dari 15 pohon pinggir map, dengan bentuk dan warna daun pohonnya.
   - Sedikit bunga kalem, kerikil, dan daun gugur di pinggiran rumput.
   - Relief yang lebih timbul.
 
@@ -31,7 +30,7 @@ gambar tampak atas adalah posisi tower.
 
 ![Peta sebelum / sesudah](docs/previews/1_peta_sebelum_sesudah.png)
 
-## Yang baru di v5: warna alami, daun jatuh, dekorasi tanah, relief lebih timbul
+## Yang baru di v5: warna alami, dekorasi tanah, relief lebih timbul
 
 Gambar-gambar di bagian ini dirender dengan **sudut dan FOV kamera game asli** (`3DCamera_11` di scene) dan
 pencahayaan baked map: kiri asli, kanan v5.
@@ -59,14 +58,6 @@ menyatu. Nuansa biru-toska yang menutupi map aslinya dibuang:
 - Kecerahan tanah naik 23% dari v4, tapi tetap ±30% lebih gelap dari peta aslinya dan lebih gelap dari referensi.
 - **Aksen magis tetap:** lingkaran rune biru, trim emas, serta kristal dan orb warna tim. Kristal dan orb sengaja tidak
   diubah warnanya karena warnanya diatur game per tim.
-
-### Daun jatuh yang cocok dengan pohonnya
-
-- Daun **jatuh dari tempat daunnya berada**: ada satu emitter kecil di kanopi setiap pohon pinggir map, total 15.
-- **Bentuk daun** sama dengan daun pohon map: oval dengan ujung runcing dan tangkai, terlipat di tulang daun, dengan
-  urat halus.
-- **Warnanya hijau alami** seperti daun pohonnya, dan tiap daun acak di antara dua nada hijau.
-- Total ±40 daun hidup sekaligus. Seluruh efek ambient ±250 partikel dari 25 sistem.
 
 ![Lane atas kiri + jungle](docs/previews/14_kamera_game_2.png)
 ![Lane bawah](docs/previews/16_kamera_game_4.png)
@@ -287,10 +278,10 @@ Satu palet natural yang sama untuk tanah, props, foliage, langit, dan lightmap, 
 - Rumput dan daun cut-out sengaja tanpa mipmap, supaya tidak menipis.
 - Bayangan, AO, relief, dan kilau semuanya baked, jadi tidak ada biaya render tambahan.
 - **Efek baru dibuat seringan mungkin:**
-  - Total ±250 partikel dari 25 sistem. 15 di antaranya emitter daun kecil, masing-masing paling banyak 6 partikel.
+  - Total ±212 partikel dari 10 sistem.
   - Tanpa modul Noise atau Collision.
   - Simulasi world-space dengan *prewarm*, plus culling otomatis.
-  - Hanya 4 tekstur kecil.
+  - Hanya 2 tekstur kecil.
 - **Dekorasi tanah** ada di dalam tekstur yang sudah ada, jadi ukurannya tidak bertambah.
 - **Konsekuensi memori:**
   - Tekstur High naik dari 8,3 MB menjadi 68,4 MB. Sekitar 11 MB dari kenaikan itu karena props sekarang ASTC 6x6.
@@ -306,7 +297,6 @@ Satu palet natural yang sama untuk tanah, props, foliage, langit, dan lightmap, 
 | Aura lubang Lord / Turtle (2) | kedua *pit* | partikel cahaya toska → ungu naik perlahan |
 | Kilau base (2) | sekitar orb kedua base | bintang putih-emas naik berputar. Warnanya netral, jadi tetap cocok saat warna tim ditukar |
 | Debu cahaya | seluruh peta | butiran cahaya kecil melayang di udara |
-| Daun berguguran (15) | di bawah kanopi 15 pohon pinggir map | daun hijau alami berbentuk daun pohon map, jatuh berputar dan bergoyang |
 
 
 ![Efek baru (simulasi)](docs/previews/5_efek_baru_simulasi.png)
@@ -333,12 +323,12 @@ Cara efek disisipkan:
   pengecualian:
   - PreloadData: ditambah 2 shader efek.
   - Cubemap air: diganti versi 128 px (orientasi sama, tidak lebih terang).
-- 1336 objek terbaca ulang lewat typetree.
+- 1274 objek terbaca ulang lewat typetree.
 - 73 tekstur ter-decode. Ukuran data cocok dengan format dan mipmap. Isi dan orientasinya berkorelasi dengan
   aslinya, tidak ada yang terbalik.
 - Cubemap: ukuran per sisi dan total cocok. Keenam sisinya berisi, dengan orientasi yang sama seperti aslinya.
 - Objek yang ditambahkan persis sesuai rencana:
-  - 25 sistem efek + 1 root, 3 material efek, dan 3 tekstur efek.
+  - 10 sistem efek + 1 root, 2 material efek, dan 2 tekstur efek.
   - Semua referensinya valid (komponen, hierarki, mesh, material → tekstur dan shader, PreloadData).
 - Kapasitas partikel cukup. Total partikel di bawah anggaran 300.
 
@@ -365,7 +355,7 @@ python tools/pack_like.py Sanctum_Island_Map.zip out Sanctum_Island_Map_HD.zip
 Build dari nol memakan ±15 menit dengan 4 core. Kalau variabel `MAP_SR_CACHE=<folder>` diisi, hasil AI
 disimpan di cache dan build berikutnya ±8 menit, dengan hasil yang identik.
 
-SHA-256 zip: `77512cbc90026d8999bec81ba946250124996d6d7b18dbda14df5c7a0f30479c`. Zip ini dibangun dengan cache hasil
+SHA-256 zip: `27199c9774fd2873e1527b35c28cfb29e9a29ef8cfff6f85669188c4004ec301`. Zip ini dibangun dengan cache hasil
 AI. Build-nya deterministik: inferensi AI memakai jumlah thread yang sama dan penempatan dekorasi memakai seed tetap.
 Versi sebelumnya sudah terbukti identik saat dibangun ulang dari nol tanpa cache.
 

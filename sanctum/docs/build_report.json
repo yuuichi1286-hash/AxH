@@ -1117,36 +1117,20 @@
    "FX_Pit_Aura_2",
    "FX_Base_Sparkles_1",
    "FX_Base_Sparkles_2",
-   "FX_Light_Motes",
-   "FX_Falling_Leaves_1",
-   "FX_Falling_Leaves_2",
-   "FX_Falling_Leaves_3",
-   "FX_Falling_Leaves_4",
-   "FX_Falling_Leaves_5",
-   "FX_Falling_Leaves_6",
-   "FX_Falling_Leaves_7",
-   "FX_Falling_Leaves_8",
-   "FX_Falling_Leaves_9",
-   "FX_Falling_Leaves_10",
-   "FX_Falling_Leaves_11",
-   "FX_Falling_Leaves_12",
-   "FX_Falling_Leaves_13",
-   "FX_Falling_Leaves_14",
-   "FX_Falling_Leaves_15"
+   "FX_Light_Motes"
   ],
-  "scene_objects_added": 102,
-  "shared_objects_added": 6,
-  "estimated_particles_alive": 250,
-  "materials": 3,
+  "scene_objects_added": 42,
+  "shared_objects_added": 4,
+  "estimated_particles_alive": 212,
+  "materials": 2,
   "textures": [
    "FX_Sanctum_glow",
-   "FX_Sanctum_sparkle",
-   "FX_Sanctum_leaf"
+   "FX_Sanctum_sparkle"
   ]
  },
- "_build_seconds": 421.8,
+ "_build_seconds": 422.0,
  "_size": {
   "before": 10062779,
-  "after": 63615351
+  "after": 63608410
  }
 }
