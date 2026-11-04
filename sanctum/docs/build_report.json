@@ -1109,60 +1109,306 @@
   }
  },
  "trees": {
-  "trees": 7,
-  "parts": 14,
-  "scene_objects_added": 58,
-  "diffmap_entries_added": 7,
+  "trees": 24,
+  "green_edge_trees": 7,
+  "blossom_lane_trees": 7,
+  "blossom_wall_trees": 10,
+  "parts": 48,
+  "scene_objects_added": 194,
+  "diffmap_entries_added": 24,
   "root": "Sanctum_NewTrees",
+  "blossom_materials": [
+   "lilac",
+   "pink"
+  ],
   "placements": [
    {
+    "group": "edge",
     "x": 21.63,
     "z": 32.4,
     "surface_y": -0.84,
     "yaw": 120.0,
-    "scale": 1.3
+    "scale": [
+     1.3,
+     1.3
+    ],
+    "variant": null
    },
    {
+    "group": "edge",
     "x": 42.43,
     "z": -12.22,
     "surface_y": -3.45,
     "yaw": 195.0,
-    "scale": 1.15
+    "scale": [
+     1.15,
+     1.15
+    ],
+    "variant": null
    },
    {
+    "group": "edge",
     "x": 31.0,
     "z": -23.87,
     "surface_y": -2.65,
     "yaw": 195.0,
-    "scale": 1.3
+    "scale": [
+     1.3,
+     1.3
+    ],
+    "variant": null
    },
    {
+    "group": "edge",
     "x": -24.08,
     "z": -31.81,
     "surface_y": -1.86,
     "yaw": 270.0,
-    "scale": 1.3
+    "scale": [
+     1.3,
+     1.3
+    ],
+    "variant": null
    },
    {
-    "x": -46.23,
-    "z": -10.32,
+    "group": "edge",
+    "x": -46.48,
+    "z": -10.57,
     "surface_y": -3.32,
     "yaw": 255.0,
-    "scale": 1.45
+    "scale": [
+     1.45,
+     1.45
+    ],
+    "variant": null
    },
    {
+    "group": "edge",
     "x": -21.1,
     "z": 33.63,
     "surface_y": -2.04,
     "yaw": 0.0,
-    "scale": 1.15
+    "scale": [
+     1.15,
+     1.15
+    ],
+    "variant": null
    },
    {
+    "group": "edge",
     "x": 12.24,
     "z": -48.0,
     "surface_y": -0.62,
     "yaw": 195.0,
-    "scale": 1.6
+    "scale": [
+     1.6,
+     1.6
+    ],
+    "variant": null
+   },
+   {
+    "group": "lane",
+    "x": 16.17,
+    "z": 42.21,
+    "surface_y": -1.2,
+    "yaw": 225.0,
+    "scale": [
+     1.15,
+     1.15
+    ],
+    "variant": "pink"
+   },
+   {
+    "group": "lane",
+    "x": 27.47,
+    "z": 27.07,
+    "surface_y": -0.39,
+    "yaw": 75.0,
+    "scale": [
+     1.15,
+     1.15
+    ],
+    "variant": "lilac"
+   },
+   {
+    "group": "lane",
+    "x": 43.24,
+    "z": 12.48,
+    "surface_y": -2.14,
+    "yaw": 255.0,
+    "scale": [
+     1.15,
+     1.15
+    ],
+    "variant": "pink"
+   },
+   {
+    "group": "lane",
+    "x": -15.7,
+    "z": 43.69,
+    "surface_y": -2.69,
+    "yaw": 330.0,
+    "scale": [
+     1.15,
+     1.15
+    ],
+    "variant": "lilac"
+   },
+   {
+    "group": "lane",
+    "x": 21.5,
+    "z": -34.15,
+    "surface_y": -2.13,
+    "yaw": 165.0,
+    "scale": [
+     1.15,
+     1.15
+    ],
+    "variant": "lilac"
+   },
+   {
+    "group": "lane",
+    "x": -40.5,
+    "z": -19.46,
+    "surface_y": -2.84,
+    "yaw": 120.0,
+    "scale": [
+     1.15,
+     1.15
+    ],
+    "variant": "pink"
+   },
+   {
+    "group": "lane",
+    "x": -29.53,
+    "z": 27.15,
+    "surface_y": -2.23,
+    "yaw": 345.0,
+    "scale": [
+     1.15,
+     1.15
+    ],
+    "variant": "pink"
+   },
+   {
+    "group": "wall",
+    "x": 24.62,
+    "z": -14.62,
+    "surface_y": 1.05,
+    "yaw": 150.0,
+    "scale": [
+     0.6,
+     0.55
+    ],
+    "variant": "pink"
+   },
+   {
+    "group": "wall",
+    "x": -16.88,
+    "z": 22.12,
+    "surface_y": 1.41,
+    "yaw": 345.0,
+    "scale": [
+     0.6,
+     0.55
+    ],
+    "variant": "lilac"
+   },
+   {
+    "group": "wall",
+    "x": 7.38,
+    "z": -31.62,
+    "surface_y": 1.44,
+    "yaw": 150.0,
+    "scale": [
+     0.6,
+     0.55
+    ],
+    "variant": "lilac"
+   },
+   {
+    "group": "wall",
+    "x": -8.87,
+    "z": 29.63,
+    "surface_y": 1.97,
+    "yaw": 300.0,
+    "scale": [
+     0.6,
+     0.55
+    ],
+    "variant": "pink"
+   },
+   {
+    "group": "wall",
+    "x": 16.38,
+    "z": -22.87,
+    "surface_y": 1.16,
+    "yaw": 150.0,
+    "scale": [
+     0.6,
+     0.55
+    ],
+    "variant": "pink"
+   },
+   {
+    "group": "wall",
+    "x": -14.88,
+    "z": -15.88,
+    "surface_y": 2.38,
+    "yaw": 225.0,
+    "scale": [
+     0.5,
+     0.48
+    ],
+    "variant": "pink"
+   },
+   {
+    "group": "wall",
+    "x": -17.62,
+    "z": 12.63,
+    "surface_y": 1.37,
+    "yaw": 165.0,
+    "scale": [
+     0.5,
+     0.48
+    ],
+    "variant": "pink"
+   },
+   {
+    "group": "wall",
+    "x": 3.62,
+    "z": 31.62,
+    "surface_y": 1.22,
+    "yaw": 120.0,
+    "scale": [
+     0.5,
+     0.48
+    ],
+    "variant": "lilac"
+   },
+   {
+    "group": "wall",
+    "x": -13.62,
+    "z": -4.88,
+    "surface_y": 1.29,
+    "yaw": 210.0,
+    "scale": [
+     0.45,
+     0.4
+    ],
+    "variant": "lilac"
+   },
+   {
+    "group": "wall",
+    "x": 10.62,
+    "z": 14.38,
+    "surface_y": 1.23,
+    "yaw": 195.0,
+    "scale": [
+     0.45,
+     0.4
+    ],
+    "variant": "lilac"
    }
   ]
  },
@@ -1199,11 +1445,28 @@
    "FX_Falling_Leaves_19",
    "FX_Falling_Leaves_20",
    "FX_Falling_Leaves_21",
-   "FX_Falling_Leaves_22"
+   "FX_Falling_Leaves_22",
+   "FX_Blossom_Petals_1",
+   "FX_Blossom_Petals_2",
+   "FX_Blossom_Petals_3",
+   "FX_Blossom_Petals_4",
+   "FX_Blossom_Petals_5",
+   "FX_Blossom_Petals_6",
+   "FX_Blossom_Petals_7",
+   "FX_Blossom_Petals_8",
+   "FX_Blossom_Petals_9",
+   "FX_Blossom_Petals_10",
+   "FX_Blossom_Petals_11",
+   "FX_Blossom_Petals_12",
+   "FX_Blossom_Petals_13",
+   "FX_Blossom_Petals_14",
+   "FX_Blossom_Petals_15",
+   "FX_Blossom_Petals_16",
+   "FX_Blossom_Petals_17"
   ],
-  "scene_objects_added": 130,
+  "scene_objects_added": 198,
   "shared_objects_added": 6,
-  "estimated_particles_alive": 268,
+  "estimated_particles_alive": 287,
   "materials": 3,
   "textures": [
    "FX_Sanctum_glow",
@@ -1211,9 +1474,9 @@
    "FX_Sanctum_leaf"
   ]
  },
- "_build_seconds": 417.2,
+ "_build_seconds": 558.8,
  "_size": {
   "before": 10062779,
-  "after": 63618084
+  "after": 64080760
  }
 }

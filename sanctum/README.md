@@ -18,6 +18,8 @@ identik byte-per-byte: versi Low `PVP_049_low`, data jalur/tembok A* (`*wall_add
 - Baru di v5:
   - Warna alami ala referensi Dota 2, tidak warna-warni.
   - 7 pohon baru yang menempel di tembok lane, dan 22 efek daun jatuh dari setiap pohon.
+  - 17 pohon berbunga, salinan pohon asli map dengan warna pink kusam / lilac lembut yang senada dengan bunga di
+    tanah: 7 di tembok lane, 10 di atas tembok jungle, dengan kelopak yang berjatuhan.
   - Bangkai monster, serta sedikit bunga kalem, kerikil, dan daun gugur di pinggiran rumput.
   - Relief yang lebih timbul.
 
@@ -83,6 +85,24 @@ menyatu. Nuansa biru-toska yang menutupi map aslinya dibuang:
 ![Pohon baru menempel di tembok lane](docs/previews/14_kamera_game_2.png)
 ![Lane bawah + pohon baru di tembok](docs/previews/16_kamera_game_4.png)
 
+### 17 pohon berbunga, senada dengan bunga di tanah
+
+- **Salinan pohon asli map** (batang `tree_04` + kanopi `outsideleaf_05`), hanya warna kanopinya yang diganti.
+  Teksturnya dibuat dari atlas daun HD map: daun hijau diganti gradasi bunga mengikuti terang-gelap lukisan aslinya,
+  dan ±20% tetap berdaun hijau supaya alami.
+  - Batang dan akar tidak diubah.
+  - Tambahannya hanya 2 tekstur (1024², ASTC 6x6) dan 2 material, yaitu salinan material daun asli dengan peta warna
+    baru.
+- **Warna kalem** dari palet bunga di tanah, jadi tidak warna-warni: pink kusam ala sakura dan lilac lembut ala
+  wisteria.
+- **7 di tembok lane**, dengan aturan ketat yang sama seperti 7 pohon hijau: tidak ada bagian di atas area yang bisa
+  dilewati dan tidak menutupi jalur dari kamera.
+- **10 pohon ringkas di atas tembok jungle** (lebar 0,45–0,6×, tinggi 0,4–0,55×).
+  - Aturannya sama dengan semak asli di tembok jungle (`leaf_01`–`leaf_35`): kanopi menjorok paling jauh 0,5 m, dan
+    garis pandang kamera menembus paling jauh 0,75 m ke tepi jalur untuk paling banyak 25% titik.
+  - Pohon tidak punya collider, jadi gerakan hero tidak terhalang.
+- **Kelopak berjatuhan:** 17 emitter kecil, berwarna pink atau lilac sesuai pohonnya.
+
 ### Daun jatuh yang cocok dengan pohonnya
 
 - Daun **jatuh dari tempat daunnya berada**: ada satu emitter kecil di setiap kanopi, yaitu 15 pohon pinggir map dan
@@ -91,7 +111,8 @@ menyatu. Nuansa biru-toska yang menutupi map aslinya dibuang:
   urat halus.
 - **Warnanya hijau alami** seperti daun pohonnya. Tekstur daun pohon ikut diubah dari toska ke hijau alami, dan tiap
   daun jatuh acak di antara dua nada hijau. Daun kuning keemasan versi sebelumnya sudah diganti.
-- Total ±55 daun hidup sekaligus. Seluruh efek ambient sekarang ±268 partikel dari 32 sistem.
+- Total ±55 daun hidup sekaligus, ditambah ±20 kelopak dari 17 pohon berbunga. Seluruh efek ambient sekarang ±287
+  partikel dari 49 sistem.
 
 ### Dekorasi tanah baru
 
@@ -310,11 +331,13 @@ Satu palet natural yang sama untuk tanah, props, foliage, langit, dan lightmap, 
 - Rumput dan daun cut-out sengaja tanpa mipmap, supaya tidak menipis.
 - Bayangan, AO, relief, dan kilau semuanya baked, jadi tidak ada biaya render tambahan.
 - **Efek baru dibuat seringan mungkin:**
-  - Total ±268 partikel dari 32 sistem (22 di antaranya emitter daun kecil, masing-masing paling banyak 6 daun).
+  - Total ±287 partikel dari 49 sistem. 39 di antaranya emitter daun atau kelopak kecil, masing-masing paling banyak
+    6 partikel.
   - Tanpa modul Noise atau Collision.
   - Simulasi world-space dengan *prewarm*, plus culling otomatis.
   - Hanya 4 tekstur kecil.
-- **Pohon baru:** 14 renderer dan ±4.800 segitiga, tanpa tekstur atau mesh tambahan.
+- **Pohon baru:** 24 pohon (48 renderer, ±16.400 segitiga) memakai mesh yang sudah ada. Tambahannya hanya 2 tekstur
+  bunga (±0,9 MB) dan 2 material.
 - **Dekorasi tanah** ada di dalam tekstur yang sudah ada, jadi ukurannya tidak bertambah.
 - **Konsekuensi memori:**
   - Tekstur High naik dari 8,3 MB menjadi 68,4 MB. Sekitar 11 MB dari kenaikan itu karena props sekarang ASTC 6x6.
@@ -331,6 +354,7 @@ Satu palet natural yang sama untuk tanah, props, foliage, langit, dan lightmap, 
 | Kilau base (2) | sekitar orb kedua base | bintang putih-emas naik berputar. Warnanya netral, jadi tetap cocok saat warna tim ditukar |
 | Debu cahaya | seluruh peta | butiran cahaya kecil melayang di udara |
 | Daun berguguran (22) | di bawah setiap kanopi pohon (15 pohon pinggir + 7 pohon baru) | daun hijau alami berbentuk daun pohon map, jatuh berputar dan bergoyang |
+| Kelopak berjatuhan (17) | di bawah setiap pohon berbunga | kelopak kecil pink kusam / lilac lembut, melayang turun |
 
 ![Efek baru (simulasi)](docs/previews/5_efek_baru_simulasi.png)
 
@@ -361,8 +385,8 @@ Cara efek disisipkan:
   aslinya, tidak ada yang terbalik.
 - Cubemap: ukuran per sisi dan total cocok. Keenam sisinya berisi, dengan orientasi yang sama seperti aslinya.
 - Objek yang ditambahkan persis sesuai rencana:
-  - 32 sistem efek + 1 root, 3 material, 3 tekstur.
-  - 7 pohon (14 bagian) + 1 root.
+  - 49 sistem efek + 1 root, 3 material efek, dan 3 tekstur efek.
+  - 24 pohon (48 bagian) + 1 root, ditambah 2 material bunga dan 2 tekstur bunga.
   - Semua referensinya valid (komponen, hierarki, mesh, material → tekstur dan shader, PreloadData).
 - Pohon baru:
   - Mesh dan material sama dengan pohon sumbernya.
@@ -370,7 +394,7 @@ Cara efek disisipkan:
   - Tidak ada bagian pohon di atas area yang bisa dilewati, berdasarkan tepi yang diukur dari geometri map.
   - Garis pandang kamera game yang melewatinya tidak mengenai area itu.
 - Satu-satunya script yang berubah adalah tabel lightmap `BattleSceneDiffmapStorage`. Entri lamanya tetap sama
-  persis, dan hanya 7 entri batang pohon baru yang ditambahkan.
+  persis, dan hanya 24 entri batang pohon baru yang ditambahkan.
 - Kapasitas partikel cukup. Total partikel di bawah anggaran 300.
 
 Catatan: validasi ini memeriksa struktur file. Tampilan di dalam game belum bisa saya uji langsung di HP.
@@ -396,9 +420,9 @@ python tools/pack_like.py Sanctum_Island_Map.zip out Sanctum_Island_Map_HD.zip
 Build dari nol memakan ±15 menit dengan 4 core. Kalau variabel `MAP_SR_CACHE=<folder>` diisi, hasil AI
 disimpan di cache dan build berikutnya ±8 menit, dengan hasil yang identik.
 
-Zip-nya bisa direproduksi: build ulang dari nol tanpa cache menghasilkan zip yang identik, dengan SHA-256
-`a148c4f11355e4824042798761cf4d7c1fc769ce26e45ad42d0a00094866133c`. Inferensi AI-nya deterministik pada
-jumlah thread yang sama, dan penempatan dekorasi memakai seed tetap.
+SHA-256 zip: `d5873a9ee667a7b370770931986dcdcf610ca4f334b75e22dd0dddf664932769`. Zip ini dibangun dengan cache hasil
+AI. Build-nya deterministik: inferensi AI memakai jumlah thread yang sama dan penempatan dekorasi memakai seed tetap.
+Versi sebelumnya sudah terbukti identik saat dibangun ulang dari nol tanpa cache.
 
 | Tool | Fungsi |
 |---|---|

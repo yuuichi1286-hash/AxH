@@ -16,6 +16,7 @@ import math
 import numpy as np
 
 SOURCE = ('PVP_049_2026s3_tree_04', 'PVP_049_2026s3_outsideleaf_05')     # trunk, canopy (pivot = trunk)
+LEAF_TEXTURE = 'PVP_049_2026s3_leaf_01_DA'                                # the canopy's colour map
 
 # (x, z, surface y, yaw deg, scale): trunks at the outer foot of the lane walls, searched against the measured
 # walkable edge: the trunk stands on solid ground beyond the wall's outer face, no vertex lies above walkable ground,
@@ -26,10 +27,39 @@ PLACEMENTS = [
     (42.43, -12.22, -3.45, 195.0, 1.15),
     (31.0, -23.87, -2.65, 195.0, 1.3),
     (-24.08, -31.81, -1.86, 270.0, 1.3),
-    (-46.23, -10.32, -3.32, 255.0, 1.45),
+    (-46.48, -10.57, -3.32, 255.0, 1.45),
     (-21.1, 33.63, -2.04, 0.0, 1.15),
     (12.24, -48.0, -0.62, 195.0, 1.6),
 ]
+# Blossom trees: copies of the same map tree with the canopy recoloured in muted dusty pink / soft lilac
+# (map_hd.BLOSSOMS), matching the ground flowers. (x, z, surface y, yaw deg, scale, variant).
+# Along the lane walls: same strict rule as the green trees, >= 8 m from every other tree.
+BLOSSOM_LANE = [
+    (16.17, 42.21, -1.2, 225.0, 1.15, 'pink'),
+    (27.47, 27.07, -0.39, 75.0, 1.15, 'lilac'),
+    (43.24, 12.48, -2.14, 255.0, 1.15, 'pink'),
+    (-15.7, 43.69, -2.69, 330.0, 1.15, 'lilac'),
+    (21.5, -34.15, -2.13, 165.0, 1.15, 'lilac'),
+    (-40.5, -19.46, -2.84, 120.0, 1.15, 'pink'),
+    (-29.53, 27.15, -2.23, 345.0, 1.15, 'pink'),
+]
+# On the inner jungle walls: compact trees (scale (width, height)) standing on the wall tops, >= 7 m apart and
+# >= 2 m from the wall plants. Rule = what the map's own wall plants (leaf_01-35) already do: the canopy reaches at
+# most 0.5 m past the wall edge, camera sight lines through the tree reach at most 0.75 m into the path for at most
+# 25 % of its vertices (fitted with a margin: <= 0.36 m / 0.56 m / 22 %).
+BLOSSOM_WALL = [
+    (24.62, -14.62, 1.05, 150.0, (0.6, 0.55), 'pink'),
+    (-16.88, 22.12, 1.41, 345.0, (0.6, 0.55), 'lilac'),
+    (7.38, -31.62, 1.44, 150.0, (0.6, 0.55), 'lilac'),
+    (-8.87, 29.63, 1.97, 300.0, (0.6, 0.55), 'pink'),
+    (16.38, -22.87, 1.16, 150.0, (0.6, 0.55), 'pink'),
+    (-14.88, -15.88, 2.38, 225.0, (0.5, 0.48), 'pink'),
+    (-17.62, 12.63, 1.37, 165.0, (0.5, 0.48), 'pink'),
+    (3.62, 31.62, 1.22, 120.0, (0.5, 0.48), 'lilac'),
+    (-13.62, -4.88, 1.29, 210.0, (0.45, 0.4), 'lilac'),
+    (10.62, 14.38, 1.23, 195.0, (0.45, 0.4), 'lilac'),
+]
+WALL_OVER_MAX, WALL_SIGHT_MAX, WALL_SIGHT_FRAC = 0.5, 0.75, 0.25
 TOLERANCE = 0.15          # m: a vertex / sight-line hit counts as over walkable ground when > 15 cm inside the edge
 HM_PPM, HM_X0, HM_Z1 = 4.0, -72.0, 58.0
 SIDES = ((1, 1), (1, -1), (-1, -1), (-1, 1))
@@ -122,6 +152,42 @@ def clearance(world_verts, cam_fwd, edge):
     return int((dv < -TOLERANCE).sum()), int((dh < -TOLERANCE).sum()), float(dv.min()), float(dh.min())
 
 
+def walkable_grid(hm, edge):
+    """ground-level cells inside the measured walkable edge, and each cell's depth into that area (m)"""
+    import cv2
+    H, W = hm.shape
+    xs = HM_X0 + (np.arange(W) + 0.5) / HM_PPM
+    zs = HM_Z1 - (np.arange(H) + 0.5) / HM_PPM
+    XX, ZZ = np.meshgrid(xs, zs)
+    inside = d_out(XX, ZZ) < _edge_at(edge, XX.ravel(), ZZ.ravel()).reshape(H, W)
+    walk = inside & (hm > -0.7) & (hm < 0.9)
+    return walk, cv2.distanceTransform(walk.astype(np.uint8), cv2.DIST_L2, 5) / HM_PPM
+
+
+def wall_clearance(world_verts, cam_fwd, hm, walk, depth):
+    """inner-wall rule -> (max canopy overhang into the path, max sight-line depth into the path, hidden fraction)"""
+    v = np.asarray(world_verts, np.float64)
+    H, W = hm.shape
+
+    def cell(x, z):
+        return (np.clip(((HM_Z1 - z) * HM_PPM).astype(int), 0, H - 1),
+                np.clip(((x - HM_X0) * HM_PPM).astype(int), 0, W - 1))
+    r, c = cell(v[:, 0], v[:, 2])
+    over = float(np.where(walk[r, c], depth[r, c], 0).max())
+    f = np.asarray(cam_fwd, np.float64); f = f / np.linalg.norm(f)
+    p = v.copy(); done = np.zeros(len(v), bool); rr = np.zeros(len(v), int); cc = np.zeros(len(v), int)
+    for _ in range(120):                                   # march each camera ray until it meets the surface
+        p = p + f[None, :] * 0.1
+        r, c = cell(p[:, 0], p[:, 2])
+        land = (~done) & (p[:, 1] <= hm[r, c])
+        rr[land], cc[land] = r[land], c[land]; done |= land
+        if done.all():
+            break
+    r, c = cell(p[~done, 0], p[~done, 2]); rr[~done], cc[~done] = r, c
+    hid = walk[rr, cc]
+    return over, float(np.where(hid, depth[rr, cc], 0).max()), float(hid.mean())
+
+
 ROOT_NAME = 'Sanctum_NewTrees'
 
 
@@ -155,9 +221,25 @@ def _yaw(deg):
     return np.array([[math.cos(a), 0, math.sin(a)], [0, 1, 0], [-math.sin(a), 0, math.cos(a)]])
 
 
+def groups():
+    """-> [(group, index, x, z, surface y, yaw, (width scale, height scale), variant)] for every new tree"""
+    out = [('edge', i, x, z, y, yaw, (sc, sc), None) for i, (x, z, y, yaw, sc) in enumerate(PLACEMENTS)]
+    for name, table in (('lane', BLOSSOM_LANE), ('wall', BLOSSOM_WALL)):
+        for i, (x, z, y, yaw, sc, var) in enumerate(table):
+            out.append((name, i, x, z, y, yaw, sc if isinstance(sc, tuple) else (sc, sc), var))
+    return out
+
+
+def part_name(group, i, src):
+    if group == 'edge':
+        return f'{src.replace("PVP_049_2026s3_", "Sanctum_")}_new{i + 1}'
+    return f'Sanctum_blossom_{group}{i + 1}_{"trunk" if src == SOURCE[0] else "canopy"}'
+
+
 def plan(env):
-    """-> list of placed parts: dict(name, src_go, M (4x4 world), ...) and the world bounding boxes (for previews,
-    leaf emitters and validation)."""
+    """-> list of placed parts: dict(name, src, group, variant, M (4x4 world), bbox, ...). Width / height scales are
+    applied along the world axes (the source parts are Z-up meshes rotated to Y-up, so each Transform stays a plain
+    rotation + per-axis scale)."""
     from map_render import Scene
     from meshio import decode
     sc = Scene(env)
@@ -177,18 +259,21 @@ def plan(env):
     pivot = trunk['M'][:3, 3].copy()
     base_off = trunk['wp'][:, 1].min() - pivot[1]          # trunk foot below its pivot
     parts = []
-    for i, (x, z, ys, yaw, s) in enumerate(PLACEMENTS):
+    for group, i, x, z, ys, yaw, (a, b), variant in groups():
         R = _yaw(yaw)
-        new_pivot = np.array([x, ys - base_off * s - 0.25, z])        # foot sunk 25 cm into the rock
+        S = np.diag([a, b, a])
+        sink = 0.25 if group != 'wall' else 0.08               # foot sunk into the rock / wall top
+        new_pivot = np.array([x, ys - base_off * b - sink, z])
         for name in SOURCE:
             p = src[name]
             Mw = np.eye(4)
-            Mw[:3, :3] = R @ (s * p['M'][:3, :3])
-            Mw[:3, 3] = new_pivot + R @ (s * (p['M'][:3, 3] - pivot))
-            wp = (R @ (s * (p['wp'] - pivot)).T).T + new_pivot
-            parts.append(dict(name=f'{name.replace("PVP_049_2026s3_", "Sanctum_")}_new{i + 1}', src=name,
+            Mw[:3, :3] = R @ S @ p['M'][:3, :3]
+            Mw[:3, 3] = new_pivot + R @ (S @ (p['M'][:3, 3] - pivot))
+            wp = (R @ (S @ (p['wp'] - pivot).T)).T + new_pivot
+            parts.append(dict(name=part_name(group, i, name), src=name, group=group,
+                              variant=variant if name == SOURCE[1] else None,
                               src_go=p['go'], src_mf=p['mf'], src_mr=p['mr'], M=Mw,
-                              bbox=(wp.min(0).tolist(), wp.max(0).tolist()), tree=i))
+                              bbox=(wp.min(0).tolist(), wp.max(0).tolist()), tree=(group, i)))
     return parts
 
 
@@ -202,10 +287,52 @@ def canopies(parts):
     return out
 
 
-def inject(env, parts, new_object):
-    """Adds the planned tree parts to the scene. new_object(sf, pid, st, idx, tree) writes one object."""
+BLOSSOM_TEX = 'Sanctum_blossom_{}_DA'
+BLOSSOM_MAT = 'Sanctum_blossom_{}'
+
+
+def inject(env, parts, new_object, blossom_images=None, encode=None):
+    """Adds the planned tree parts to the scene. new_object(sf, pid, st, idx, tree) writes one object.
+    blossom_images: {variant: RGBA float image} for the blossom canopies (textures + materials are added to
+    sharedAssets as copies of the leaf canopy's own texture / material, only the colour map differs)."""
     bf = env.files[list(env.files)[0]]
     scene = next(sf for n, sf in bf.files.items() if hasattr(sf, 'types') and not n.endswith('.sharedAssets'))
+    shared = next(sf for n, sf in bf.files.items() if n.endswith('.sharedAssets'))
+    variants = sorted({p['variant'] for p in parts if p['variant']})
+    blossom_mat = {}
+    if variants:
+        from PIL import Image
+        canopy_part = next(p for p in parts if p['src'] == SOURCE[1])
+        mr_src = scene.objects[canopy_part['src_mr']].read_typetree()
+        mat_pp = mr_src['m_Materials'][0]
+        leaf_mat = shared.objects[mat_pp['m_PathID']].read_typetree()
+        tex_pp = dict(leaf_mat['m_SavedProperties']['m_TexEnvs'])['_MainTex']['m_Texture']
+        leaf_tex = shared.objects[tex_pp['m_PathID']].read_typetree()
+        ti = next(i for i, t in enumerate(shared.types) if t.class_id == 28)
+        mi = next(i for i, t in enumerate(shared.types) if t.class_id == 21)
+        nsh = max(shared.objects) + 1
+        for var in variants:
+            img = blossom_images[var]
+            im = Image.fromarray((np.clip(img, 0, 1) * 255 + 0.5).astype(np.uint8), 'RGBA')
+            data = encode(im, leaf_tex['m_TextureFormat'], 1)
+            t = copy.deepcopy(leaf_tex)
+            t.update({'m_Name': BLOSSOM_TEX.format(var), 'm_Width': im.width, 'm_Height': im.height, 'm_MipCount': 1,
+                      'm_CompleteImageSize': len(data), 'image data': data,
+                      'm_StreamData': {'offset': 0, 'size': 0, 'path': ''}})
+            new_object(shared, nsh, shared.types[ti], ti, t)
+            tex_id = nsh; nsh += 1
+            m = copy.deepcopy(leaf_mat)
+            m['m_Name'] = BLOSSOM_MAT.format(var)
+            envs = []
+            for k, v in m['m_SavedProperties']['m_TexEnvs']:
+                if k == '_MainTex':
+                    v = dict(v, m_Texture={'m_FileID': 0, 'm_PathID': tex_id})
+                envs.append((k, v))
+            m['m_SavedProperties']['m_TexEnvs'] = envs
+            new_object(shared, nsh, shared.types[mi], mi, m)
+            blossom_mat[var] = {'m_FileID': mat_pp['m_FileID'], 'm_PathID': nsh}; nsh += 1
+        if hasattr(shared, 'mark_changed'):
+            shared.mark_changed()
 
     def type_of(cid):
         i = next(i for i, t in enumerate(scene.types) if t.class_id == cid)
@@ -239,13 +366,16 @@ def inject(env, parts, new_object):
         g.update({'m_Name': p['name'], 'm_IsActive': True,
                   'm_Component': [{'component': pp(t_id)}, {'component': pp(f_id)}, {'component': pp(r_id)}]})
         M = p['M']
-        sx = float(np.linalg.norm(M[:3, 0]))
+        sc_ = np.linalg.norm(M[:3, :3], axis=0)              # per local axis (rotation + axis-aligned scale)
         t = copy.deepcopy(tr_tmpl)
-        t.update({'m_GameObject': pp(g_id), 'm_LocalRotation': _m_to_quat(M[:3, :3] / sx),
+        t.update({'m_GameObject': pp(g_id), 'm_LocalRotation': _m_to_quat(M[:3, :3] / sc_[None, :]),
                   'm_LocalPosition': {'x': float(M[0, 3]), 'y': float(M[1, 3]), 'z': float(M[2, 3])},
-                  'm_LocalScale': {'x': sx, 'y': sx, 'z': sx}, 'm_Children': [], 'm_Father': pp(root_t)})
+                  'm_LocalScale': {'x': float(sc_[0]), 'y': float(sc_[1]), 'z': float(sc_[2])},
+                  'm_Children': [], 'm_Father': pp(root_t)})
         f = copy.deepcopy(objs[p['src_mf']].read_typetree()); f['m_GameObject'] = pp(g_id)
         r = copy.deepcopy(objs[p['src_mr']].read_typetree()); r['m_GameObject'] = pp(g_id)
+        if p['variant']:
+            r['m_Materials'] = [dict(blossom_mat[p['variant']])]
         rt['m_Children'].append(pp(t_id))
         pending += [(g_id, go_t, go_i, g), (t_id, tr_t, tr_i, t), (f_id, mf_t, mf_i, f), (r_id, mr_t, mr_i, r)]
         new_mr[r_id] = p['src_mr']
@@ -268,6 +398,8 @@ def inject(env, parts, new_object):
         o.save_typetree(tt)
     if hasattr(scene, 'mark_changed'):
         scene.mark_changed()
-    return {'trees': len(PLACEMENTS), 'parts': len(parts), 'scene_objects_added': len(pending),
-            'diffmap_entries_added': added, 'root': ROOT_NAME,
-            'placements': [dict(x=x, z=z, surface_y=ys, yaw=yaw, scale=s) for x, z, ys, yaw, s in PLACEMENTS]}
+    return {'trees': len(groups()), 'green_edge_trees': len(PLACEMENTS), 'blossom_lane_trees': len(BLOSSOM_LANE),
+            'blossom_wall_trees': len(BLOSSOM_WALL), 'parts': len(parts), 'scene_objects_added': len(pending),
+            'diffmap_entries_added': added, 'root': ROOT_NAME, 'blossom_materials': sorted(blossom_mat),
+            'placements': [dict(group=g, x=x, z=z, surface_y=y, yaw=yaw, scale=list(sc), variant=v)
+                           for g, i, x, z, y, yaw, sc, v in groups()]}

@@ -196,6 +196,8 @@ def process_high(env, report, sr, pool):
         kind = kind_of(name)
         img = np.asarray(o.read().image.convert('RGBA'), np.float32) / 255.0
         out = process_image(kind, img, sr, name, bake)
+        if name == map_trees.LEAF_TEXTURE:                # blossom canopies: recoloured from the finished leaf atlas
+            bake['blossom'] = {v: map_hd.blossom(out, v) for v in map_hd.BLOSSOMS}
         im = Image.fromarray((np.clip(out, 0, 1) * 255 + 0.5).astype(np.uint8), 'RGBA')
         fmt, mips, filt, aniso = PLAN[kind]
         nm = fx_tex_hd.full_chain(*im.size) if mips else 1
@@ -235,7 +237,7 @@ def process_high(env, report, sr, pool):
                     o.save_typetree(tt)
                     report.setdefault('water_materials', []).append(tt['m_Name'])
     # new trees (clones of the map's edge tree) on the outer cliff rim, then the ambient effects
-    report['trees'] = map_trees.inject(env, map_trees.plan(env), map_fx._new_object)
+    report['trees'] = map_trees.inject(env, map_trees.plan(env), map_fx._new_object, bake['blossom'], fx_tex_hd.encode)
     report['effects'] = map_fx.inject(env, TEMPLATES, fx_tex_hd.encode)
 
 
