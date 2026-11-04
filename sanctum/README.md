@@ -10,12 +10,27 @@ Sesuai permintaan, yang diubah **hanya scene grafik High** (`PVP_049_add.unity3d
 identik byte-per-byte: versi Low `PVP_049_low`, data jalur/tembok A* (`*wall_add`), `PVP_003_add`, `PVP_009`, dan
 `GalleryCenter`.
 
+**Seluruh peta High ikut berubah**, bukan hanya beberapa bagian:
+
+- 16 dari 16 petak tanah, termasuk sungai.
+- 40 dari 40 tekstur props: bangunan base, patung, tembok, batu jungle, pohon, tebing luar, pilar, kristal.
+- Langit dan pulau melayang, 7 lightmap, rumput dan daun 3D, serta pantulan air.
+
+Gambar di bawah adalah seluruh peta beserta bangunannya: atas asli, bawah remaster.
+
+![Seluruh peta sebelum / sesudah](docs/previews/0_seluruh_peta.png)
+
+Ada beberapa hal yang memang **bukan bagian dari file map**, sehingga tetap seperti biasa: turret/tower, inti base,
+monster jungle, Lord/Turtle, minion, hero, dan efek skill. Semuanya dimuat dari file game lain. Lubang hitam di
+gambar tampak atas adalah posisi tower.
+
 ![Peta sebelum / sesudah](docs/previews/1_peta_sebelum_sesudah.png)
 
 ## Yang baru di versi ini
 
-- **Pewarnaan lebih gelap:** rata-rata ±25–30% lebih gelap dari aslinya, dengan bayangan lebih dalam. Warna tetap
-  kaya, jadi tidak kusam.
+- **Pewarnaan lebih gelap di seluruh peta:** tanah, props/bangunan, tebing, dan langit, rata-rata ±25–30% lebih gelap
+  dari aslinya, dengan bayangan lebih dalam. Warna tetap kaya, jadi tidak kusam. Props dan bangunan juga mendapat
+  kontras lokal dan relief, jadi lebih detail.
 - **Rumput dan tanah lebih detail:** serat helai rumput, butiran tanah dan kerikil, plus kontras lokal dua skala.
 - **Bayangan setiap bangunan:** 181 bangunan dan props memberi bayangan nyata ke tanah, mengikuti arah cahaya peta.
 - **AO:** gelap kontak di kaki bangunan, ditambah AO celah di dalam tekstur.
@@ -97,8 +112,11 @@ Di petak tanah (sekitar 1,3 cm per texel setelah 2×), sungai sengaja dibiarkan 
 Grading sinematik yang sama untuk tanah, props, langit, dan lightmap, jadi semuanya tetap serasi:
 
 - *Dehaze* dan kontras mid-tone.
-- **Mid-tone lebih gelap** (gamma 1,08) dan *exposure* diturunkan (tanah 0,92, props 0,93). Lightmap props ikut
-  digelapkan.
+- **Mid-tone lebih gelap** dan *exposure* diturunkan:
+  - tanah: gamma 1,08, exposure 0,92
+  - props dan bangunan: gamma 1,10, exposure 0,90
+  - langit: gamma 1,07, exposure 0,92
+  - Lightmap props ikut digelapkan.
 - *Vibrance*: hijau rumput dan pohon lebih pekat, air lebih toska.
 - *Split-tone*: highlight hangat, bayangan sedikit dingin.
 - *Clarity*: ukiran lane, retakan batu, dan tepi semak lebih tegas.
@@ -184,7 +202,7 @@ python tools/pack_like.py Sanctum_Island_Map.zip out Sanctum_Island_Map_HD.zip
 
 Build dari nol memakan ±15 menit dengan 4 core. Kalau variabel `MAP_SR_CACHE=<folder>` diisi, hasil AI disimpan di
 cache dan build berikutnya ±6 menit, dengan hasil yang identik. Zip-nya (SHA-256
-`b1476e8d73f7a5594aa8435af23b01a3fbd7f467dd78f6ba00f53086d52e82bb`) bisa direproduksi. Inferensi AI-nya
+`48cc163c5c244357bd4a58d5336a98915d6abb00b84d7cd1c862d3dd38a1a54f`) bisa direproduksi. Inferensi AI-nya
 deterministik pada jumlah thread yang sama.
 
 | Tool | Fungsi |

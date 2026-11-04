@@ -34,8 +34,25 @@ def pair(a, b, title, la='Asli (High)', lb='HD remaster'):
     return s
 
 
-# 1. overview + close-ups
+# 0. the WHOLE map with buildings / props (supersampled), stacked vertically so it can be viewed large
 full = (-64, 64, -50, 50)
+
+
+def whole(env, ppm=14):
+    im = map_render.render(env, px_per_m=ppm * 2, extent=full, layers=(17, 10))
+    return im.resize((im.width // 2, im.height // 2), Image.BOX)
+
+
+a, b = whole(eo), whole(en)
+w, h = a.size
+s0 = Image.new('RGB', (w, 2 * h + 90), (12, 13, 15))
+s0.paste(a, (0, 40)); s0.paste(b, (0, h + 90))
+d0 = ImageDraw.Draw(s0)
+d0.text((8, 8), 'SELURUH PETA - atas: asli (High)', font=F, fill=(230, 230, 230))
+d0.text((8, h + 56), 'SELURUH PETA - bawah: remaster (semua 16 petak tanah, 40 props, langit, lightmap, air diubah)', font=F, fill=(140, 230, 170))
+s0.save(os.path.join(out, '0_seluruh_peta.png'))
+
+# 1. overview + close-ups
 a = map_render.render(eo, px_per_m=9, extent=full)
 b = map_render.render(en, px_per_m=9, extent=full)
 pair(a, b, 'Sanctum Island, tampak atas').save(os.path.join(out, '1_peta_sebelum_sesudah.png'))

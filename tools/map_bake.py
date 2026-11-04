@@ -157,25 +157,30 @@ def shadow_ao_maps(props, hm):
     return np.clip(soft, 0, 1), np.clip(ao, 0, 1)
 
 
-def tile_position_map(M, d, size):
-    """Per-texel world (x, z) of a ground tile texture (texels outside the UV islands take the nearest)."""
+def tile_position_map(meshes, size):
+    """Per-texel world (x, z) of a ground texture, rasterised from EVERY mesh that samples it (ground tile and
+    the river surface meshes that reuse the same texture); texels outside all UV islands take the nearest."""
     from scipy import ndimage
     W, H = size
-    tris = world_tris(M, d)
-    uv = d['uv0'][:, :2].astype(np.float64)
-    idx = d['index'].astype(np.int64)
-    n = len(idx) // 3 * 3
-    uvt = uv[idx[:n]].reshape(-1, 3, 2)
-    px = np.stack([uvt[..., 0] * W, (1 - uvt[..., 1]) * H], -1)
     out = np.zeros((H, W, 2), np.float64)
     cov = np.zeros((H, W), bool)
-    raster_attr((H, W), px, tris[..., [0, 2]], out, cov)
+    uv_all, xz_all = [], []
+    for M, d in meshes:
+        tris = world_tris(M, d)
+        uv = d['uv0'][:, :2].astype(np.float64)
+        idx = d['index'].astype(np.int64)
+        n = len(idx) // 3 * 3
+        uvt = uv[idx[:n]].reshape(-1, 3, 2)
+        px = np.stack([uvt[..., 0] * W, (1 - uvt[..., 1]) * H], -1)
+        raster_attr((H, W), px, tris[..., [0, 2]], out, cov)
+        uv_all.append(uvt.reshape(-1, 2)); xz_all.append(tris[..., [0, 2]].reshape(-1, 2))
     if (~cov).any() and cov.any():
         ii = ndimage.distance_transform_edt(~cov, return_distances=False, return_indices=True)
         out = out[ii[0], ii[1]]
     # texture-space direction of the horizontal light (for relief shading): least squares uv -> world
-    A = np.c_[uvt.reshape(-1, 2), np.ones(len(uvt) * 3)]
-    sol, *_ = np.linalg.lstsq(A, tris[..., [0, 2]].reshape(-1, 2), rcond=None)
+    uvs, xzs = np.concatenate(uv_all), np.concatenate(xz_all)
+    A = np.c_[uvs, np.ones(len(uvs))]
+    sol, *_ = np.linalg.lstsq(A, xzs, rcond=None)
     J = sol[:2].T                                  # d(world x,z) / d(u,v)
     to_light_xz = TO_LIGHT[[0, 2]]
     duv = np.linalg.lstsq(J, to_light_xz, rcond=None)[0]

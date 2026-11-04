@@ -97,7 +97,9 @@ def process_image(kind, rgba, sr, name='', bake=None):
             x = map_hd.local_detail(x, np.clip(cv2.resize(a, (W * 2, H * 2)), 0, 1), 0.45, 0.2)
             x = map_bake.relief_pbr(x, emboss=0.06, cavity=0.12, sheen=0.02, kind='prop')
         elif kind == 'prop':
-            x = map_bake.relief_pbr(x, emboss=0.10, cavity=0.16, sheen=0.09, kind='prop')
+            # buildings, walls, rocks, trees, statues, cliffs: same darker look + more detail as the ground
+            x = map_hd.local_detail(x, np.ones(x.shape[:2], np.float32), 0.30, 0.15)
+            x = map_bake.relief_pbr(x, emboss=0.12, cavity=0.18, sheen=0.09, kind='prop')
         x = map_hd.grade(x, {'ground': 'ground', 'prop': 'prop', 'sky': 'sky', 'foliage': 'prop'}[kind])
         x = map_hd.sharpen(x, 0.25 if kind != 'sky' else 0.15, 0.8)
         if a.min() < 0.999:
@@ -139,17 +141,20 @@ def bake_context(env):
     mats = {pid: o.read_typetree() for pid, o in sc.shared.items() if o.type.name == 'Material'}
     texname = {pid: o.read_typetree() for pid, o in sc.shared.items() if o.type.name == 'Texture2D'}
     from meshio import decode
-    tiles = {}
+    users = {}                                     # ground texture -> every layer-17 mesh sampling it
     for gname, layer, M, mesh_pid, mat_pids in sc.renderers():
-        if layer != 17 or 'dibiaobake' not in gname or not mat_pids or mat_pids[0] not in mats:
+        if layer != 17 or not mat_pids or mat_pids[0] not in mats:
             continue
         tp = dict(mats[mat_pids[0]]['m_SavedProperties']['m_TexEnvs']).get('_MainTex')
         t = texname.get(tp['m_Texture']['m_PathID']) if tp else None
         d = decode(sc.shared[mesh_pid].read_typetree())
         if t is None or 'uv0' not in d:
             continue
+        users.setdefault(t['m_Name'], (t, []))[1].append((M, d))
+    tiles = {}
+    for tname, (t, meshes) in users.items():
         size = (t['m_Width'] * 2, t['m_Height'] * 2)
-        tiles[t['m_Name']] = map_bake.tile_position_map(M, d, size)
+        tiles[tname] = map_bake.tile_position_map(meshes, size)
     return {'shadow': shadow, 'ao': ao, 'tiles': tiles, 'props': len(props), 'props_failed': failed,
             'shadow_cover': float((shadow > 0.5).mean())}
 
