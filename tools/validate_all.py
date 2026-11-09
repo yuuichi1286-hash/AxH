@@ -86,7 +86,18 @@ for mb, (size, src_mb) in SIZES.items():
     got = [o.read() for o in en.objects if o.type.name == 'Texture2D'][0]
     want = np.asarray(model_tex.revamp(src, size, uv_tris).convert('RGB'), np.float32)
     have = np.asarray(got.image.convert('RGB'), np.float32)
-    err = np.abs(want - have).mean(); flip_err = np.abs(want[::-1] - have).mean()
+    # v5.1: the detailed scythe (rigid on L_Weapon) has its own square of the atlas -> compared elsewhere
+    keep = np.ones(have.shape[:2], bool)
+    for o in en.objects:
+        if o.type.name == 'Mesh':
+            d = decode(o.read_typetree())
+            names_ok = d['weights'][:, 0] > 0.999
+            uv = d['uv0'][names_ok & (d['indices'][:, 0] == np.bincount(d['indices'][names_ok, 0]).argmax())][:, :2]
+            if len(uv) > 500:
+                x0, x1 = int(uv[:, 0].min() * size) - 24, int(np.ceil(uv[:, 0].max() * size)) + 24
+                y0, y1 = int((1 - uv[:, 1].max()) * size) - 24, int(np.ceil((1 - uv[:, 1].min()) * size)) + 24
+                keep[max(y0, 0):y1, max(x0, 0):x1] = False
+    err = np.abs(want - have)[keep].mean(); flip_err = np.abs(want[::-1] - have)[keep].mean()
     ok = err < 6 and err < flip_err and got.m_Width == size
     print(f'TEXTURE {mb}: {got.m_Width}x{got.m_Height} mips {got.m_MipCount} mean abs err {err:.2f} (flipped {flip_err:.2f})', 'OK' if ok else 'BAD')
     for o in en.objects:

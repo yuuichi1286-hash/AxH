@@ -1,4 +1,4 @@
-# AxH — Hidan Revamp v5
+# AxH — Hidan Revamp v5.1
 
 > **Skin lain di repo ini:** [Shisui x Suyou — Dark Green Revamp](shisui/README.md). Semua efek dominan hijau
 > gelap, lebih besar dan brutal, tekstur HD 2×, fade-in/out di semua efek, plus ikon skill baru.
@@ -9,11 +9,25 @@
 > gugur di pinggiran rumput, relief lebih timbul, bayangan bangunan + AO + emboss/PBR (baked), pantulan air lebih
 > tajam, dan 32 efek ambient.
 
-**Unduh:** [`release/Hidan.Revamp.v5.zip`](release/Hidan.Revamp.v5.zip)
+**Unduh:** [`release/Hidan.Revamp.v5.1.zip`](release/Hidan.Revamp.v5.1.zip)
 
 Isinya 99 file dengan struktur folder (`HIDAN/Art`, `HIDAN/UI`, `HIDAN/Audio`) yang sama persis dengan
 `Hidan.Revamp.zip` di rilis [AxH](https://github.com/yuuichi1286-hash/AxH/releases/tag/AxH). Cara pasangnya juga
 sama: timpa file lama dengan file di zip ini. v5 sudah mencakup semua perbaikan v4, v3 dan v2 (lihat bagian di bawah).
+
+## Yang baru di v5.1: sabit 3 bilah yang lebih detail
+
+Sabit di tangan kiri adalah senjata utama Hidan di semua serangan. Sabit lama (536 vertex) diganti dengan sabit
+detail dari model extlow mod ini (993 vertex): bilah merah dengan tepi baja, dan gagang yang dibalut.
+
+- **Posisi sama persis dengan sabit lama.** Porosnya searah, bilahnya di sisi dan bidang yang sama, tangan memegang
+  gagang, dan ujung bilah sama jauhnya dari tangan seperti sebelumnya. Jadi semua animasi serangan dan skill tetap
+  pas.
+- **Tekstur sabit menempati kotak 512 px di atlas 2048** (bekas tempat sabit lama). Warnanya digrading sama dengan
+  bagian model lain. Atlas dibangun ulang sekali dari tekstur asli, jadi tidak ada kompresi ganda.
+- Tusuk hitam Hidan di tangan kanan tetap ada.
+
+![Sabit sebelum dan sesudah](docs/hidan_scythe_before_after.png)
 
 ## Yang baru di v5: grafik Low sampai Ultra tampil Ultra, efek lebih brutal
 
@@ -266,7 +280,8 @@ Perbaikan:
   Kedua, tidak ada efek yang dihapus sebelum partikel terakhirnya, termasuk overlay, selesai memudar (44/44).
 - Mulai v5 validator memeriksa paritas: tidak ada efek yang masih punya split node atau jumlah partikel yang
   dikurangi (0 dari 48). Setiap objek tambahan juga dicek: bisa dibaca dan semua referensinya valid (853 objek).
-  Hasil v5: 0 masalah, fade 572/572, timing 44/44.
+  Hasil v5.1: 0 masalah, fade 572/572, timing 44/44, tekstur model OK (area sabit dicek terpisah), mesh `noraml`
+  4822 vertex dan `ulti` 4945 vertex valid.
 - **Belum dites langsung di dalam game.** Di lingkungan build tidak ada perangkat Android maupun MLBB. Kalau ada
   skill yang terlihat aneh, sebutkan nama skill-nya.
 
@@ -285,6 +300,7 @@ python tools/build.py orig/HIDAN out/HIDAN out/report.json        # semua pass (
 python tools/merge_overlays.py out/HIDAN out/merge_report.json     # v5: efek Low = Ultra
 python tools/skin_ultra.py out/HIDAN                               # v5: skin Ultra di semua grafik
 python tools/boost_hidan.py out/HIDAN out/boost_report.json        # v5: efek crimson brutal + DelayTime
+python tools/scythe.py orig/HIDAN out/HIDAN                        # v5.1: sabit 3 bilah detail
 python tools/validate_all.py orig/HIDAN out/HIDAN                  # validasi
 python tools/make_previews.py orig/HIDAN out/HIDAN docs/previews   # gambar sebelum/sesudah
 ```
@@ -300,6 +316,7 @@ python tools/make_previews.py orig/HIDAN out/HIDAN docs/previews   # gambar sebe
 | `tools/cinematic.py` | v4: fade sinematik per peran partikel (basic attack & pasif), flare pasif selesai, perbaikan mesh "pop" |
 | `tools/merge_overlays.py` | v5: gabung split node ke efek dasar (type tree 2017/2019 dipertahankan), hapus referensi, `fGatherNum`, tekstur duplikat dibagi |
 | `tools/skin_ultra.py` | v5: tekstur 2048, shader, dan material High/Ultra untuk model dasar |
+| `tools/scythe.py` | v5.1: sabit detail dari model extlow, dipasang di frame sabit lama (L_Weapon), tekstur di atlas 2048 |
 | `tools/boost_hidan.py`, `tools/brutal.py` | v5: profil brutal crimson per peran partikel (nama pinyin + nama layer HIDAN) |
 | `tools/effect_timing.py` | kapan partikel terakhir benar-benar hilang vs `DelayTime` efek (dipakai build & validator) |
 | `tools/make_previews_v4.py`, `make_passive_end_chart.py`, `dump_effect.py` | timeline fade dan inspeksi efek |
