@@ -131,6 +131,69 @@ for mb in SIZES:
                 worst = max(worst, float(np.max(np.abs(L - c) - e)))
     print(f'BOUNDS {mb}: worst vertex outside the renderer bounds over all clips {worst:+.3f} m', 'OK' if worst <= 0.01 else 'BAD')
 
+# --- v5.3: feet and scythe never deeper in the ground than in the original mod (per frame, every clip)
+from anim_ground import Feet, overrides
+from clipio import decode_clip, binding_layout, sample_clip
+orig_rig = Rig(os.path.join(orig_root, HIGH.replace('_high_add', '')))
+new_rig = Rig(os.path.join(new_root, HIGH.replace('_high_add', '')))
+of, nf = Feet(orig_rig), Feet(new_rig)
+sole = min(nf.lowest(new_rig.pose({})).values())
+oc = {o.read_typetree()['m_Name']: o.read_typetree() for o in orig_rig.env.objects if o.type.name == 'AnimationClip'}
+
+
+def weapon_low(rig, W):
+    sm = [x for x in rig.smrs if x['name'] == 'noraml'][0]
+    nm = [rig.goname[b] for b in sm['bones']]
+    on = (sm['d']['weights'].astype(float) * (sm['d']['indices'] == nm.index('L_Weapon'))).sum(1) > 0.5
+    return rig.skin(sm, W)[on][:, 1].min()
+
+
+feet_bad = wpn_bad = 0
+for o in new_rig.env.objects:
+    if o.type.name != 'AnimationClip':
+        continue
+    ct = o.read_typetree(); name = ct['m_Name']
+    if name == 'recall' or name not in oc:
+        continue
+    nd_, od_ = decode_clip(ct), decode_clip(oc[name])
+    nl, ol = binding_layout(ct)[0], binding_layout(oc[name])[0]
+    ts = np.linspace(nd_['start'], nd_['stop'], 24)
+    NM, OM = sample_clip(nd_, ts), sample_clip(od_, np.clip(ts, od_['start'], od_['stop']))
+    fdeep = wdeep = -1.0
+    for i in range(len(ts)):
+        Wn, Wo = new_rig.pose(overrides(new_rig, nl, NM[i])), orig_rig.pose(overrides(orig_rig, ol, OM[i]))
+        ln, lo = nf.lowest(Wn), of.lowest(Wo)
+        fdeep = max(fdeep, max(min(lo[S], sole) - ln[S] for S in ln))
+        if name != 'dead':                          # the death pose lies on the floor, scythe included
+            wdeep = max(wdeep, min(weapon_low(orig_rig, Wo), 0.0) - weapon_low(new_rig, Wn))
+    feet_bad += fdeep > 0.015
+    wpn_bad += wdeep > 0.02
+    if fdeep > 0.015 or wdeep > 0.02:
+        print(f'GROUND {name}: feet {fdeep * 100:+.1f} cm, scythe {wdeep * 100:+.1f} cm deeper than the original')
+print(f'GROUND clips with feet deeper than the original: {feet_bad}, scythe deeper than the original: {wpn_bad}',
+      'OK' if feet_bad == 0 and wpn_bad == 0 else 'BAD')
+
+# --- v5.3: the game caps each particle system at its ParSysInfo count -> the count must not be below the capacity
+low_counts = 0
+for stem_path in [os.path.join(dp, f) for dp, dn, fn in os.walk(new_root) for f in fn if f.endswith('.unity3d')]:
+    f = os.path.basename(stem_path)
+    if f.startswith(('hero_', 'heroshow', 'Hero45')) or 'Atlas' in f:
+        continue
+    env = UnityPy.load(stem_path); objs = {o.path_id: o for o in env.objects}
+    for o in env.objects:
+        if o.type.name != 'MonoBehaviour':
+            continue
+        try:
+            mt = o.read_typetree()
+        except Exception:
+            continue
+        for e in mt.get('ParSysInfo', []):
+            p = e['parSys']
+            if p['m_FileID'] == 0 and p['m_PathID'] in objs and objs[p['m_PathID']].type.name == 'ParticleSystem':
+                mx = objs[p['m_PathID']].read_typetree()['InitialModule']['maxNumParticles']
+                low_counts += e['fDefaultNum'] < mx or e['fGatherNum'] < mx
+print(f'COUNTS particle systems capped below their capacity: {low_counts}', 'OK' if low_counts == 0 else 'BAD')
+
 # --- effect timing: no effect may be recycled before its last particle (incl. overlays) has faded out
 from effect_timing import analyse as timing_analyse
 paths = {}

@@ -1,4 +1,4 @@
-# AxH — Hidan Revamp v5.2
+# AxH — Hidan Revamp v5.3
 
 > **Skin lain di repo ini:** [Shisui x Suyou — Dark Green Revamp](shisui/README.md). Semua efek dominan hijau
 > gelap, lebih besar dan brutal, tekstur HD 2×, fade-in/out di semua efek, plus ikon skill baru.
@@ -9,11 +9,28 @@
 > gugur di pinggiran rumput, relief lebih timbul, bayangan bangunan + AO + emboss/PBR (baked), pantulan air lebih
 > tajam, dan 32 efek ambient.
 
-**Unduh:** [`release/Hidan.Revamp.v5.2.zip`](release/Hidan.Revamp.v5.2.zip)
+**Unduh:** [`release/Hidan.Revamp.v5.3.zip`](release/Hidan.Revamp.v5.3.zip)
 
 Isinya 99 file dengan struktur folder (`HIDAN/Art`, `HIDAN/UI`, `HIDAN/Audio`) yang sama persis dengan
 `Hidan.Revamp.zip` di rilis [AxH](https://github.com/yuuichi1286-hash/AxH/releases/tag/AxH). Cara pasangnya juga
 sama: timpa file lama dengan file di zip ini. v5 sudah mencakup semua perbaikan v4, v3 dan v2 (lihat bagian di bawah).
+
+## Yang baru di v5.3: partikel boost utuh, kaki dan sabit tidak menembus lantai
+
+- **Partikel hasil boost tidak dipotong game lagi.** Game membatasi tiap sistem partikel ke `fDefaultNum` di
+  `ParSysInfo`. Di data asli, angka itu sama dengan kapasitas partikel (`maxNumParticles`) di 309 dari 374 sistem.
+  Boost v5 menaikkan kapasitas, tetapi angka ini belum ikut naik. Akibatnya tambahan percikan dan darah kemungkinan
+  dipotong, dan efek bisa tampak bolong-bolong. Sekarang 353 angka disamakan dengan kapasitas baru.
+- **Kaki tidak tenggelam.** Smoothing animasi v3 membuat kaki masuk lantai: attack4/attack5 24 cm, skill2 17 cm,
+  skill4_2 16 cm (di animasi asli 6–9 cm). Perbaikannya memakai IK dua tulang per frame: pinggul tetap, lutut
+  menekuk, arah telapak tetap, dan transisinya halus. Kaki tidak pernah lebih dalam dari animasi asli.
+- **Sabit tidak masuk lantai.** Bilah sabit detail v5.1 menempel lebih dekat ke ujung gagang, jadi saat sabit mengarah
+  ke bawah (idle, recall, hantaman) bilahnya masuk lantai sampai 13 cm. Sekarang sabit diskalakan 0,93 dengan pusat di
+  tangan. Angka ini skala terbesar yang membuat sabit tidak masuk lantai lebih dalam dari sabit lama, dihitung otomatis
+  dari semua animasi.
+- Validator punya dua cek baru: GROUND (kaki dan sabit dibanding mod asli, per frame, semua animasi) dan COUNTS.
+
+![Lantai v5.2 dan v5.3](docs/hidan_v53_ground.png)
 
 ## Yang baru di v5.2: model tidak hilang di pinggir layar
 
@@ -35,7 +52,7 @@ detail dari model extlow mod ini (993 vertex): bilah merah dengan tepi baja, dan
 
 - **Posisi sama persis dengan sabit lama.** Porosnya searah, bilahnya di sisi dan bidang yang sama, tangan memegang
   gagang, dan ujung bilah sama jauhnya dari tangan seperti sebelumnya. Jadi semua animasi serangan dan skill tetap
-  pas.
+  pas. (Di v5.3 sabit diperkecil 7% di sekitar tangan supaya tidak masuk lantai.)
 - **Tekstur sabit menempati kotak 512 px di atlas 2048** (bekas tempat sabit lama). Warnanya digrading sama dengan
   bagian model lain. Atlas dibangun ulang sekali dari tekstur asli, jadi tidak ada kompresi ganda.
 - Tusuk hitam Hidan di tangan kanan tetap ada.
@@ -294,7 +311,9 @@ Perbaikan:
 - Mulai v5 validator memeriksa paritas: tidak ada efek yang masih punya split node atau jumlah partikel yang
   dikurangi (0 dari 48). Setiap objek tambahan juga dicek: bisa dibaca dan semua referensinya valid (853 objek).
   Mulai v5.2 validator juga memeriksa bounds render di semua animasi (0 vertex di luar).
-  Hasil v5.2: 0 masalah, fade 572/572, timing 44/44, tekstur model OK (area sabit dicek terpisah), mesh `noraml`
+  Mulai v5.3 validator juga memeriksa lantai (kaki dan sabit tidak lebih dalam dari mod asli) dan jumlah partikel
+  (`fDefaultNum` tidak di bawah kapasitas).
+  Hasil v5.3: 0 masalah, GROUND OK, COUNTS OK, bounds OK, fade 572/572, timing 44/44, tekstur model OK (area sabit dicek terpisah), mesh `noraml`
   4822 vertex dan `ulti` 4945 vertex valid.
 - **Belum dites langsung di dalam game.** Di lingkungan build tidak ada perangkat Android maupun MLBB. Kalau ada
   skill yang terlihat aneh, sebutkan nama skill-nya.
@@ -315,6 +334,7 @@ python tools/merge_overlays.py out/HIDAN out/merge_report.json     # v5: efek Lo
 python tools/skin_ultra.py out/HIDAN                               # v5: skin Ultra di semua grafik
 python tools/boost_hidan.py out/HIDAN out/boost_report.json        # v5: efek crimson brutal + DelayTime
 python tools/scythe.py orig/HIDAN out/HIDAN                        # v5.1: sabit 3 bilah detail
+python tools/anim_ground.py orig/HIDAN out/HIDAN out/ground.json   # v5.3: kaki tidak tenggelam (IK)
 python tools/skin_bounds.py out/HIDAN                              # v5.2: bounds render + fresnel crimson
 python tools/validate_all.py orig/HIDAN out/HIDAN                  # validasi
 python tools/make_previews.py orig/HIDAN out/HIDAN docs/previews   # gambar sebelum/sesudah
@@ -331,9 +351,10 @@ python tools/make_previews.py orig/HIDAN out/HIDAN docs/previews   # gambar sebe
 | `tools/cinematic.py` | v4: fade sinematik per peran partikel (basic attack & pasif), flare pasif selesai, perbaikan mesh "pop" |
 | `tools/merge_overlays.py` | v5: gabung split node ke efek dasar (type tree 2017/2019 dipertahankan), hapus referensi, `fGatherNum`, tekstur duplikat dibagi |
 | `tools/skin_ultra.py` | v5: tekstur 2048, shader, dan material High/Ultra untuk model dasar |
+| `tools/anim_ground.py` | v5.3: IK dua tulang per frame, kaki tidak pernah lebih dalam dari animasi asli |
 | `tools/skin_bounds.py` | v5.2: bounds SkinnedMeshRenderer dari semua frame animasi, fresnel biru jadi crimson |
 | `tools/scythe.py` | v5.1: sabit detail dari model extlow, dipasang di frame sabit lama (L_Weapon), tekstur di atlas 2048 |
-| `tools/boost_hidan.py`, `tools/brutal.py` | v5: profil brutal crimson per peran partikel (nama pinyin + nama layer HIDAN) |
+| `tools/boost_hidan.py`, `tools/brutal.py` | v5: profil brutal crimson per peran partikel (nama pinyin + nama layer HIDAN); v5.3: `ParSysInfo` ikut kapasitas baru |
 | `tools/effect_timing.py` | kapan partikel terakhir benar-benar hilang vs `DelayTime` efek (dipakai build & validator) |
 | `tools/make_previews_v4.py`, `make_passive_end_chart.py`, `dump_effect.py` | timeline fade dan inspeksi efek |
 | `tools/clipio.py`, `meshio.py`, `fk.py` | parser kurva streamed/dense, vertex buffer, forward kinematics + skinning |

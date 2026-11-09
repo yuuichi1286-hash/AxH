@@ -4,8 +4,10 @@ Every particle system of a combat effect gets the cinematic treatment of brutal.
 bigger, heavier hits; sparks and debris fly further; more sparks / debris / flames (never more than 60 alive per
 system, so the cost stays bounded); a white-hot birth that settles into Hidan's crimson; a long S-curve decay that
 cools into deep blood red; shock rings and blooms grow while they fade; blood splashes, drips and fragments fall
-with gravity. Fade-in / fade-out stay (alpha 0 at birth and death). The ritual sigils / glyphs and countdowns keep
-their shape, the lobby showcase and the ultimate cut-in stay as they are. Effect lifetimes (DelayTime) are
+with gravity. Fade-in / fade-out stay (alpha 0 at birth and death). The ParticleSysMgr counts (fDefaultNum /
+fGatherNum, the cap the game applies at run time) follow the new capacity, so the extra particles are not cut.
+The ritual sigils / glyphs and countdowns keep their shape, the lobby showcase and the ultimate cut-in stay as they
+are. Effect lifetimes (DelayTime) are
 extended afterwards so no particle is cut before it has faded.
 
 Roles: the pinyin names of brutal.role(), plus the English names of the Hidan layers (ember, splash, drip,
@@ -50,6 +52,42 @@ def role(name, render_mode):
     return brutal.role(name, render_mode)
 
 
+def sync_counts(env, gos, maxp):
+    """ParSysInfo counts follow the particle capacity. In the shipped data fDefaultNum equals maxNumParticles for
+    309 of 374 systems: the game caps every system at fDefaultNum (fGatherNum on low settings), which would cut the
+    boosted capacity back. Entries are resolved by reference, or by name when the reference is empty."""
+    by_name = {}
+    for pid, (gid, _) in maxp.items():
+        by_name.setdefault(gos.get(gid, ''), []).append(pid)
+    n = 0
+    for o in env.objects:
+        if o.type.name != 'MonoBehaviour':
+            continue
+        try:
+            tt = o.read_typetree()
+        except Exception:
+            continue
+        if 'ParSysInfo' not in tt:
+            continue
+        hit = False
+        for e in tt['ParSysInfo']:
+            p = e['parSys']
+            pid = p['m_PathID'] if p['m_FileID'] == 0 and p['m_PathID'] in maxp else None
+            if pid is None:
+                c = by_name.get(e['strParName'], [])
+                pid = c[0] if len(c) == 1 else None
+            if pid is None:
+                continue
+            want = max(float(e['fDefaultNum']), maxp[pid][1])
+            if e['fDefaultNum'] != want or e['fGatherNum'] != want:
+                e['fDefaultNum'] = e['fGatherNum'] = want
+                n += 1
+                hit = True
+        if hit:
+            o.save_typetree(tt)
+    return n
+
+
 def process(path, fname, totals):
     env = UnityPy.load(path)
     cls = brutal.bundle_class(fname)
@@ -61,6 +99,7 @@ def process(path, fname, totals):
             t = o.read_typetree()
             rmode[t['m_GameObject']['m_PathID']] = t['m_RenderMode']
     changed = 0
+    maxp = {}
     for o in env.objects:
         if o.type.name != 'ParticleSystem':
             continue
@@ -73,7 +112,10 @@ def process(path, fname, totals):
         if done:
             o.save_typetree(tt)
             changed += 1
-    if changed:
+        maxp[o.path_id] = (gid, float(tt['InitialModule']['maxNumParticles']))
+    synced = sync_counts(env, gos, maxp)
+    totals['counts_synced'] += synced
+    if changed or synced:
         with open(path, 'wb') as fh:
             fh.write(env.file.save(packer='original'))
     return changed

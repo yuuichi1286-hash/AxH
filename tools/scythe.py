@@ -6,7 +6,10 @@ L_Weapon bone; it is the weapon of every attack. That scythe is replaced by the 
 
 * placement: the new scythe gets the old one's frame in L_Weapon space: shaft along the same axis, blades on the
   same side and in the same plane, the hand on the wrapped grip, the blade end as far from the hand as before (so
-  the animations keep their reach and clearance); rigidly skinned to L_Weapon
+  the animations keep their reach and clearance), the blades reach as far sideways as the old ones (v5.3: the
+  wider extlow blades went up to 9 cm deeper into the ground), then the largest uniform scale about the hand for
+  which in no frame of any clip it goes deeper into the ground than the old one (its blades sit closer to the shaft
+  tip); rigidly skinned to L_Weapon
 * texture: the scythe's part of the 4096x1024 extlow atlas is graded like the rest of the model and placed in a
   free square of the 2048 atlas (the old scythe's texels are free now); the atlas is rebuilt once from the original
   texture (model_tex.revamp steps, then padding and ETC2 + mips), so nothing is compressed twice
@@ -76,19 +79,59 @@ def extlow_scythe(root):
 
 
 def place(P_new, P_old_local):
-    """rotation / scale / translation that put the extlow scythe on the old scythe's frame (L_Weapon space)"""
+    """maps that put the extlow scythe on the old scythe's frame (L_Weapon space): positions and normals
+
+    shaft axis, blade side and blade plane as the old scythe; the hand on the same fraction of the shaft; the blade
+    end as far from the hand as before; the blades reach as far sideways as the old ones (so the scythe never goes
+    deeper into the ground or the body than the old one did)"""
     c0, a0, b0, u0, t0 = _frame(P_old_local)
     c1, a1, b1, u1, t1 = _frame(P_new)
     n0, n1 = np.cross(a0, b0), np.cross(a1, b1)
-    R = np.stack([a0, b0, n0], 1) @ np.stack([a1, b1, n1], 0)
-    # the hand (L_Weapon origin) sits on the old shaft at t = grip0; new grip: same fraction of the shaft length
     grip0 = (np.zeros(3) - c0) @ a0
     frac = (grip0 - t0.min()) / (t0.max() - t0.min())
     grip1 = t1.min() + frac * (t1.max() - t1.min())
-    s = (t0.max() - grip0) / (t1.max() - grip1)          # blade end as far from the hand as before
+    s = (t0.max() - grip0) / (t1.max() - grip1)
+    reach0 = ((P_old_local - c0) @ b0).max()
+    reach1 = ((P_new - c1) @ b1).max()
+    sb = reach0 / (reach1 * s)
     g1 = c1 + a1 * grip1
     g0 = c0 + a0 * grip0
-    return lambda X: (X - g1) @ R.T * s + g0, R
+    F0 = np.stack([a0, b0, n0], 1)              # columns: old frame axes
+    F1 = np.stack([a1, b1, n1], 0)              # rows: new frame axes
+    S = np.array([s, s * sb, s])
+
+    def pos(X):
+        return ((X - g1) @ F1.T * S) @ F0.T + g0
+
+    def nrm(N):
+        Y = ((N @ F1.T) / S) @ F0.T
+        return Y / np.linalg.norm(Y, axis=1, keepdims=True)
+    return pos, nrm, sb
+
+
+def fit_scale(rig, bone_pid, old_local, pos_local, tol=0.015, skip=('dead',)):
+    """largest uniform scale about the hand (the L_Weapon origin) so that in no frame of any clip the new scythe goes
+    deeper into the ground (y < 0) than the old one (+ tol). Its blades sit closer to the shaft tip than the old ones, so at
+    full size they cut up to 11 cm deeper into the floor when the scythe points down; scaling about the hand lifts
+    every point that is below the hand, whichever end points down. The death pose lies on the floor anyway."""
+    from fk import clip_overrides
+    mats = []
+    for o in rig.env.objects:
+        if o.type.name != 'AnimationClip':
+            continue
+        tt = o.read_typetree()
+        if tt['m_Name'] in skip:
+            continue
+        mc = tt['m_MuscleClip']
+        for ov in clip_overrides(rig, tt, np.linspace(0, mc['m_StopTime'] - mc['m_StartTime'], 24))[0]:
+            mats.append(rig.pose(ov)[bone_pid])
+    mats = np.array(mats)
+    low = lambda X: np.einsum('fj,nj->fn', mats[:, 1, :3], X).min(1) + mats[:, 1, 3]
+    allowed = np.minimum(low(old_local), 0.0)       # above the floor anything goes; below it, no deeper than the old
+    for k in np.arange(1.0, 0.69, -0.01):
+        if (allowed - low(pos_local * k)).max() <= tol:
+            return float(round(k, 2))
+    return 0.7
 
 
 def free_square(used, need):
@@ -103,7 +146,7 @@ def free_square(used, need):
     raise ValueError('no free space in the atlas for the scythe')
 
 
-def edit_mesh(mesh_tt, smr, rig, W, xform, R, newP, newN, newUV, newT):
+def edit_mesh(mesh_tt, smr, rig, W, xform, nxform, newP, newN, newUV, newT):
     d = decode(mesh_tt)
     names = [rig.goname[b] for b in smr['bones']]
     bi = names.index('L_Weapon')
@@ -119,7 +162,7 @@ def edit_mesh(mesh_tt, smr, rig, W, xform, R, newP, newN, newUV, newT):
     M = _mesh_space(rig, smr, bi, W)
     Pw = xform(newP)
     Pm = (np.c_[Pw, np.ones(len(Pw))] @ M.T)[:, :3]
-    Nm = newN @ R.T @ M[:3, :3].T
+    Nm = nxform(newN) @ M[:3, :3].T
     Nm /= np.linalg.norm(Nm, axis=1, keepdims=True)
     n_old, n_new = len(used), len(Pm)
     add = {'pos': Pm, 'normal': Nm, 'uv0': newUV,
@@ -197,10 +240,14 @@ def main():
             Pw = rig.skin(s0, W)[on]
             Lw = np.linalg.inv(W[s0['bones'][bi]])
             old_local = (np.c_[Pw, np.ones(len(Pw))] @ Lw.T)[:, :3]
-            to_local, R = place(P, old_local)
+            to_local0, n_local, sb = place(P, old_local)
+            k = fit_scale(rig, s0['bones'][bi], old_local, to_local0(P))
+            to_local = lambda X: to_local0(X) * k
+            print(f'scale about the hand {k:.2f}')
             Bw = W[s0['bones'][bi]]
             xform = lambda X: (np.c_[to_local(X), np.ones(len(X))] @ Bw.T)[:, :3]
-            Rw = Bw[:3, :3] @ R
+            nxform = lambda X: n_local(X) @ Bw[:3, :3].T
+            print(f'blade reach scale {sb:.3f}')
             keep_uv = []
             for s in rig.smrs:
                 nm = [rig.goname[b] for b in s['bones']]
@@ -224,7 +271,7 @@ def main():
             mo = objs[st['m_Mesh']['m_PathID']]
             mt = mo.read_typetree()
             smr = [s for s in rig.smrs if s['name'] == mt['m_Name']][0]
-            rep, tri_uv = edit_mesh(mt, smr, rig, W, xform, Rw, P, N, newUV, T)
+            rep, tri_uv = edit_mesh(mt, smr, rig, W, xform, nxform, P, N, newUV, T)
             mo.save_typetree(mt)
             all_uv.append(tri_uv)
             report[f'{bname}:{mt["m_Name"]}'] = rep
