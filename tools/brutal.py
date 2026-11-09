@@ -108,12 +108,12 @@ def _always(h, s):
     return True
 
 
-def apply(tt, go_name, render_mode, cls):
-    """-> (role, {what was done})"""
-    r = role(go_name, render_mode)
+def apply(tt, go_name, render_mode, cls, profile=None, role_fn=None):
+    """-> (role, {what was done}); profile / role_fn replace PROFILE / role() (Hidan uses a crimson profile)"""
+    r = (role_fn or role)(go_name, render_mode)
     if r == 'keep' or cls != 'combat':
         return r, {}
-    size, speed, burst, life_mul, whip, expand, peak, t_out, end_rgb, hot = PROFILE[r]
+    size, speed, burst, life_mul, whip, expand, peak, t_out, end_rgb, hot = (profile or PROFILE)[r]
     im, em = tt['InitialModule'], tt['EmissionModule']
     done = {}
     # ---- bigger / heavier

@@ -1,4 +1,4 @@
-# AxH — Hidan Revamp v4
+# AxH — Hidan Revamp v5
 
 > **Skin lain di repo ini:** [Shisui x Suyou — Dark Green Revamp](shisui/README.md). Semua efek dominan hijau
 > gelap, lebih besar dan brutal, tekstur HD 2×, fade-in/out di semua efek, plus ikon skill baru.
@@ -9,11 +9,55 @@
 > gugur di pinggiran rumput, relief lebih timbul, bayangan bangunan + AO + emboss/PBR (baked), pantulan air lebih
 > tajam, dan 32 efek ambient.
 
-**Unduh:** [`release/Hidan.Revamp.v4.zip`](release/Hidan.Revamp.v4.zip)
+**Unduh:** [`release/Hidan.Revamp.v5.zip`](release/Hidan.Revamp.v5.zip)
 
 Isinya 99 file dengan struktur folder (`HIDAN/Art`, `HIDAN/UI`, `HIDAN/Audio`) yang sama persis dengan
 `Hidan.Revamp.zip` di rilis [AxH](https://github.com/yuuichi1286-hash/AxH/releases/tag/AxH). Cara pasangnya juga
-sama: timpa file lama dengan file di zip ini. v4 sudah mencakup semua perbaikan v3 dan v2 (lihat bagian di bawah).
+sama: timpa file lama dengan file di zip ini. v5 sudah mencakup semua perbaikan v4, v3 dan v2 (lihat bagian di bawah).
+
+## Yang baru di v5: grafik Low sampai Ultra tampil Ultra, efek lebih brutal
+
+### Efek sama persis di semua grafik
+
+MLBB memecah efek menjadi efek dasar dan "split node" (`zzp1_*`/`zzp2_*` dan efek tambahan lain di
+`FilterInfo.strSpliteNode1/2`). Split node ini hanya dimuat di grafik tinggi, dan di grafik rendah jumlah
+partikelnya juga dikurangi (`fGatherNum`). Sekarang:
+
+- **36 lapisan khusus Ultra digabung langsung ke 22 efek dasarnya** (853 objek: partikel, renderer, mesh, material,
+  tekstur). Lapisan dipasang di bawah root efek, persis seperti yang dilakukan game saat memuatnya, jadi lapisan ini
+  muncul juga di Low. Bundle Unity 2017 dan 2019 dicampur tanpa konversi: setiap objek memakai type tree aslinya.
+- **37 referensi ke lapisan dari file game skin lain dihapus** (file itu tidak ada di mod). Tanpa ini, grafik tinggi
+  akan menampilkan lapisan yang tidak ada di grafik rendah.
+- **337 jumlah partikel yang dikurangi di grafik rendah dikembalikan penuh** (`fGatherNum = fDefaultNum`).
+
+### Skin Ultra di semua grafik
+
+Model dasar `hero_argus_skin` dipakai di bawah High. Sekarang model ini memakai tekstur 2048, shader
+`Custom/MLBB_Final_Fixed`, dan material dari `hero_argus_skin_high_add` (High/Ultra), disalin byte demi byte. Mesh,
+tulang, dan animasi memang sudah sama.
+
+### Efek lebih keren (tema ritual darah Hidan)
+
+Ada 524 sistem partikel di 77 efek tempur yang diubah. Profilnya sama dengan Shisui, tetapi dengan palet crimson:
+
+- Efek lebih besar dan pukulan terasa lebih berat. Percikan dan puing terbang lebih jauh dan lebih cepat.
+- Percikan, darah, dan api lebih banyak, tetapi maksimal 60 partikel hidup per sistem.
+- Partikel lahir putih-panas, lalu menjadi merah crimson. Saat memudar, warnanya mendingin jadi merah darah gelap
+  dengan kurva S yang panjang dan sinematik.
+- Cincin kejut dan bloom mengembang sambil memudar. Cipratan, tetesan, dan serpihan darah jatuh dengan gravitasi.
+- Bentuk sigil dan glyph ritual Jashin, tanda di tanah, serta hitungan mundur tidak diubah.
+- Showcase lobby dan cut-in ult tidak diubah.
+- `DelayTime` diperpanjang seperlunya di 28 efek, jadi tidak ada partikel yang terpotong sebelum selesai memudar.
+
+### Optimasi dan catatan
+
+- 13 tekstur duplikat dipakai bersama, tidak disimpan dua kali. Kapasitas partikel (`maxNumParticles`) dihitung
+  sesuai kebutuhan.
+- Grafik Low sekarang merender sebanyak Ultra, jadi di HP kelas bawah bisa sedikit lebih berat. Ini konsekuensi
+  dari "Low = Ultra".
+- Shader Ultra tidak punya varian OpenGL ES 2.0, jadi model Ultra butuh OpenGL ES 3 atau Vulkan. HP yang hanya
+  mendukung ES 2.0 sudah sangat lama.
+- `hero_argus_skin_extlow_add` tetap tidak diubah (lihat daftar di bawah).
 
 ## Yang baru di v4: fade-in & fade-out di semua efek, versi sinematik untuk basic attack & pasif
 
@@ -220,6 +264,9 @@ Perbaikan:
 - Build-nya deterministik: menjalankan `tools/build.py` ulang menghasilkan 99 file yang identik byte demi byte.
 - Mulai v4 validator juga memeriksa dua hal. Pertama, setiap sistem partikel mulai dan berakhir di alpha 0 (463/463).
   Kedua, tidak ada efek yang dihapus sebelum partikel terakhirnya, termasuk overlay, selesai memudar (44/44).
+- Mulai v5 validator memeriksa paritas: tidak ada efek yang masih punya split node atau jumlah partikel yang
+  dikurangi (0 dari 48). Setiap objek tambahan juga dicek: bisa dibaca dan semua referensinya valid (853 objek).
+  Hasil v5: 0 masalah, fade 572/572, timing 44/44.
 - **Belum dites langsung di dalam game.** Di lingkungan build tidak ada perangkat Android maupun MLBB. Kalau ada
   skill yang terlihat aneh, sebutkan nama skill-nya.
 
@@ -234,7 +281,10 @@ File yang sengaja **tidak diubah**: audio, UI, `hero_argus.unity3d` (animasi Arg
 ```bash
 pip install -r tools/requirements.txt
 unzip Hidan.Revamp.zip -d orig
-python tools/build.py orig/HIDAN out/HIDAN out/report.json        # semua pass
+python tools/build.py orig/HIDAN out/HIDAN out/report.json        # semua pass (v4)
+python tools/merge_overlays.py out/HIDAN out/merge_report.json     # v5: efek Low = Ultra
+python tools/skin_ultra.py out/HIDAN                               # v5: skin Ultra di semua grafik
+python tools/boost_hidan.py out/HIDAN out/boost_report.json        # v5: efek crimson brutal + DelayTime
 python tools/validate_all.py orig/HIDAN out/HIDAN                  # validasi
 python tools/make_previews.py orig/HIDAN out/HIDAN docs/previews   # gambar sebelum/sesudah
 ```
@@ -248,6 +298,9 @@ python tools/make_previews.py orig/HIDAN out/HIDAN docs/previews   # gambar sebe
 | `tools/fx_tex.py` | penajaman tepi + grading tekstur efek, encoder ASTC/ETC2 (format & mip sama dengan aslinya) |
 | `tools/jerk_metrics.py`, `make_previews_v3.py` | metrik kehalusan animasi dan gambar pratinjau v3 |
 | `tools/cinematic.py` | v4: fade sinematik per peran partikel (basic attack & pasif), flare pasif selesai, perbaikan mesh "pop" |
+| `tools/merge_overlays.py` | v5: gabung split node ke efek dasar (type tree 2017/2019 dipertahankan), hapus referensi, `fGatherNum`, tekstur duplikat dibagi |
+| `tools/skin_ultra.py` | v5: tekstur 2048, shader, dan material High/Ultra untuk model dasar |
+| `tools/boost_hidan.py`, `tools/brutal.py` | v5: profil brutal crimson per peran partikel (nama pinyin + nama layer HIDAN) |
 | `tools/effect_timing.py` | kapan partikel terakhir benar-benar hilang vs `DelayTime` efek (dipakai build & validator) |
 | `tools/make_previews_v4.py`, `make_passive_end_chart.py`, `dump_effect.py` | timeline fade dan inspeksi efek |
 | `tools/clipio.py`, `meshio.py`, `fk.py` | parser kurva streamed/dense, vertex buffer, forward kinematics + skinning |

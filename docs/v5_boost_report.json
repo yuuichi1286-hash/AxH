@@ -1,0 +1,223 @@
+{
+ "particle_systems_boosted": 524,
+ "files": {
+  "45_argus_Attack_01.unity3d": 17,
+  "45_argus_Attack_02.unity3d": 17,
+  "45_argus_Attack_03.unity3d": 17,
+  "45_argus_Attack_04_1.unity3d": 13,
+  "45_argus_Attack_04_1_skin03_add.unity3d": 13,
+  "45_argus_Attack_04_2.unity3d": 13,
+  "45_argus_Attack_04_2_skin03_add.unity3d": 13,
+  "45_argus_Attack_04_3.unity3d": 13,
+  "45_argus_Attack_04_3_skin03_add.unity3d": 13,
+  "45_argus_Hit_01.unity3d": 9,
+  "45_argus_Hit_01_skin03_add.unity3d": 7,
+  "45_argus_Hit_05.unity3d": 11,
+  "45_argus_Keep_daoguang.unity3d": 3,
+  "45_argus_Keep_daoguang_skin03_add.unity3d": 1,
+  "45_argus_Keep_daoguang_xiaosan.unity3d": 1,
+  "45_argus_Keep_daoguang_xiaosan_skin03_add.unity3d": 1,
+  "45_argus_Keep_tuodi_skin03_add.unity3d": 4,
+  "45_argus_skill01_Bullet_01.unity3d": 3,
+  "45_argus_skill01_Fire_01.unity3d": 11,
+  "45_argus_skill01_Fire_02.unity3d": 27,
+  "45_argus_skill01_Fire_03.unity3d": 22,
+  "45_argus_skill01_Hit_01.unity3d": 28,
+  "45_argus_skill01_Hit_03.unity3d": 5,
+  "45_argus_skill02_Fire_01.unity3d": 12,
+  "45_argus_skill02_Fire_02.unity3d": 23,
+  "45_argus_skill02_Hit_01.unity3d": 23,
+  "45_argus_skill02_Keep_01.unity3d": 4,
+  "45_argus_skill02_Keep_02.unity3d": 1,
+  "45_argus_skill02_Keep_biaoji.unity3d": 4,
+  "45_argus_skill02_Keep_liuxue.unity3d": 4,
+  "45_argus_skill03_Fire_01.unity3d": 17,
+  "45_argus_skill03_Fire_02.unity3d": 13,
+  "45_argus_skill03_Keep_01_skin01_add.unity3d": 14,
+  "45_argus_skill03_Keep_02.unity3d": 5,
+  "45_argus_skill03_Keep_03.unity3d": 3,
+  "45_argus_skill03_keep_01.unity3d": 4,
+  "45_argus_skill3_dilie.unity3d": 13,
+  "51_sdhunter_skill03_bianshen_skin04_add.unity3d": 1,
+  "argus_skill4_2.unity3d": 11,
+  "argus_skill4_2_chuxian.unity3d": 5,
+  "argus_skill4_2_daoguang.unity3d": 6,
+  "fanny_attack01_skin11_add.unity3d": 3,
+  "julian_skill3_2_02.unity3d": 2,
+  "Yin_skill01_fire04_skin03_add.unity3d": 7,
+  "zzp1_45_argus_Attack_01_skin03_add.unity3d": 1,
+  "zzp1_45_argus_Attack_02_skin03_add.unity3d": 1,
+  "zzp1_45_argus_Attack_04_1_skin03_add.unity3d": 1,
+  "zzp1_45_argus_Attack_04_2_skin03_add.unity3d": 1,
+  "zzp1_45_argus_Attack_04_3_skin03_add.unity3d": 1,
+  "zzp1_45_argus_Keep_tuodi_skin03_add.unity3d": 1,
+  "zzp1_45_argus_skill03_Fire_02_skin03_add.unity3d": 1,
+  "zzp1_balancemagic_skill04_01_skin08_add.unity3d": 1,
+  "zzp1_couplemage_skill03_buff_skin05_add.unity3d": 3,
+  "zzp1_Kaijiacike_Henshin_skill01_attack02_skin02_add.unity3d": 3,
+  "zzp1_nextalice_skill02_2.unity3d": 2,
+  "zzp1_nextbadninja_benti_skill01_yao_next.unity3d": 1,
+  "zzp1_nextwarrior_yingxiong_skill2_1_skin05_add.unity3d": 2,
+  "zzp2_45_argus_Attack_01_skin03_add.unity3d": 1,
+  "zzp2_45_argus_Attack_02_skin03_add.unity3d": 1,
+  "zzp2_45_argus_Attack_04_1_skin03_add.unity3d": 1,
+  "zzp2_45_argus_Attack_04_2_skin03_add.unity3d": 1,
+  "zzp2_45_argus_Attack_04_3_skin03_add.unity3d": 1,
+  "zzp2_45_argus_Hit_01_skin03_add.unity3d": 1,
+  "zzp2_45_argus_Hit_05_skin03_add.unity3d": 1,
+  "zzp2_45_argus_Keep_daoguang_xiaosan_skin03_add.unity3d": 1,
+  "zzp2_45_argus_skill02_Keep_liuxue_skin03_add.unity3d": 1,
+  "zzp2_45_argus_skill03_Fire_02_skin03_add.unity3d": 2,
+  "zzp2_45_argus_skill03_Keep_02_skin03_add.unity3d": 1,
+  "zzp2_45_argus_skill03_Keep_03_skin03_add.unity3d": 2,
+  "zzp2_argus_skill4_2_daoguang_skin06_add.unity3d": 6,
+  "zzp2_asura_skll02_2_skin06_add.unity3d": 7,
+  "zzp2_feilun_skill3_buff02_skin10_add.unity3d": 4,
+  "zzp2_Kaijiacike_Henshin_skill01_attack02_skin02_add.unity3d": 13,
+  "zzp2_Lukas_skill03_bianshen_end_skin02_add.unity3d": 7,
+  "zzp2_nextalice_skill02_2.unity3d": 4,
+  "zzp2_nextbadninja_benti_skill01_yao_next.unity3d": 2,
+  "zzp2_nextbadninja_fenshen_skill01_tun_bao_next_skin05_add.unity3d": 11
+ },
+ "totals": {
+  "role_smoke": 41,
+  "boost_size": 521,
+  "boost_life": 524,
+  "boost_shape": 325,
+  "boost_fade": 524,
+  "boost_maxp": 444,
+  "role_slash": 87,
+  "boost_hot": 303,
+  "role_flash": 70,
+  "role_mesh": 36,
+  "role_dark": 34,
+  "role_debris": 39,
+  "boost_speed": 140,
+  "boost_burst": 147,
+  "role_spark": 106,
+  "role_ring": 31,
+  "role_other": 50,
+  "role_keep": 36,
+  "role_flow": 14,
+  "role_trail": 5,
+  "role_flame": 15,
+  "boost_rise": 8,
+  "boost_gravity": 5,
+  "role_slash_dark": 1,
+  "role_crack": 7
+ },
+ "delaytime_extended": {
+  "45_argus_Attack_01": [
+   1.132,
+   1.279
+  ],
+  "45_argus_Attack_02": [
+   1.132,
+   1.279
+  ],
+  "45_argus_Attack_03": [
+   1.132,
+   1.279
+  ],
+  "45_argus_Attack_04_1": [
+   1.992,
+   2.259
+  ],
+  "45_argus_Attack_04_1_skin03_add": [
+   0.725,
+   0.856
+  ],
+  "45_argus_Attack_04_2": [
+   2.092,
+   2.359
+  ],
+  "45_argus_Attack_04_2_skin03_add": [
+   0.871,
+   1.019
+  ],
+  "45_argus_Attack_04_3": [
+   2.298,
+   2.619
+  ],
+  "45_argus_Attack_04_3_skin03_add": [
+   0.615,
+   0.67
+  ],
+  "45_argus_Hit_01": [
+   0.585,
+   0.661
+  ],
+  "45_argus_Hit_01_skin03_add": [
+   1.23,
+   1.522
+  ],
+  "45_argus_Keep_daoguang_xiaosan": [
+   1.046,
+   1.082
+  ],
+  "45_argus_Keep_daoguang_xiaosan_skin03_add": [
+   2.187,
+   2.399
+  ],
+  "45_argus_skill01_Fire_01": [
+   1.07,
+   1.185
+  ],
+  "45_argus_skill01_Fire_03": [
+   1.5,
+   1.52
+  ],
+  "45_argus_skill01_Hit_01": [
+   0.86,
+   1.035
+  ],
+  "45_argus_skill02_Fire_01": [
+   1.03,
+   1.185
+  ],
+  "45_argus_skill02_Fire_02": [
+   1.2,
+   1.26
+  ],
+  "45_argus_skill02_Hit_01": [
+   0.93,
+   1.147
+  ],
+  "45_argus_skill02_Keep_01": [
+   5.01,
+   5.257
+  ],
+  "45_argus_skill02_Keep_biaoji": [
+   4.53,
+   4.753
+  ],
+  "45_argus_skill02_Keep_liuxue": [
+   5.01,
+   5.08
+  ],
+  "45_argus_skill03_Fire_02": [
+   2.0,
+   2.02
+  ],
+  "45_argus_skill03_Keep_02": [
+   5.68,
+   5.985
+  ],
+  "45_argus_skill03_Keep_03": [
+   7.83,
+   7.91
+  ],
+  "argus_skill4_2": [
+   1.03,
+   1.185
+  ],
+  "argus_skill4_2_chuxian": [
+   1.3,
+   1.351
+  ],
+  "fanny_attack01_skin11_add": [
+   1.0,
+   1.097
+  ]
+ }
+}

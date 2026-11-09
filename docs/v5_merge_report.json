@@ -1,0 +1,663 @@
+{
+ "45_argus_Attack_01": {
+  "merged": {
+   "zzp1_45_argus_Attack_01_skin03_add": {
+    "Mesh": 1,
+    "GameObject": 2,
+    "Material": 1,
+    "Texture2D": 1,
+    "Transform": 2,
+    "ParticleSystem": 1,
+    "ParticleSystemRenderer": 1
+   },
+   "zzp2_45_argus_Attack_01_skin03_add": {
+    "Material": 1,
+    "Texture2D": 2,
+    "Mesh": 1,
+    "GameObject": 2,
+    "Transform": 2,
+    "ParticleSystemRenderer": 1,
+    "ParticleSystem": 1
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 6,
+  "textures_shared": 0
+ },
+ "45_argus_Attack_02": {
+  "merged": {
+   "zzp1_45_argus_Attack_02_skin03_add": {
+    "Mesh": 1,
+    "GameObject": 2,
+    "Material": 1,
+    "Texture2D": 1,
+    "Transform": 2,
+    "ParticleSystem": 1,
+    "ParticleSystemRenderer": 1
+   },
+   "zzp2_45_argus_Attack_02_skin03_add": {
+    "Material": 1,
+    "GameObject": 2,
+    "Texture2D": 2,
+    "Mesh": 1,
+    "ParticleSystem": 1,
+    "Transform": 2,
+    "ParticleSystemRenderer": 1
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 6,
+  "textures_shared": 0
+ },
+ "45_argus_Attack_03": {
+  "merged": {
+   "zzp1_45_argus_Attack_01_skin03_add": {
+    "Mesh": 1,
+    "GameObject": 2,
+    "Material": 1,
+    "Texture2D": 1,
+    "Transform": 2,
+    "ParticleSystem": 1,
+    "ParticleSystemRenderer": 1
+   },
+   "zzp2_45_argus_Attack_01_skin03_add": {
+    "Material": 1,
+    "Texture2D": 2,
+    "Mesh": 1,
+    "GameObject": 2,
+    "Transform": 2,
+    "ParticleSystemRenderer": 1,
+    "ParticleSystem": 1
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 6,
+  "textures_shared": 0
+ },
+ "45_argus_Attack_04_1": {
+  "merged": {},
+  "cleared": [
+   "zzp1_next45_argus_Attack_04_1_skin05_add",
+   "zzp2_next45_argus_Attack_04_1_skin05_add"
+  ],
+  "gather_fixed": 10
+ },
+ "45_argus_Attack_04_1_skin03_add": {
+  "merged": {
+   "zzp1_45_argus_Attack_04_1_skin03_add": {
+    "Mesh": 1,
+    "Transform": 2,
+    "ParticleSystemRenderer": 1,
+    "Material": 1,
+    "GameObject": 2,
+    "Texture2D": 1,
+    "ParticleSystem": 1
+   },
+   "zzp2_45_argus_Attack_04_1_skin03_add": {
+    "ParticleSystem": 1,
+    "Mesh": 1,
+    "GameObject": 2,
+    "Transform": 2,
+    "Texture2D": 2,
+    "ParticleSystemRenderer": 1,
+    "Material": 1
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 5,
+  "textures_shared": 0
+ },
+ "45_argus_Attack_04_2": {
+  "merged": {},
+  "cleared": [
+   "zzp1_next45_argus_Attack_04_2_skin05_add",
+   "zzp2_next45_argus_Attack_04_2_skin05_add"
+  ],
+  "gather_fixed": 10
+ },
+ "45_argus_Attack_04_2_skin03_add": {
+  "merged": {
+   "zzp1_45_argus_Attack_04_2_skin03_add": {
+    "Mesh": 1,
+    "Transform": 2,
+    "GameObject": 2,
+    "ParticleSystem": 1,
+    "Material": 1,
+    "ParticleSystemRenderer": 1,
+    "Texture2D": 1
+   },
+   "zzp2_45_argus_Attack_04_2_skin03_add": {
+    "ParticleSystemRenderer": 1,
+    "GameObject": 2,
+    "Mesh": 1,
+    "Transform": 2,
+    "Texture2D": 2,
+    "ParticleSystem": 1,
+    "Material": 1
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 5,
+  "textures_shared": 0
+ },
+ "45_argus_Attack_04_3": {
+  "merged": {},
+  "cleared": [
+   "zzp1_next45_argus_Attack_04_3_skin05_add",
+   "zzp2_next45_argus_Attack_04_3_skin05_add"
+  ],
+  "gather_fixed": 10
+ },
+ "45_argus_Attack_04_3_skin03_add": {
+  "merged": {
+   "zzp1_45_argus_Attack_04_3_skin03_add": {
+    "GameObject": 2,
+    "Transform": 2,
+    "Mesh": 1,
+    "ParticleSystemRenderer": 1,
+    "ParticleSystem": 1,
+    "Texture2D": 1,
+    "Material": 1
+   },
+   "zzp2_45_argus_Attack_04_3_skin03_add": {
+    "GameObject": 2,
+    "Transform": 2,
+    "ParticleSystem": 1,
+    "Mesh": 1,
+    "ParticleSystemRenderer": 1,
+    "Texture2D": 2,
+    "Material": 1
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 6,
+  "textures_shared": 0
+ },
+ "45_argus_Hit_01": {
+  "merged": {},
+  "cleared": [
+   "zzp1_Yin_attack_hit_skin05_add",
+   "zzp2_Yin_attack_hit_skin05_add"
+  ],
+  "gather_fixed": 9
+ },
+ "45_argus_Hit_01_skin03_add": {
+  "merged": {
+   "zzp2_45_argus_Hit_01_skin03_add": {
+    "Texture2D": 1,
+    "ParticleSystemRenderer": 1,
+    "Material": 1,
+    "ParticleSystem": 1,
+    "Transform": 2,
+    "GameObject": 2
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 5,
+  "textures_shared": 0
+ },
+ "45_argus_Hit_05": {
+  "merged": {},
+  "cleared": [
+   "zzp2_Yin_skill01_fire04_skin03_add"
+  ],
+  "gather_fixed": 26
+ },
+ "45_argus_Keep_daoguang": {
+  "merged": {
+   "51_sdhunter_skill03_bianshen_skin04_add": {
+    "GameObject": 2,
+    "Material": 1,
+    "Transform": 2,
+    "Texture2D": 3,
+    "ParticleSystemRenderer": 1,
+    "ParticleSystem": 1
+   }
+  },
+  "cleared": [
+   "zzp2_51_sdhunter_skill03_bianshen_skin04_add"
+  ],
+  "gather_fixed": 4,
+  "textures_shared": 0
+ },
+ "45_argus_Keep_daoguang_skin03_add": {
+  "merged": {},
+  "cleared": [],
+  "gather_fixed": 2
+ },
+ "45_argus_Keep_daoguang_xiaosan": {
+  "merged": {},
+  "cleared": [
+   "zzp2_nextalice_skill01"
+  ],
+  "gather_fixed": 1
+ },
+ "45_argus_Keep_daoguang_xiaosan_skin03_add": {
+  "merged": {
+   "zzp1_45_argus_Keep_daoguang_xiaosan_skin03_add": {
+    "Transform": 2,
+    "Material": 1,
+    "GameObject": 2,
+    "MeshRenderer": 1,
+    "Mesh": 1,
+    "Texture2D": 2,
+    "MeshFilter": 1
+   },
+   "zzp2_45_argus_Keep_daoguang_xiaosan_skin03_add": {
+    "ParticleSystem": 1,
+    "Transform": 2,
+    "ParticleSystemRenderer": 1,
+    "GameObject": 2,
+    "Texture2D": 1,
+    "Material": 1
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 1,
+  "textures_shared": 0
+ },
+ "45_argus_Keep_tuodi_skin03_add": {
+  "merged": {
+   "zzp1_45_argus_Keep_tuodi_skin03_add": {
+    "GameObject": 2,
+    "Material": 1,
+    "Transform": 2,
+    "ParticleSystem": 1,
+    "Texture2D": 1,
+    "ParticleSystemRenderer": 1
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 4,
+  "textures_shared": 0
+ },
+ "45_argus_skill01_Bullet_01": {
+  "merged": {},
+  "cleared": [
+   "zzp1_next45_argus_skill01_Bullet_01_skin05_add",
+   "zzp2_next45_argus_skill01_Bullet_01_skin05_add"
+  ],
+  "gather_fixed": 5
+ },
+ "45_argus_skill01_Fire_01": {
+  "merged": {},
+  "cleared": [
+   "zzp1_45_argus_skill01_fire_01_skin05_add",
+   "zzp2_45_argus_skill01_Fire_01_skin05_add"
+  ],
+  "gather_fixed": 11
+ },
+ "45_argus_skill01_Fire_02": {
+  "merged": {
+   "zzp2_nextbadninja_fenshen_skill01_tun_bao_next_skin05_add": {
+    "ParticleSystem": 11,
+    "Material": 11,
+    "ParticleSystemRenderer": 11,
+    "GameObject": 12,
+    "Transform": 12,
+    "Mesh": 3,
+    "Texture2D": 19
+   },
+   "zzp2_Lukas_skill03_bianshen_end_skin02_add": {
+    "GameObject": 8,
+    "ParticleSystem": 7,
+    "Texture2D": 11,
+    "ParticleSystemRenderer": 7,
+    "Material": 7,
+    "Mesh": 4,
+    "Transform": 8
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 10,
+  "textures_shared": 3
+ },
+ "45_argus_skill01_Fire_03": {
+  "merged": {
+   "fanny_attack01_skin11_add": {
+    "Material": 2,
+    "Texture2D": 4,
+    "ParticleSystem": 3,
+    "GameObject": 5,
+    "Transform": 5,
+    "ParticleSystemRenderer": 3,
+    "Mesh": 1
+   },
+   "zzp2_asura_skll02_2_skin06_add": {
+    "Material": 5,
+    "Mesh": 6,
+    "GameObject": 8,
+    "Texture2D": 7,
+    "ParticleSystemRenderer": 7,
+    "Transform": 8,
+    "ParticleSystem": 7
+   }
+  },
+  "cleared": [
+   "zzp1_fanny_attack01_skin11_add",
+   "zzp2_fanny_attack01_skin11_add"
+  ],
+  "gather_fixed": 10,
+  "textures_shared": 0
+ },
+ "45_argus_skill01_Hit_01": {
+  "merged": {
+   "zzp2_nextbadninja_fenshen_skill01_tun_bao_next_skin05_add": {
+    "ParticleSystem": 11,
+    "Material": 11,
+    "ParticleSystemRenderer": 11,
+    "GameObject": 12,
+    "Transform": 12,
+    "Texture2D": 22,
+    "Mesh": 3
+   }
+  },
+  "cleared": [
+   "zzp2_45_argus_hit_05_skin03_add"
+  ],
+  "gather_fixed": 12,
+  "textures_shared": 0
+ },
+ "45_argus_skill01_Hit_03": {
+  "merged": {},
+  "cleared": [
+   "zzp2_nextalice_hit"
+  ],
+  "gather_fixed": 7
+ },
+ "45_argus_skill01_Keep_01": {
+  "merged": {},
+  "cleared": [
+   "zzp1_next45_argus_skill01_Keep_01_skin05_add"
+  ],
+  "gather_fixed": 0
+ },
+ "45_argus_skill02_Fire_01": {
+  "merged": {
+   "zzp1_nextbadninja_benti_skill01_yao_next": {
+    "Texture2D": 4,
+    "ParticleSystemRenderer": 2,
+    "GameObject": 3,
+    "Transform": 3,
+    "Material": 2,
+    "ParticleSystem": 2,
+    "Mesh": 1
+   },
+   "zzp2_nextbadninja_benti_skill01_yao_next": {
+    "Texture2D": 6,
+    "ParticleSystem": 3,
+    "GameObject": 4,
+    "Transform": 4,
+    "Mesh": 2,
+    "Material": 3,
+    "ParticleSystemRenderer": 3
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 9,
+  "textures_shared": 0
+ },
+ "45_argus_skill02_Fire_02": {
+  "merged": {
+   "zzp1_Kaijiacike_Henshin_skill01_attack02_skin02_add": {
+    "Transform": 5,
+    "Texture2D": 6,
+    "ParticleSystemRenderer": 3,
+    "GameObject": 5,
+    "Mesh": 1,
+    "ParticleSystem": 3,
+    "Material": 3
+   },
+   "zzp2_Kaijiacike_Henshin_skill01_attack02_skin02_add": {
+    "Texture2D": 13,
+    "Material": 13,
+    "GameObject": 17,
+    "ParticleSystemRenderer": 13,
+    "Transform": 17,
+    "ParticleSystem": 13,
+    "Mesh": 4
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 18,
+  "textures_shared": 6
+ },
+ "45_argus_skill02_Hit_01": {
+  "merged": {
+   "zzp2_nextbadninja_fenshen_skill01_tun_bao_next_skin05_add": {
+    "ParticleSystem": 11,
+    "Material": 11,
+    "ParticleSystemRenderer": 11,
+    "GameObject": 12,
+    "Transform": 12,
+    "Texture2D": 22,
+    "Mesh": 3
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 17,
+  "textures_shared": 0
+ },
+ "45_argus_skill02_Keep_01": {
+  "merged": {},
+  "cleared": [],
+  "gather_fixed": 3
+ },
+ "45_argus_skill02_Keep_02": {
+  "merged": {},
+  "cleared": [
+   "zzp2_next45_argus_skill02_Keep_02_skin05_add"
+  ],
+  "gather_fixed": 3
+ },
+ "45_argus_skill02_Keep_biaoji": {
+  "merged": {},
+  "cleared": [],
+  "gather_fixed": 3
+ },
+ "45_argus_skill02_Keep_liuxue": {
+  "merged": {
+   "zzp2_45_argus_skill02_Keep_liuxue_skin03_add": {
+    "Material": 1,
+    "Texture2D": 2,
+    "Transform": 2,
+    "GameObject": 2,
+    "ParticleSystem": 1,
+    "ParticleSystemRenderer": 1
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 4,
+  "textures_shared": 0
+ },
+ "45_argus_skill03_Fire_01": {
+  "merged": {},
+  "cleared": [
+   "Apa_Gak_Bisa_Nyari_Efek_Sendiri_By_Alkuamaxgg",
+   "zzp2_julian_skill3_2_02_skin08_add"
+  ],
+  "gather_fixed": 24
+ },
+ "45_argus_skill03_Fire_02": {
+  "merged": {
+   "zzp1_45_argus_skill03_Fire_02_skin03_add": {
+    "Transform": 2,
+    "ParticleSystem": 1,
+    "GameObject": 2,
+    "Material": 1,
+    "ParticleSystemRenderer": 1,
+    "Texture2D": 1
+   },
+   "zzp2_45_argus_skill03_Fire_02_skin03_add": {
+    "Material": 2,
+    "ParticleSystemRenderer": 2,
+    "ParticleSystem": 2,
+    "GameObject": 3,
+    "Texture2D": 2,
+    "Transform": 3
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 6,
+  "textures_shared": 0
+ },
+ "45_argus_skill03_Keep_01_skin01_add": {
+  "merged": {
+   "zzp1_couplemage_skill03_buff_skin05_add": {
+    "GameObject": 4,
+    "Texture2D": 5,
+    "Transform": 4,
+    "ParticleSystemRenderer": 3,
+    "Material": 3,
+    "ParticleSystem": 3,
+    "Mesh": 1
+   },
+   "zzp2_feilun_skill3_buff02_skin10_add": {
+    "Mesh": 2,
+    "MeshFilter": 1,
+    "Texture2D": 5,
+    "GameObject": 6,
+    "ParticleSystemRenderer": 4,
+    "ParticleSystem": 4,
+    "Transform": 6,
+    "Material": 5,
+    "MeshRenderer": 1
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 11,
+  "textures_shared": 2
+ },
+ "45_argus_skill03_Keep_02": {
+  "merged": {
+   "zzp2_45_argus_skill03_Keep_02_skin03_add": {
+    "Transform": 4,
+    "GameObject": 4,
+    "Texture2D": 4,
+    "ParticleSystemRenderer": 3,
+    "ParticleSystem": 3,
+    "Material": 3
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 4,
+  "textures_shared": 0
+ },
+ "45_argus_skill03_Keep_03": {
+  "merged": {
+   "zzp2_45_argus_skill03_Keep_03_skin03_add": {
+    "ParticleSystemRenderer": 2,
+    "Material": 2,
+    "Transform": 3,
+    "ParticleSystem": 2,
+    "Texture2D": 2,
+    "GameObject": 3
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 3,
+  "textures_shared": 0
+ },
+ "45_argus_skill03_keep_01": {
+  "merged": {},
+  "cleared": [],
+  "gather_fixed": 1
+ },
+ "45_argus_skill03_ui_01": {
+  "merged": {},
+  "cleared": [
+   "zzp1_45_argus_skill03_ui_01_skin05_add",
+   "zzp2_45_argus_skill03_ui_01_skin05_add"
+  ],
+  "gather_fixed": 1
+ },
+ "45_argus_skill03_ui_02": {
+  "merged": {},
+  "cleared": [
+   "zzp1_45_argus_skill03_ui_02_skin05_add",
+   "zzp2_45_argus_skill03_ui_02_skin05_add"
+  ],
+  "gather_fixed": 2
+ },
+ "45_argus_skill3_dilie": {
+  "merged": {
+   "zzp1_nextalice_skill02_2": {
+    "Material": 2,
+    "Mesh": 2,
+    "GameObject": 3,
+    "ParticleSystem": 2,
+    "Texture2D": 4,
+    "Transform": 3,
+    "ParticleSystemRenderer": 2
+   },
+   "zzp2_nextalice_skill02_2": {
+    "GameObject": 5,
+    "Texture2D": 6,
+    "ParticleSystemRenderer": 4,
+    "Transform": 5,
+    "Material": 4,
+    "ParticleSystem": 4,
+    "Mesh": 2
+   }
+  },
+  "cleared": [],
+  "gather_fixed": 7,
+  "textures_shared": 2
+ },
+ "51_sdhunter_skill03_bianshen_skin04_add": {
+  "merged": {},
+  "cleared": [
+   "zzp2_51_sdhunter_skill03_bianshen_skin04_add"
+  ],
+  "gather_fixed": 2
+ },
+ "Yin_skill01_fire04_skin03_add": {
+  "merged": {},
+  "cleared": [
+   "zzp2_Yin_skill01_fire04_skin03_add"
+  ],
+  "gather_fixed": 20
+ },
+ "argus_skill4_2": {
+  "merged": {},
+  "cleared": [
+   "zzp1_fanny_attack02_skin11_add",
+   "zzp2_fanny_attack02_skin11_add"
+  ],
+  "gather_fixed": 9
+ },
+ "argus_skill4_2_chuxian": {
+  "merged": {},
+  "cleared": [],
+  "gather_fixed": 4
+ },
+ "argus_skill4_2_daoguang": {
+  "merged": {},
+  "cleared": [
+   "zzp1_Aamon_attack_05_skin04_add",
+   "zzp2_Aamon_attack_axgg05_skin04_add"
+  ],
+  "gather_fixed": 5
+ },
+ "fanny_attack01_skin11_add": {
+  "merged": {},
+  "cleared": [
+   "zzp1_fanny_attack01_skin11_add",
+   "zzp2_fanny_attack01_skin11_add"
+  ],
+  "gather_fixed": 0
+ },
+ "julian_skill3_2_02": {
+  "merged": {},
+  "cleared": [
+   "zzp1_julian_skill3_2_02_skin02_add",
+   "zzp2_julian_skill3_2_02_skin02_add"
+  ],
+  "gather_fixed": 3
+ },
+ "zzp2_argus_skill4_2_daoguang_skin06_add": {
+  "merged": {},
+  "cleared": [],
+  "gather_fixed": 7
+ }
+}

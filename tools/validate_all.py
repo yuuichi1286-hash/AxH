@@ -4,7 +4,20 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import UnityPy
 from validate_clips import check as check_clips
 orig_root, new_root = sys.argv[1], sys.argv[2]
-problems = 0; changed = 0; same = 0
+problems = 0; changed = 0; same = 0; added_total = 0
+
+
+def _pptrs(v, out):
+    if isinstance(v, dict):
+        if set(v) == {'m_FileID', 'm_PathID'}:
+            out.append((v['m_FileID'], v['m_PathID'])); return
+        for x in v.values():
+            _pptrs(x, out)
+    elif isinstance(v, (list, tuple)):
+        for x in v:
+            _pptrs(x, out)
+
+
 for dp, dn, fn in os.walk(orig_root):
     for f in sorted(fn):
         po = os.path.join(dp, f); rel = os.path.relpath(po, orig_root); pn = os.path.join(new_root, rel)
@@ -24,13 +37,22 @@ for dp, dn, fn in os.walk(orig_root):
             print('INTERNAL NAMES DIFFER', rel); problems += 1
         co = collections.Counter((o.type.name, o.path_id) for o in eo.objects)
         cn = collections.Counter((o.type.name, o.path_id) for o in en.objects)
-        if co != cn:
+        if co - cn:                                 # objects may only be added (v5: Ultra layers merged in)
             print('OBJECT SET DIFFERS', rel); problems += 1
+        added_here = sum((cn - co).values()); added_total += added_here
         mo = {o.path_id: o for o in eo.objects}
+        ids = {o.path_id for o in en.objects}
         nchg = collections.Counter()
         for o in en.objects:
             try:
                 tn = o.read_typetree()
+                if o.path_id not in mo:             # added object: readable, and every in-file reference resolves
+                    refs = []; _pptrs(tn, refs)
+                    bad = [p for f_, p in refs if f_ == 0 and p and p not in ids]
+                    if bad:
+                        print('DANGLING', rel, o.type.name, bad[:3]); problems += 1
+                    nchg['added ' + o.type.name] += 1
+                    continue
                 to = mo[o.path_id].read_typetree()
             except Exception as e:
                 print('READ FAIL', rel, o.type.name, e); problems += 1; continue
@@ -43,15 +65,17 @@ for dp, dn, fn in os.walk(orig_root):
         for e in errs:
             print('CLIP', rel, e); problems += 1
         print(f'{rel:70s} {len(bo):>9d} -> {len(bn):>9d}  changed objs: {dict(nchg)}')
-print(f'\nunchanged files: {same}, changed: {changed}, problems: {problems}')
+print(f'\nunchanged files: {same}, changed: {changed}, objects added: {added_total}, problems: {problems}')
 
 # --- model checks: texture orientation/content and tessellated meshes
 import numpy as np
 import model_tex
 from meshio import decode
-SIZES = {'Art/Android/h/hero_argus_skin.unity3d': 1024, 'Art/Android/h/hero_argus_skin_high_add.unity3d': 2048}
-for mb, size in SIZES.items():
-    eo, en = UnityPy.load(os.path.join(orig_root, mb)), UnityPy.load(os.path.join(new_root, mb))
+HIGH = 'Art/Android/h/hero_argus_skin_high_add.unity3d'
+# v5: the base model shows the Ultra texture too, so it is checked against the High source
+SIZES = {'Art/Android/h/hero_argus_skin.unity3d': (2048, HIGH), HIGH: (2048, HIGH)}
+for mb, (size, src_mb) in SIZES.items():
+    eo, en = UnityPy.load(os.path.join(orig_root, src_mb)), UnityPy.load(os.path.join(new_root, mb))
     uv_tris = []
     for o in eo.objects:
         if o.type.name == 'Mesh':
@@ -82,7 +106,7 @@ for dp, dn, fn in os.walk(new_root):
     for f in fn:
         if f.endswith('.unity3d'):
             paths[f[:-len('.unity3d')]] = os.path.join(dp, f)
-cut = 0; checked = 0
+cut = 0; checked = 0; parity_bad = 0
 cache = {}
 def tend(stem):
     if stem not in cache:
@@ -92,6 +116,12 @@ for stem in sorted(paths):
     if stem.startswith(('hero_', 'heroshow', 'Hero45')) or 'Atlas' in stem:
         continue
     mgr, own = tend(stem)
+    if mgr:                                         # v5: same effect on Low ... Ultra
+        left = [mgr['FilterInfo'][k] for k in ('strSpliteNode1', 'strSpliteNode2') if mgr['FilterInfo'].get(k)]
+        low = sum(1 for e in mgr.get('ParSysInfo', []) if e['fGatherNum'] != e['fDefaultNum'])
+        parity_bad += bool(left or low)
+        if left or low:
+            print(f'PARITY {stem}: split nodes {left}, reduced gather counts {low}')
     if not mgr or mgr['DelayTime'] >= 7000:
         continue
     last = own
@@ -103,6 +133,7 @@ for stem in sorted(paths):
     if last > mgr['DelayTime'] + 1e-3:
         cut += 1; print(f'TIMING CUT {stem}: last fade {last:.2f} > DelayTime {mgr["DelayTime"]:.2f}')
 print(f'TIMING effects checked {checked}, cut before fade end: {cut}', 'OK' if cut == 0 else 'BAD')
+print(f'PARITY effects that differ between Low and Ultra: {parity_bad}', 'OK' if parity_bad == 0 else 'BAD')
 
 # --- every particle system starts and ends invisible (fade-in + fade-out)
 from vfx_fix import get_alpha, interp
