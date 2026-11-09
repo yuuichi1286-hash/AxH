@@ -1,4 +1,4 @@
-# AxH — Hidan Revamp v5.1
+# AxH — Hidan Revamp v5.2
 
 > **Skin lain di repo ini:** [Shisui x Suyou — Dark Green Revamp](shisui/README.md). Semua efek dominan hijau
 > gelap, lebih besar dan brutal, tekstur HD 2×, fade-in/out di semua efek, plus ikon skill baru.
@@ -9,11 +9,24 @@
 > gugur di pinggiran rumput, relief lebih timbul, bayangan bangunan + AO + emboss/PBR (baked), pantulan air lebih
 > tajam, dan 32 efek ambient.
 
-**Unduh:** [`release/Hidan.Revamp.v5.1.zip`](release/Hidan.Revamp.v5.1.zip)
+**Unduh:** [`release/Hidan.Revamp.v5.2.zip`](release/Hidan.Revamp.v5.2.zip)
 
 Isinya 99 file dengan struktur folder (`HIDAN/Art`, `HIDAN/UI`, `HIDAN/Audio`) yang sama persis dengan
 `Hidan.Revamp.zip` di rilis [AxH](https://github.com/yuuichi1286-hash/AxH/releases/tag/AxH). Cara pasangnya juga
 sama: timpa file lama dengan file di zip ini. v5 sudah mencakup semua perbaikan v4, v3 dan v2 (lihat bagian di bawah).
+
+## Yang baru di v5.2: model tidak hilang di pinggir layar
+
+- **Bounds render model sekarang menutupi semua animasi.** Bounds lama hanya seukuran pose diam:
+  - ayunan serangan keluar 1–1,4 m dari bounds;
+  - lemparan sabit skill 1 keluar sampai 6 m;
+  - bounds wujud ritual (`ulti`) paling sempit.
+
+  Unity menyembunyikan model begitu bounds-nya keluar layar. Akibatnya, kalau Hidan berada tepat di luar layar,
+  sabit yang sedang dilempar atau diayun ke dalam layar ikut hilang. Bounds baru dihitung dari semua vertex di
+  setiap animasi (30 fps) ditambah 5 cm. Validator memeriksa ini: 0 vertex di luar bounds.
+- Sabit baru v5.1 dicek di semua animasi: tidak lebih sering menembus badan dibanding sabit lama.
+- Lapisan efek terakhir yang masih punya pinggiran (fresnel) biru sekarang crimson.
 
 ## Yang baru di v5.1: sabit 3 bilah yang lebih detail
 
@@ -280,7 +293,8 @@ Perbaikan:
   Kedua, tidak ada efek yang dihapus sebelum partikel terakhirnya, termasuk overlay, selesai memudar (44/44).
 - Mulai v5 validator memeriksa paritas: tidak ada efek yang masih punya split node atau jumlah partikel yang
   dikurangi (0 dari 48). Setiap objek tambahan juga dicek: bisa dibaca dan semua referensinya valid (853 objek).
-  Hasil v5.1: 0 masalah, fade 572/572, timing 44/44, tekstur model OK (area sabit dicek terpisah), mesh `noraml`
+  Mulai v5.2 validator juga memeriksa bounds render di semua animasi (0 vertex di luar).
+  Hasil v5.2: 0 masalah, fade 572/572, timing 44/44, tekstur model OK (area sabit dicek terpisah), mesh `noraml`
   4822 vertex dan `ulti` 4945 vertex valid.
 - **Belum dites langsung di dalam game.** Di lingkungan build tidak ada perangkat Android maupun MLBB. Kalau ada
   skill yang terlihat aneh, sebutkan nama skill-nya.
@@ -301,6 +315,7 @@ python tools/merge_overlays.py out/HIDAN out/merge_report.json     # v5: efek Lo
 python tools/skin_ultra.py out/HIDAN                               # v5: skin Ultra di semua grafik
 python tools/boost_hidan.py out/HIDAN out/boost_report.json        # v5: efek crimson brutal + DelayTime
 python tools/scythe.py orig/HIDAN out/HIDAN                        # v5.1: sabit 3 bilah detail
+python tools/skin_bounds.py out/HIDAN                              # v5.2: bounds render + fresnel crimson
 python tools/validate_all.py orig/HIDAN out/HIDAN                  # validasi
 python tools/make_previews.py orig/HIDAN out/HIDAN docs/previews   # gambar sebelum/sesudah
 ```
@@ -316,6 +331,7 @@ python tools/make_previews.py orig/HIDAN out/HIDAN docs/previews   # gambar sebe
 | `tools/cinematic.py` | v4: fade sinematik per peran partikel (basic attack & pasif), flare pasif selesai, perbaikan mesh "pop" |
 | `tools/merge_overlays.py` | v5: gabung split node ke efek dasar (type tree 2017/2019 dipertahankan), hapus referensi, `fGatherNum`, tekstur duplikat dibagi |
 | `tools/skin_ultra.py` | v5: tekstur 2048, shader, dan material High/Ultra untuk model dasar |
+| `tools/skin_bounds.py` | v5.2: bounds SkinnedMeshRenderer dari semua frame animasi, fresnel biru jadi crimson |
 | `tools/scythe.py` | v5.1: sabit detail dari model extlow, dipasang di frame sabit lama (L_Weapon), tekstur di atlas 2048 |
 | `tools/boost_hidan.py`, `tools/brutal.py` | v5: profil brutal crimson per peran partikel (nama pinyin + nama layer HIDAN) |
 | `tools/effect_timing.py` | kapan partikel terakhir benar-benar hilang vs `DelayTime` efek (dipakai build & validator) |

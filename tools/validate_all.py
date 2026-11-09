@@ -110,6 +110,27 @@ for mb, (size, src_mb) in SIZES.items():
             and abs(d['weights'].sum(1) - 1).max() < 1e-3 and np.abs(np.linalg.norm(d['normal'], axis=1) - 1).max() < 1e-2
         print(f"MESH {mb} {tt['m_Name']}: verts {nv} tris {len(idx)//3}", 'OK' if good else 'BAD')
 
+# --- v5.2: renderer bounds cover every animation frame (no culling of a visible scythe at the screen edge)
+from fk import Rig, clip_overrides
+for mb in SIZES:
+    rig = Rig(os.path.join(new_root, mb))
+    st = {rig.objs[o.read_typetree()['m_Mesh']['m_PathID']].read_typetree()['m_Name']: o.read_typetree()
+          for o in rig.env.objects if o.type.name == 'SkinnedMeshRenderer' and o.read_typetree()['m_Mesh']['m_PathID']}
+    worst = 0.0
+    for o in rig.env.objects:
+        if o.type.name != 'AnimationClip':
+            continue
+        ct = o.read_typetree(); mc = ct.get('m_MuscleClip', {})
+        dur = max(mc.get('m_StopTime', 1.0) - mc.get('m_StartTime', 0.0), 0.0)
+        for ov in clip_overrides(rig, ct, np.linspace(0, dur, 16))[0]:
+            W = rig.pose(ov)
+            for sm in rig.smrs:
+                t = st[sm['name']]; P = rig.skin(sm, W)
+                L = (np.c_[P, np.ones(len(P))] @ np.linalg.inv(W[t['m_RootBone']['m_PathID']]).T)[:, :3]
+                c = np.array([t['m_AABB']['m_Center'][k] for k in 'xyz']); e = np.array([t['m_AABB']['m_Extent'][k] for k in 'xyz'])
+                worst = max(worst, float(np.max(np.abs(L - c) - e)))
+    print(f'BOUNDS {mb}: worst vertex outside the renderer bounds over all clips {worst:+.3f} m', 'OK' if worst <= 0.01 else 'BAD')
+
 # --- effect timing: no effect may be recycled before its last particle (incl. overlays) has faded out
 from effect_timing import analyse as timing_analyse
 paths = {}
